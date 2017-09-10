@@ -1,0 +1,24 @@
+default_erlang: "20"
+kerl_executable: "${HOME}/kerl"
+temp_path: "/tmp/coon_auto_builder"
+artifacts_path: "file:/${HOME}/coon/artifacts"
+
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/coon_packages?createDatabaseIfNotExist=true&amp;amp;useUnicode=true&amp;amp;characterEncoding=utf-8&amp;amp;autoReconnect=true"
+    username: "coon"
+    password: "coon"
+    poolName: "dataPool"
+    maximumPoolSize: 5
+    minimumIdle: 3
+    maxLifetime: 2000000
+    connectionTimeout: 30000
+    idleTimeout: 30000
+    pool-prepared-statements: true
+    max-open-prepared-statements: 250
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

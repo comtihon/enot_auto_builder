@@ -1,0 +1,36 @@
+package com.coon.coon_auto_builder.controller.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class BuildRequestDTO {
+    private String ref;
+    @JsonProperty("ref_type")
+    private String refType;
+    @JsonProperty("repository")
+    private RepositoryDTO repository;
+
+    public String getRef() {
+        return ref;
+    }
+
+    public String getRefType() {
+        return refType;
+    }
+
+    public String getName() {
+        return repository.getFullName();
+    }
+
+    public String getUrl() {
+        return repository.getCloneUrl();
+    }
+
+    @Override
+    public String toString() {
+        return "BuildRequestDTO{" +
+                "ref='" + ref + '\'' +
+                ", refType='" + refType + '\'' +
+                ", repository=" + repository +
+                '}';
+    }
+}
