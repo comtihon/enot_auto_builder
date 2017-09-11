@@ -13,7 +13,6 @@ public class ErlPackage {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
-
     @Column(name = "name", length = 100, nullable = false)
     private String name;
     @Column(name = "namespace", length = 100, nullable = false)
@@ -55,12 +54,12 @@ public class ErlPackage {
         return erlVsn;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public String getPath() {
         return this.path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getTempPath() {

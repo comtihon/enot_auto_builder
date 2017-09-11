@@ -1,7 +1,9 @@
 package com.coon.coon_auto_builder.model;
 
 import com.coon.coon_auto_builder.controller.dto.BuildRequestDTO;
+import com.coon.coon_auto_builder.domain.BuildResult;
 import com.coon.coon_auto_builder.domain.ErlPackage;
+import com.coon.coon_auto_builder.jpa.service.BuildResultServiceInterface;
 import com.coon.coon_auto_builder.loader.Loader;
 import com.coon.coon_auto_builder.system.ProcessException;
 import com.coon.coon_auto_builder.system.ServerConfiguration;
@@ -22,34 +24,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BuildRequest implements Task {
+    private final List<BuildResult> results = new CopyOnWriteArrayList<>();
     private String ref;
-    private String refType;
     private String url;
     private String name;
     private List<String> erlangVersions;
-    private Status status; //TODO status or results?
-    private List<BuildResult> results = new ArrayList<>();
     private String email;
     private Path tempPath; //Path where package is cloned
 
     @Autowired
-    private Loader loader;  //TODO loader is null (I don't know why).
+    private Loader loader;
+
+    @Autowired
+    private BuildResultServiceInterface buildResultService;
 
     public void initFromDTO(BuildRequestDTO dto) {
         ref = dto.getRef();
-        refType = dto.getRefType();
         url = dto.getUrl();
         name = dto.getName();
     }
 
     private String getName() {
         return this.name;
-    }
-
-    public String getUrl() {
-        return this.url;
     }
 
     private void initFromRepo(String defaultErlang) throws IOException {
@@ -59,52 +58,40 @@ public class BuildRequest implements Task {
     }
 
     @Override
-    public String toString() {
-        return "BuildRequest{" +
-                "ref='" + ref + '\'' +
-                ", refType='" + refType + '\'' +
-                ", url=" + url +
-                ", name=" + name +
-                '}';
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    @Override
-    public Status getStatus() {
-        return status;    //TODO should be thread safe
-    }
-
-    @Override
     public void process(ServerConfiguration configuration) throws ProcessException {
         tempPath = Paths.get(configuration.getTempPath(), getName(), ref);
         try {
             cloneRepo(configuration.getErlangVersion());
-            status = Status.BUILD;
             Map<String, String> installations = configuration.getKerlInstallations();
-            List<ErlPackage> artifacts = new ArrayList<>(erlangVersions.size());
             for (String erlang : erlangVersions) {
                 try {
                     Path artifact = build(installations.get(erlang));
                     ErlPackage pack = new ErlPackage();
                     pack.init(getName(), ref, erlang, artifact.toString());
-                    artifacts.add(pack);
-                    addStep(true, "ok", erlang);
-                } catch (Exception e) {
-                    System.out.println(getName() + " " + erlang + " build failed");
-                    System.out.println(e.getLocalizedMessage());
-                    addStep(false, e.getMessage(), erlang);
-                }
-            }
-            status = Status.LOAD;
-            for (ErlPackage artifact : artifacts) {
-                try {
-                    loader.loadArtifact(artifact);
+                    loader.loadArtifact(pack);
+                    results.add(new BuildStep()
+                            .withName(name)
+                            .withUrl(url)
+                            .withRef(ref)
+                            .withStatus(Status.FINISHED).toResult());
                 } catch (IOException e) {
                     System.out.println(getName() + " load failed: " + e.getLocalizedMessage());
-                    addStep(false, e.getMessage(), artifact.getErlVsn());
+                    results.add(new BuildStep()
+                            .withName(name)
+                            .withUrl(url)
+                            .withRef(ref)
+                            .withMessage(e.getMessage())
+                            .withResult(false)
+                            .withStatus(Status.LOAD).toResult());
+                } catch (Exception e) {
+                    System.out.println(getName() + " " + erlang + " build failed");
+                    results.add(new BuildStep()
+                            .withName(name)
+                            .withUrl(url)
+                            .withRef(ref)
+                            .withMessage(e.getMessage())
+                            .withResult(false)
+                            .withStatus(Status.BUILD).toResult());
                 }
             }
         } finally {
@@ -113,22 +100,29 @@ public class BuildRequest implements Task {
                 tryDelete(dirToDelete.toFile());
             }
             tryDelete(tempPath.toFile());
+            dumpStatuses();
         }
     }
 
     @Override
     public void email() {
+    }
 
+    private void dumpStatuses() {
+        results.forEach(buildResultService::save);
     }
 
     private void cloneRepo(String defaultErlang) throws ProcessException {
-        status = Status.CLONE;
         try {
             doCloneRepo();
             initFromRepo(defaultErlang);
-            addStep(true, "ok", null);
         } catch (IOException | GitAPIException e) {
-            addStep(false, e.getLocalizedMessage(), null);
+            results.add(new BuildStep()
+                    .withName(name)
+                    .withUrl(url)
+                    .withRef(ref)
+                    .withResult(false)
+                    .withStatus(Status.CLONE).toResult());
             throw new ProcessException("clone failed");
         }
     }
@@ -190,15 +184,17 @@ public class BuildRequest implements Task {
         try {
             FileUtils.copyDirectory(tempPath.toFile(), buildPath.toFile());
         } catch (IOException e) {
-            addStep(false, e.getLocalizedMessage(), erlang);
+            results.add(new BuildStep()
+                    .withName(name)
+                    .withUrl(url)
+                    .withRef(ref)
+                    .withErlangVsn(erlang)
+                    .withMessage(e.getMessage())
+                    .withResult(false)
+                    .withStatus(Status.CLONE).toResult());
             throw new ProcessException("pre-build copy failed");
         }
         return buildPath;
-    }
-
-    // TODO add Status to steps to determine the state where the error comes from?
-    private void addStep(boolean success, String message, String erlangVsn) {
-        results.add(new BuildResult(name, ref, status, erlangVsn, success, message));
     }
 
     private String[] parseErlangVsns(Map config, String defaultErlang) {

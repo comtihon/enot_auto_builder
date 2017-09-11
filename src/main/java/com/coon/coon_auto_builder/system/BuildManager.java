@@ -12,13 +12,11 @@ public class BuildManager {
 
     @Async
     public void process(final Task request) {
-        request.setStatus(Status.WAIT);
         //TODO save request somewhere before building
         try {
             request.process(configuration);
         } catch (ProcessException e) {
             e.printStackTrace();  //TODO collect error stack trace
-            request.setStatus(Status.ERROR);
             request.email(); //TODO String message?
         } // TODO finally remove from executing?
     }
