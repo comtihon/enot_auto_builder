@@ -1,23 +1,25 @@
 package com.coon.coon_auto_builder.system;
 
 import com.coon.coon_auto_builder.model.Task;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Service
 public class BuildManager {
-    @Autowired
-    private ServerConfiguration configuration;
+    private final Map<String, Task> tasks = new ConcurrentHashMap<>();
 
     @Async
     public void process(final Task request) {
-        //TODO save request somewhere before building
+        tasks.put(request.key(), request);
         try {
-            request.process(configuration);
+            request.process();
         } catch (ProcessException e) {
-            e.printStackTrace();  //TODO collect error stack trace
-            request.email(); //TODO String message?
-        } // TODO finally remove from executing?
+            request.sendEmail();
+        } finally {
+            tasks.remove(request.key());
+        }
     }
 }

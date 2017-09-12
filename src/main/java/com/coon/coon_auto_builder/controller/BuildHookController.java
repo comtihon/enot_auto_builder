@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.controller.dto.BuildRequestDTO;
 import com.coon.coon_auto_builder.model.BuildRequest;
+import com.coon.coon_auto_builder.model.dto.BuildRequestDTO;
 import com.coon.coon_auto_builder.system.BuildManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

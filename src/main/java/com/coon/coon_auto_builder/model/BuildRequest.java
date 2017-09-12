@@ -1,10 +1,11 @@
 package com.coon.coon_auto_builder.model;
 
-import com.coon.coon_auto_builder.controller.dto.BuildRequestDTO;
+import com.coon.coon_auto_builder.model.dto.BuildRequestDTO;
 import com.coon.coon_auto_builder.domain.BuildResult;
 import com.coon.coon_auto_builder.domain.ErlPackage;
 import com.coon.coon_auto_builder.jpa.service.BuildResultServiceInterface;
 import com.coon.coon_auto_builder.loader.Loader;
+import com.coon.coon_auto_builder.system.MailSenderService;
 import com.coon.coon_auto_builder.system.ProcessException;
 import com.coon.coon_auto_builder.system.ServerConfiguration;
 import com.coon.coon_auto_builder.system.Status;
@@ -28,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BuildRequest implements Task {
     private final List<BuildResult> results = new CopyOnWriteArrayList<>();
+    private Status internalStatus;
     private String ref;
     private String url;
     private String name;
@@ -36,7 +38,13 @@ public class BuildRequest implements Task {
     private Path tempPath; //Path where package is cloned
 
     @Autowired
+    private ServerConfiguration configuration;
+
+    @Autowired
     private Loader loader;
+
+    @Autowired
+    private MailSenderService mailSender;
 
     @Autowired
     private BuildResultServiceInterface buildResultService;
@@ -45,55 +53,33 @@ public class BuildRequest implements Task {
         ref = dto.getRef();
         url = dto.getUrl();
         name = dto.getName();
-    }
-
-    private String getName() {
-        return this.name;
-    }
-
-    private void initFromRepo(String defaultErlang) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Map config = mapper.readValue(Paths.get(tempPath.toString(), "coonfig.json").toFile(), Map.class);
-        erlangVersions = new ArrayList<>(Arrays.asList(parseErlangVsns(config, defaultErlang)));
+        internalStatus = Status.WAIT;
     }
 
     @Override
-    public void process(ServerConfiguration configuration) throws ProcessException {
-        tempPath = Paths.get(configuration.getTempPath(), getName(), ref);
+    public void process() throws ProcessException {
+        tempPath = Paths.get(configuration.getTempPath(), name, ref);
         try {
             cloneRepo(configuration.getErlangVersion());
             Map<String, String> installations = configuration.getKerlInstallations();
+            internalStatus = Status.BUILD;
             for (String erlang : erlangVersions) {
                 try {
                     Path artifact = build(installations.get(erlang));
                     ErlPackage pack = new ErlPackage();
-                    pack.init(getName(), ref, erlang, artifact.toString());
+                    pack.init(name, ref, erlang, artifact.toString());
                     loader.loadArtifact(pack);
-                    results.add(new BuildStep()
-                            .withName(name)
-                            .withUrl(url)
-                            .withRef(ref)
-                            .withStatus(Status.FINISHED).toResult());
+                    addFinishStep(erlang);
                 } catch (IOException e) {
-                    System.out.println(getName() + " load failed: " + e.getLocalizedMessage());
-                    results.add(new BuildStep()
-                            .withName(name)
-                            .withUrl(url)
-                            .withRef(ref)
-                            .withMessage(e.getMessage())
-                            .withResult(false)
-                            .withStatus(Status.LOAD).toResult());
+                    System.out.println(name + " load failed: " + e.getLocalizedMessage());
+                    addStep(e.getMessage(), Status.LOAD, erlang);
                 } catch (Exception e) {
-                    System.out.println(getName() + " " + erlang + " build failed");
-                    results.add(new BuildStep()
-                            .withName(name)
-                            .withUrl(url)
-                            .withRef(ref)
-                            .withMessage(e.getMessage())
-                            .withResult(false)
-                            .withStatus(Status.BUILD).toResult());
+                    System.out.println(name + " " + erlang + " build failed");
+                    addStep(e.getMessage(), Status.BUILD, erlang);
                 }
             }
+            internalStatus = Status.FINISHED;
+            sendEmail();
         } finally {
             for (String erlang : erlangVersions) {
                 Path dirToDelete = getAnotherDirName(erlang);
@@ -105,7 +91,13 @@ public class BuildRequest implements Task {
     }
 
     @Override
-    public void email() {
+    public void sendEmail() {
+        mailSender.sendReport(email, name + ref, internalStatus, results);
+    }
+
+    @Override
+    public String key() {
+        return name + ref; //Ex. comtihon/bson1.0.0
     }
 
     private void dumpStatuses() {
@@ -113,16 +105,12 @@ public class BuildRequest implements Task {
     }
 
     private void cloneRepo(String defaultErlang) throws ProcessException {
+        internalStatus = Status.CLONE;
         try {
             doCloneRepo();
             initFromRepo(defaultErlang);
         } catch (IOException | GitAPIException e) {
-            results.add(new BuildStep()
-                    .withName(name)
-                    .withUrl(url)
-                    .withRef(ref)
-                    .withResult(false)
-                    .withStatus(Status.CLONE).toResult());
+            addStep(e.getMessage(), Status.CLONE);
             throw new ProcessException("clone failed");
         }
     }
@@ -135,11 +123,17 @@ public class BuildRequest implements Task {
                 .setURI(url)
                 .setDirectory(tempPath.toFile())
                 .setBranch(ref)
-                .call()) { //TODO change to log.debug
+                .call()) { //TODO change all println to log.debug
             System.out.println("Cloned " + url + " to " + result.getRepository().getDirectory());
             RevCommit commit = result.getRepository().parseCommit(result.getRepository().findRef(ref).getObjectId());
             email = commit.getAuthorIdent().getEmailAddress();
         }
+    }
+
+    private void initFromRepo(String defaultErlang) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Map config = mapper.readValue(Paths.get(tempPath.toString(), "coonfig.json").toFile(), Map.class);
+        erlangVersions = new ArrayList<>(Arrays.asList(parseErlangVsns(config, defaultErlang)));
     }
 
     private void tryDelete(File dirToDelete) {
@@ -155,7 +149,7 @@ public class BuildRequest implements Task {
         if (erlang == null) {
             throw new ProcessException("no erlang installed");
         }
-        System.out.println("build " + getName() + " with " + erlang);
+        System.out.println("build " + name + " with " + erlang);
         Path buildPath = copyToBuildDir(erlang);
         ProcessBuilder pb = new ProcessBuilder("coon", "package");
         pb.directory(buildPath.toFile());
@@ -184,14 +178,7 @@ public class BuildRequest implements Task {
         try {
             FileUtils.copyDirectory(tempPath.toFile(), buildPath.toFile());
         } catch (IOException e) {
-            results.add(new BuildStep()
-                    .withName(name)
-                    .withUrl(url)
-                    .withRef(ref)
-                    .withErlangVsn(erlang)
-                    .withMessage(e.getMessage())
-                    .withResult(false)
-                    .withStatus(Status.CLONE).toResult());
+            addStep(e.getMessage(), Status.CLONE, erlang);
             throw new ProcessException("pre-build copy failed");
         }
         return buildPath;
@@ -202,5 +189,29 @@ public class BuildRequest implements Task {
             return (String[]) config.get("erlang");
         }
         return new String[]{defaultErlang};
+    }
+
+    private void addFinishStep(String erlang) {
+        results.add(new BuildStep()
+                .withName(name)
+                .withUrl(url)
+                .withRef(ref)
+                .withErlangVsn(erlang)
+                .withStatus(Status.FINISHED).toResult());
+    }
+
+    private void addStep(String message, Status status) {
+        addStep(message, status, null);
+    }
+
+    private void addStep(String message, Status status, String erlang) {
+        results.add(new BuildStep()
+                .withName(name)
+                .withUrl(url)
+                .withRef(ref)
+                .withErlangVsn(erlang)
+                .withMessage(message)
+                .withResult(false)
+                .withStatus(status).toResult());
     }
 }

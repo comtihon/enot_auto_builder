@@ -1,7 +1,6 @@
 package com.coon.coon_auto_builder.jpa.service;
 
 import com.coon.coon_auto_builder.domain.BuildResult;
-import com.coon.coon_auto_builder.domain.ErlPackage;
 import com.coon.coon_auto_builder.repository.BuildResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,21 +13,21 @@ import java.util.Optional;
 public class BuildResultServiceInterfaceImpl implements BuildResultServiceInterface {
 
     @Autowired
-    private BuildResultRepository repository;
+    private BuildResultRepository buildResultRepository;
 
     @Override
     public BuildResult save(BuildResult pack) {
-        return repository.save(pack);
+        return buildResultRepository.save(pack);
     }
 
     @Override
     public void delete(String resId) {
-        repository.delete(resId);
+        buildResultRepository.delete(resId);
     }
 
     @Override
     public Optional<BuildResult> find(String resId) {
-        return Optional.ofNullable(repository.findOne(resId));
+        return Optional.ofNullable(buildResultRepository.findOne(resId));
     }
 
     @Override
@@ -45,7 +44,7 @@ public class BuildResultServiceInterfaceImpl implements BuildResultServiceInterf
 
     @Override
     public Collection<BuildResult> getAllBuildResults() {
-        Iterable<BuildResult> itr = repository.findAll();
+        Iterable<BuildResult> itr = buildResultRepository.findAll();
         return (Collection<BuildResult>) itr;
     }
 }

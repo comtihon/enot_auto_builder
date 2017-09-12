@@ -1,4 +1,4 @@
-package com.coon.coon_auto_builder.controller.dto;
+package com.coon.coon_auto_builder.model.dto;
 
 import com.coon.coon_auto_builder.domain.ErlPackage;
 

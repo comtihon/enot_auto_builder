@@ -1,6 +1,6 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.controller.dto.PackageDTO;
+import com.coon.coon_auto_builder.model.dto.PackageDTO;
 import com.coon.coon_auto_builder.domain.ErlPackage;
 import com.coon.coon_auto_builder.jpa.service.ErlPackageServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;

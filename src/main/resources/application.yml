@@ -1,7 +1,14 @@
+# builder
 default_erlang: "20"
 kerl_executable: "${HOME}/kerl"
 temp_path: "/tmp/coon_auto_builder"
 artifacts_path: "file:/${HOME}/coon/artifacts"
+# sendEmail
+email:
+  host: "smtp.yandex.com"
+  port: 465
+  username: "${EMAIL_USER}"
+  password: "${EMAIL_PASSWORD}"
 
 spring:
   datasource:

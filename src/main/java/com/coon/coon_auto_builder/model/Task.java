@@ -5,7 +5,9 @@ import com.coon.coon_auto_builder.system.ServerConfiguration;
 import com.coon.coon_auto_builder.system.Status;
 
 public interface Task {
-    void process(ServerConfiguration configuration) throws ProcessException;
+    void process() throws ProcessException;
 
-    void email();
+    void sendEmail();
+
+    String key();
 }

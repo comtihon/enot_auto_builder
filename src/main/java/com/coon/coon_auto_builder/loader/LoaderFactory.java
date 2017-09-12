@@ -5,18 +5,18 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 public class LoaderFactory extends AbstractFactoryBean<Loader> {
 
     private String path;
-    private Class aClass;
+    private Class className;
 
     LoaderFactory(String path) {
         this.path = path;
         if (path.startsWith("file:")) {
-            this.aClass = FileLoader.class;
+            this.className = FileLoader.class;
         }
     }
 
     @Override
     public Class<?> getObjectType() {
-        return aClass;
+        return className;
     }
 
     @Override
