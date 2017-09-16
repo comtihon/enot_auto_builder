@@ -14,7 +14,7 @@ public class PackageBuilder {
     private String erlang;
     private Path basePath;
     private Path buildPath;
-    private String failMessage;
+    private String failMessage = "OK";
 
     PackageBuilder(String erlang, Path basePath) {
         this.erlang = erlang;
@@ -36,7 +36,7 @@ public class PackageBuilder {
     }
 
     public boolean isSuccess() {
-        return failMessage == null;
+        return failMessage.equals("OK");
     }
 
     public Path getBuildPath() {

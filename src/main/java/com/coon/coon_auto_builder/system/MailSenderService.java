@@ -8,6 +8,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 public class MailSenderService {
@@ -18,17 +19,17 @@ public class MailSenderService {
     @Autowired
     MessageChannel smtpChannel;
 
-    public void sendReport(MailReport report) {
-        String subject;
-        if (report.isSuccesss()) {
-            subject = "Coon build for " + report.getPackageName() + " succeed";
-        } else
-            subject = "Coon build for " + report.getPackageName() + " failed";
+    @Autowired
+    TemplateEngine emailTemplateEngine;
 
-        //TODO form payload via Thymeleaf
+    public void sendReport(MailReport report) {
+        final String htmlContent = emailTemplateEngine.process("build_notification",
+                report.getContext());
+
         Message<String> message = MessageBuilder
-                .withPayload(report.getBody())
-                .setHeader(MailHeaders.SUBJECT, subject)
+                .withPayload(htmlContent)
+                .setHeader(MailHeaders.SUBJECT, report.getSubject())
+                .setHeader(MailHeaders.CONTENT_TYPE, "text/html")
                 .setHeader(MailHeaders.TO, report.getTo())
                 .setHeader(MailHeaders.FROM, configuration.getUser())
                 .build();

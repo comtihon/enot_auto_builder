@@ -1,10 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>${title}</title>
+    <title th:text="${subject}"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
-${body}
+<p>
+    Hello,
+</p>
+<p>
+    Your build of
+    <span th:text="${name}"/>-<span th:text="${ref}"/>
+    <span th:text="${successs}? succeeded : failed"/>.<br/>
+    <span th:text="${#dates.format(buildDate)}"/>
+    Build finished on status <span th:text="${status}"/>.
+</p>
+<p>Build logs:</p>
+<table>
+    <tr>
+        <th>Erlang</th>
+        <th>Log</th>
+    </tr>
+    <tr th:each="log : ${logs}">
+        <td th:text="${log.key}"></td>
+        <td th:text="${log.value.failMessage}">No error</td>
+    </tr>
+</table>
+<p>
+    Regards, <br/>
+    <em>Coon</em>
+</p>
 </body>
 </html>

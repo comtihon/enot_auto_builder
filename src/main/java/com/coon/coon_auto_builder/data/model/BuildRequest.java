@@ -50,7 +50,8 @@ public class BuildRequest implements Task {
                 repo.getName(),
                 internalStatus,
                 repo.isBuildSucceed(),
-                repo.getBuilders());
+                repo.getBuilders(),
+                repo.getRef());
     }
 
     @Override
