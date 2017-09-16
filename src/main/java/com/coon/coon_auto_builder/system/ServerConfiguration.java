@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.system;
 
-import com.coon.coon_auto_builder.model.BuildRequest;
-import com.coon.coon_auto_builder.tool.CmdExec;
+import com.coon.coon_auto_builder.data.model.BuildRequest;
+import com.coon.coon_auto_builder.tool.CmdHelper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -107,7 +107,7 @@ public class ServerConfiguration implements InitializingBean {
     private String runCmd(String cmd) throws IOException, InterruptedException {
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
-        return CmdExec.getProcessOutput(p);
+        return CmdHelper.getProcessOutput(p);
     }
 
     private String trimKey(String installation) {

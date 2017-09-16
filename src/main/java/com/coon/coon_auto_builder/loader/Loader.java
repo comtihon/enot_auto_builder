@@ -1,9 +1,8 @@
 package com.coon.coon_auto_builder.loader;
 
-import com.coon.coon_auto_builder.domain.ErlPackage;
-
-import java.io.IOException;
+import com.coon.coon_auto_builder.data.model.Repository;
 
 public interface Loader {
-    void loadArtifact(ErlPackage artifact) throws IOException;
+
+    void loadArtifacts(Repository repository);
 }

@@ -1,7 +1,7 @@
-package com.coon.coon_auto_builder.jpa.service;
+package com.coon.coon_auto_builder.data.dao.service;
 
-import com.coon.coon_auto_builder.domain.BuildResult;
-import com.coon.coon_auto_builder.repository.BuildResultRepository;
+import com.coon.coon_auto_builder.data.dao.BuildResult;
+import com.coon.coon_auto_builder.data.dao.repository.BuildResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

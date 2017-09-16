@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.model.BuildRequest;
-import com.coon.coon_auto_builder.model.dto.BuildRequestDTO;
+import com.coon.coon_auto_builder.data.dto.BuildRequestDTO;
+import com.coon.coon_auto_builder.data.model.BuildRequest;
 import com.coon.coon_auto_builder.system.BuildManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +23,7 @@ public class BuildHookController {
     public String build(@RequestBody BuildRequestDTO body) {
         System.out.println("body = " + body);
         BuildRequest request = getBuildRequst();
-        request.initFromDTO(body);
+        request.init(body); //TODO refactor
         manager.process(request);
         return "OK";
     }

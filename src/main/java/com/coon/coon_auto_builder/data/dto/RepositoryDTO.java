@@ -1,8 +1,8 @@
-package com.coon.coon_auto_builder.model.dto;
+package com.coon.coon_auto_builder.data.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RepositoryDTO {
+class RepositoryDTO {
     @JsonProperty("full_name")
     private String fullName;
     @JsonProperty("clone_url")

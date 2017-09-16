@@ -5,8 +5,8 @@ temp_path: "/tmp/coon_auto_builder"
 artifacts_path: "file:/${HOME}/coon/artifacts"
 # sendEmail
 email:
-  host: "smtp.yandex.com"
-  port: 465
+  host: "smtp.gmail.com"
+  port: 587
   username: "${EMAIL_USER}"
   password: "${EMAIL_PASSWORD}"
 

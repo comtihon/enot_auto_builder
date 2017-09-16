@@ -10,19 +10,22 @@ import org.springframework.integration.mail.MailSendingMessageHandler;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.messaging.MessageChannel;
+import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+import org.thymeleaf.templateresolver.TemplateResolver;
 
 import java.util.Properties;
 
 @Configuration
 @EnableIntegration
 public class MailConfiguration {
-    @Value("${sendEmail.host}")
+    @Value("${email.host}")
     private String host;
-    @Value("${sendEmail.port}")
+    @Value("${email.port}")
     private int port;
-    @Value("${sendEmail.username}")
+    @Value("${email.username}")
     private String user;
-    @Value("${sendEmail.password}")
+    @Value("${email.password}")
     private String pass;
 
     public String getUser() {

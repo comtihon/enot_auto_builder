@@ -17,7 +17,7 @@ public class CoonAutoBuilderApplication {
         SpringApplication.run(CoonAutoBuilderApplication.class, args);
     }
 
-    @Bean
+    @Bean("taskExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         int cores = Runtime.getRuntime().availableProcessors();

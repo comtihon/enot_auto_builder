@@ -1,6 +1,6 @@
-package com.coon.coon_auto_builder.jpa.service;
+package com.coon.coon_auto_builder.data.dao.service;
 
-import com.coon.coon_auto_builder.domain.ErlPackage;
+import com.coon.coon_auto_builder.data.dao.ErlPackage;
 import org.eclipse.jgit.annotations.Nullable;
 
 import java.util.Collection;

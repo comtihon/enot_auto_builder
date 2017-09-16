@@ -1,7 +1,7 @@
-package com.coon.coon_auto_builder.jpa.service;
+package com.coon.coon_auto_builder.data.dao.service;
 
-import com.coon.coon_auto_builder.domain.ErlPackage;
-import com.coon.coon_auto_builder.repository.ErlPackageRepository;
+import com.coon.coon_auto_builder.data.dao.ErlPackage;
+import com.coon.coon_auto_builder.data.dao.repository.ErlPackageRepository;
 import org.eclipse.jgit.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,23 +34,13 @@ public class ErlPackageServiceInterfaceImpl implements ErlPackageServiceInterfac
 
     @Override
     public List<ErlPackage> findByValues(String name, String namespace, String ref, String erlVsn) {
-        if (erlVsn == null)
-            return erlPackageRepository.findPackagesByNameAndNamespaceAndRef(name, namespace, ref);
-        if (ref == null)
-            return erlPackageRepository.findPackagesByNameAndNamespace(name, namespace);
-        return erlPackageRepository.findPackagesByNameAndNamespaceAndRefAndErlVsn(name, namespace, ref, erlVsn);
+        return null;
     }
 
     @Override
     @Nullable
     public ErlPackage getByValues(String name, String namespace, String ref, String erlVsn) {
-        List<ErlPackage> found = erlPackageRepository.findPackagesByNameAndNamespaceAndRefAndErlVsn(
-                name, namespace, ref, erlVsn);
-        if(found.isEmpty()) {
-            return null;
-        } else {
-            return found.get(0);
-        }
+        return null;
     }
 
 

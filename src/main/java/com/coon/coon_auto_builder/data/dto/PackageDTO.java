@@ -1,9 +1,10 @@
-package com.coon.coon_auto_builder.model.dto;
+package com.coon.coon_auto_builder.data.dto;
 
-import com.coon.coon_auto_builder.domain.ErlPackage;
+import com.coon.coon_auto_builder.data.dao.ErlPackage;
+import com.coon.coon_auto_builder.data.dao.PackageVersion;
 
 public class PackageDTO {
-    private String id;
+    private String url;
     private String namespace;
     private String name;
     private String ref;
@@ -13,12 +14,12 @@ public class PackageDTO {
 
     }
 
-    public PackageDTO(ErlPackage pack) {
+    public PackageDTO(ErlPackage pack, PackageVersion version) {
         this.namespace = pack.getNamespace();
         this.name = pack.getName();
-        this.ref = pack.getRef();
-        this.erl = pack.getErlVsn();
-        this.id = pack.getId(); // TODO id is null?
+        this.ref = version.getRef();
+        this.erl = version.getErlVsn();
+        this.url = pack.getUrl();
     }
 
     public String getNamespace() {
@@ -44,7 +45,7 @@ public class PackageDTO {
                 ", name='" + name + '\'' +
                 ", ref='" + ref + '\'' +
                 ", erl='" + erl + '\'' +
-                ", id='" + id + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }
