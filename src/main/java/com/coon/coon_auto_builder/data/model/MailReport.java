@@ -1,11 +1,10 @@
 package com.coon.coon_auto_builder.data.model;
 
 import com.coon.coon_auto_builder.system.Status;
-import org.thymeleaf.context.Context;
+import org.eclipse.jgit.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MailReport {
@@ -14,19 +13,53 @@ public class MailReport {
     private String packageName;
     private Status status;
     private String ref;
+    private String subject;
+    private Date buildDate;
 
     private boolean successs;
 
-    private Map<String, PackageBuilder> body;
+    private Map<String, BuildBO> results;
 
-    MailReport(String to, String packageName, Status status, boolean successs,
-               Map<String, PackageBuilder> builders, String ref) {
+    MailReport(String to, String packageName, Status status, boolean successs, String ref, @Nullable RepositoryBO repository) {
         this.to = to;
         this.packageName = packageName;
         this.status = status;
         this.successs = successs;
         this.ref = ref;
-        this.body = builders;
+        if (repository != null) {
+            this.results = repository.getBuilds();
+        } else {
+            this.results = new HashMap<>();
+        }
+        this.buildDate = new Date();
+        if (successs) {
+            subject = "Coon build for " + packageName + " " + ref + " succeed";
+        } else
+            subject = "Coon build for " + packageName + " " + ref + " failed";
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public Date getBuildDate() {
+        return buildDate;
+    }
+
+    public boolean isSuccesss() {
+        return successs;
+    }
+
+    public Map<String, BuildBO> getResults() {
+        return results;
     }
 
     public String getTo() {
@@ -34,21 +67,6 @@ public class MailReport {
     }
 
     public String getSubject() {
-        if (successs) {
-            return "Coon build for " + packageName + " " + ref + " succeed";
-        } else
-            return "Coon build for " + packageName + " " + ref + " failed";
-    }
-
-    public Context getContext() {
-        final Context ctx = new Context();
-        ctx.setVariable("subject", getSubject());
-        ctx.setVariable("buildDate", new Date());
-        ctx.setVariable("logs", body);
-        ctx.setVariable("name", packageName);
-        ctx.setVariable("successs", successs);
-        ctx.setVariable("status", status);
-        ctx.setVariable("ref", ref);
-        return ctx;
+        return subject;
     }
 }

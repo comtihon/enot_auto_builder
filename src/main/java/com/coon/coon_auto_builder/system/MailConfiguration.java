@@ -31,9 +31,16 @@ public class MailConfiguration {
     private String user;
     @Value("${email.password}")
     private String pass;
+    @Value("${spring.service.host}")
+    private String serviceHost;
+
 
     public String getUser() {
         return user;
+    }
+
+    public String getServiceHost() {
+        return serviceHost;
     }
 
     @Bean

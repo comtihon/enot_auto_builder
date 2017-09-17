@@ -1,20 +1,17 @@
 package com.coon.coon_auto_builder.loader;
 
-import com.coon.coon_auto_builder.data.dao.BuildResult;
-import com.coon.coon_auto_builder.data.dao.ErlPackage;
-import com.coon.coon_auto_builder.data.dao.PackageVersion;
-import com.coon.coon_auto_builder.data.dao.service.ErlPackageServiceInterface;
-import com.coon.coon_auto_builder.data.dao.service.PackageVersionServiceInterface;
-import com.coon.coon_auto_builder.data.model.PackageBuilder;
-import com.coon.coon_auto_builder.data.model.Repository;
+import com.coon.coon_auto_builder.data.dao.service.PackageVersionDAOService;
+import com.coon.coon_auto_builder.data.dao.service.RepositoryDAOService;
+import com.coon.coon_auto_builder.data.model.BuildBO;
+import com.coon.coon_auto_builder.data.model.PackageVersionBO;
+import com.coon.coon_auto_builder.data.model.RepositoryBO;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,10 +20,10 @@ public class FileLoader implements Loader {
     private final String artifactsPath;
 
     @Autowired
-    private PackageVersionServiceInterface versionInterface;
+    PackageVersionDAOService pavkageVersionDAO;
 
     @Autowired
-    private ErlPackageServiceInterface packageService;
+    RepositoryDAOService repositoryDAO;
 
     FileLoader(String path) {
         String[] splitted = path.split("file:");
@@ -34,42 +31,38 @@ public class FileLoader implements Loader {
     }
 
     @Override
-    public void loadArtifacts(Repository repository) {
+    @Nullable
+    public RepositoryBO loadArtifacts(RepositoryBO repositoryBO) {
         try {
-            List<BuildResult> results = copyAndFormResults(repository);
-            ErlPackage erlPackage = repository.getErlPackage(results);
-            for (BuildResult result : results) {
-                Optional<PackageVersion> mayBeVsn = versionInterface.findVersionByValues(
-                        repository.getRef(), result.getErlang(), repository.getUrl());
-                PackageVersion vsn = mayBeVsn.orElseGet(() ->
-                        new PackageVersion(repository.getRef(), result.getErlang(), repository.getUrl()));
-                result.setPackAndVsn(erlPackage, vsn);
+            copyArtifacts(repositoryBO);
+            for (Map.Entry<String, BuildBO> result : repositoryBO.getBuilds().entrySet()) {
+                final PackageVersionBO vsn = new PackageVersionBO(repositoryBO.getRef(), result.getKey(), repositoryBO);
+                Optional<PackageVersionBO> mayBeVsn = pavkageVersionDAO.findByRefAndErlVersionAndRepositoryUrl(vsn);
+                result.getValue().setPackageVersion(mayBeVsn.orElse(vsn));
             }
-            packageService.savePackage(erlPackage);
+            return repositoryDAO.save(repositoryBO);
         } catch (IOException e) {
-            System.out.println(repository.getName() + " load failed: " + e.getMessage());
+            System.out.println(repositoryBO.getName() + " load failed: " + e.getMessage());
+            return null;
         }
     }
 
-    private List<BuildResult> copyAndFormResults(Repository repository) throws IOException {
+    private void copyArtifacts(RepositoryBO repositoryBO) throws IOException {
         Path src, dest;
-        List<BuildResult> results = new ArrayList<>();
-        for (Map.Entry<String, PackageBuilder> entry : repository.getBuilders().entrySet()) {
+        for (Map.Entry<String, BuildBO> entry : repositoryBO.getBuilds().entrySet()) {
             String erlang = entry.getKey();
-            PackageBuilder builder = entry.getValue();
+            BuildBO builder = entry.getValue();
             if (builder.isSuccess()) {
-                dest = Paths.get(artifactsPath, repository.getName(),
-                        repository.getNamespace(),
-                        repository.getRef(),
+                dest = Paths.get(artifactsPath, repositoryBO.getName(),
+                        repositoryBO.getNamespace(),
+                        repositoryBO.getRef(),
                         erlang,
-                        repository.getName() + ".cp");
-                src = Paths.get(builder.getBuildPath().toString(), repository.getName() + ".cp");
+                        repositoryBO.getName() + ".cp");
+                src = Paths.get(builder.getBuildPath().toString(), repositoryBO.getName() + ".cp");
                 System.out.println("Copy " + src + " to " + dest);
                 FileUtils.copyFile(src.toFile(), dest.toFile());
-                results.add(builder.getBuildResult(dest.toString()));
-            } else
-                results.add(builder.getBuildResult("none"));
+                builder.setArtifactPath(dest);
+            }
         }
-        return results;
     }
 }

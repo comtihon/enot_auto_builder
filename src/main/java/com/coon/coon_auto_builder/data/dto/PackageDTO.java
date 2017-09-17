@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.data.dto;
 
-import com.coon.coon_auto_builder.data.dao.ErlPackage;
-import com.coon.coon_auto_builder.data.dao.PackageVersion;
+import com.coon.coon_auto_builder.data.model.PackageVersionBO;
+import com.coon.coon_auto_builder.data.model.RepositoryBO;
 
 public class PackageDTO {
     private String url;
@@ -14,7 +14,7 @@ public class PackageDTO {
 
     }
 
-    public PackageDTO(ErlPackage pack, PackageVersion version) {
+    public PackageDTO(RepositoryBO pack, PackageVersionBO version) {
         this.namespace = pack.getNamespace();
         this.name = pack.getName();
         this.ref = version.getRef();

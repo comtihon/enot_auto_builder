@@ -1,29 +1,40 @@
 package com.coon.coon_auto_builder.data.model;
 
-import com.coon.coon_auto_builder.data.dao.ErlPackage;
-import com.coon.coon_auto_builder.system.ProcessException;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import javax.persistence.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class Repository {
-    private Path repoPath; //Path where package is cloned
+@Entity
+@Table(name = "packages")
+public class RepositoryBO {
+    @Id
+    @Column(name = "url", length = 100, nullable = false)
     private String url;
-    private String ref;
-    private String email;
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
+    @Column(name = "namespace", length = 100, nullable = false)
     private String namespace;
-    private List<String> erlangVersions;
-    private Map<String, PackageBuilder> builders;
 
-    Repository(String repoPath, String fullName, String ref, String url) {
+    @Transient
+    private Path repoPath; //Path where package is cloned
+    @Transient
+    private String ref;
+    @Transient
+    private String email;
+    @Transient
+    private List<String> erlangVersions;
+    @Transient
+    private Map<String, BuildBO> builders;
+
+    RepositoryBO(String repoPath, String fullName, String ref, String url) {
         String[] splitted = fullName.split("/");
         this.namespace = splitted[0];
         this.name = splitted[1];
@@ -53,24 +64,20 @@ public class Repository {
         return email;
     }
 
-    public ErlPackage getErlPackage(List results) {
-        return new ErlPackage(name, namespace, url, results);
-    }
-
-    public Map<String, PackageBuilder> getBuilders() {
+    public Map<String, BuildBO> getBuilds() {
         return builders;
     }
 
     public boolean isBuildSucceed() {
-        for(PackageBuilder builder : builders.values())
+        for (BuildBO builder : builders.values())
             if (builder.isSuccess()) return true;
         return false;
     }
 
-    boolean cloneRepo(String defaultErlang){
+    boolean cloneRepo(String defaultErlang) {
         if (!repoPath.toFile().mkdirs()) {
             String msg = "clone failed, can't create " + repoPath;
-            builders.put(defaultErlang, new PackageBuilder(defaultErlang, msg));
+            builders.put(defaultErlang, new BuildBO(new PackageVersionBO(ref, defaultErlang, this), msg));
             return false;
         }
         try (Git result = Git.cloneRepository()
@@ -85,21 +92,21 @@ public class Repository {
             return true;
         } catch (IOException | GitAPIException e) {
             String msg = "clone failed " + e.getMessage();
-            builders.put(defaultErlang, new PackageBuilder(defaultErlang, msg));
+            builders.put(defaultErlang, new BuildBO(new PackageVersionBO(ref, defaultErlang, this), msg));
             return false;
         }
     }
 
     void build(Map<String, String> erlangAvailable) {
         for (String erlang : erlangVersions) {
-            PackageBuilder builder = new PackageBuilder(erlang, repoPath);
+            BuildBO builder = new BuildBO(new PackageVersionBO(ref, erlang, this), repoPath);
             builder.build(erlangAvailable.get(erlang), erlangVersions.size() > 1);
             builders.put(erlang, builder);
         }
     }
 
     void clean() throws IOException {
-        for (PackageBuilder builder : builders.values()) {
+        for (BuildBO builder : builders.values()) {
             builder.clean();
         }
         FileHelper.deleteDir(repoPath);

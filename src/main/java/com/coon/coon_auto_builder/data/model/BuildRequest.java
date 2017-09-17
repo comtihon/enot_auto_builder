@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class BuildRequest implements Task {
     private Status internalStatus;
-    private Repository repo;
+    private RepositoryBO repo;
 
     @Autowired
     private ServerConfiguration configuration;
@@ -20,7 +20,7 @@ public class BuildRequest implements Task {
 
     public void init(BuildRequestDTO dto) {
         internalStatus = Status.WAIT;
-        repo = new Repository(configuration.getTempPath(), dto.getName(), dto.getRef(), dto.getUrl());
+        repo = new RepositoryBO(configuration.getTempPath(), dto.getName(), dto.getRef(), dto.getUrl());
     }
 
     @Override
@@ -30,10 +30,10 @@ public class BuildRequest implements Task {
             if (repo.cloneRepo(configuration.getErlangVersion())) {
                 internalStatus = Status.BUILD;
                 repo.build(configuration.getKerlInstallations());
-                loader.loadArtifacts(repo);
+                repo = loader.loadArtifacts(repo);
                 internalStatus = Status.FINISHED;
             } else { // just save build result with error message
-                loader.loadArtifacts(repo);
+                repo = loader.loadArtifacts(repo);
             }
         } finally {
             try {
@@ -50,8 +50,8 @@ public class BuildRequest implements Task {
                 repo.getName(),
                 internalStatus,
                 repo.isBuildSucceed(),
-                repo.getBuilders(),
-                repo.getRef());
+                repo.getRef(),
+                repo);
     }
 
     @Override

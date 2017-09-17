@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${subject}"/>
+    <title th:text="${report.subject}"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
@@ -9,21 +9,24 @@
     Hello,
 </p>
 <p>
-    Your build of
-    <span th:text="${name}"/>-<span th:text="${ref}"/>
-    <span th:text="${successs}? succeeded : failed"/>.<br/>
-    <span th:text="${#dates.format(buildDate)}"/>
-    Build finished on status <span th:text="${status}"/>.
+    <span th:text="${report.packageName}"/>-<span th:text="${report.ref}"/> build
+    <span th:text="${report.successs}? succeeded : failed"/>.<br/>
+    <span th:text="${#dates.format(report.buildDate)}"/>
+    build finished on status <span th:text="${report.status}"/>.
 </p>
 <p>Build logs:</p>
 <table>
     <tr>
         <th>Erlang</th>
         <th>Log</th>
+        <th>Success</th>
+        <th>Download url</th>
     </tr>
-    <tr th:each="log : ${logs}">
-        <td th:text="${log.key}"></td>
-        <td th:text="${log.value.failMessage}">No error</td>
+    <tr th:each="result : ${report.results}">
+        <td th:text="${result.key}"></td>
+        <td th:text="${result.value.message}"></td>
+        <td th:text="${result.value.result}"></td>
+        <td th:text="${host + '/download/' + result.value.id}"></td>
     </tr>
 </table>
 <p>

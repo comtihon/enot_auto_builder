@@ -24,7 +24,7 @@ public class CoonAutoBuilderApplication {
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(cores * 2);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("PackageBuilder-");
+        executor.setThreadNamePrefix("BuildBO-");
         executor.initialize();
         return executor;
     }

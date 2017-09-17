@@ -1,4 +1,4 @@
-package com.coon.coon_auto_builder.data.dao;
+package com.coon.coon_auto_builder.data.model;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -9,14 +9,15 @@ import javax.persistence.*;
 @Entity
 @Table(name = "package_versions")
 @Configurable(autowire = Autowire.BY_TYPE)
-public class PackageVersion {
+public class PackageVersionBO {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
-    @Column(name = "pack_url", length = 100, nullable = false) //TODO join ErlPackage?
-    private String packUrl;
+    @ManyToOne(targetEntity = PackageVersionBO.class, cascade = CascadeType.ALL)
+    @JoinColumn
+    private RepositoryBO repository;
 
     @Column(name = "ref", length = 100, nullable = false)
     private String ref;
@@ -24,13 +25,13 @@ public class PackageVersion {
     @Column(name = "erl_vsn", length = 5, nullable = false)
     private String erlVsn;
 
-    public PackageVersion() {
+    public PackageVersionBO() {
     }
 
-    public PackageVersion(String ref, String erlVsn, String packUrl) {
+    public PackageVersionBO(String ref, String erlVsn, RepositoryBO repository) {
         this.ref = ref;
         this.erlVsn = erlVsn;
-        this.packUrl = packUrl;
+        this.repository = repository;
     }
 
     public String getRef() {
@@ -41,7 +42,7 @@ public class PackageVersion {
         return erlVsn;
     }
 
-    public String getPackUrl() {
-        return packUrl;
+    public RepositoryBO getRepository() {
+        return repository;
     }
 }

@@ -1,13 +1,12 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.data.dto.PackageDTO;
-import com.coon.coon_auto_builder.data.dao.ErlPackage;
-import com.coon.coon_auto_builder.data.dao.service.ErlPackageServiceInterface;
+import com.coon.coon_auto_builder.data.dao.BuildDAO;
+import com.coon.coon_auto_builder.data.dao.service.BuildDAOService;
+import com.coon.coon_auto_builder.data.model.BuildBO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -20,11 +19,11 @@ import java.util.Optional;
 public class ErlPackageDownloadController {
 
     @Autowired
-    private ErlPackageServiceInterface packageService;
+    BuildDAOService buildDao;
 
 //    @RequestMapping(value = "/get", method = RequestMethod.POST)
 //    public void downloadBySearch(HttpServletResponse response, @RequestBody PackageDTO request) throws IOException {
-//        ErlPackage pack = packageService.getByValues(
+//        RepositoryDAO pack = packageService.getByValues(
 //                request.getName(), request.getNamespace(), request.getRef(), request.getErl());
 //        if (pack == null) {
 //            String errorMessage = "No package for id " + request;
@@ -36,30 +35,30 @@ public class ErlPackageDownloadController {
 //        }
 //        renderPackage(pack, response);
 //    }
-//
-//    @RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
-//    public void downloadById(HttpServletResponse response, @PathVariable String packId) throws IOException {
-//        Optional<ErlPackage> maybePackage = packageService.findPackage(packId);
-//        if (!maybePackage.isPresent()) {
-//            String errorMessage = "No package for id " + packId;
-//            System.out.println(errorMessage);
-//            OutputStream outputStream = response.getOutputStream();
-//            outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-//            outputStream.close();
-//            return;
-//        }
-//        renderPackage(maybePackage.get(), response);
-//    }
 
-//    private void renderPackage(ErlPackage pack, HttpServletResponse response) throws IOException {
-//        File file = new File(pack.getPath());
-//        String mimeType = "application/gzip";
-//
-//        response.setContentType(mimeType);
-//        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
-//        response.setContentLength((int) file.length());
-//
-//        InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-//        FileCopyUtils.copy(inputStream, response.getOutputStream());
-//    }
+    @RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
+    public void downloadById(HttpServletResponse response, @PathVariable String id) throws IOException {
+        Optional<BuildBO> maybeResult = buildDao.find(id);
+        if (!maybeResult.isPresent()) {
+            String errorMessage = "No result for id " + id;
+            System.out.println(errorMessage);
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+            outputStream.close();
+            return;
+        }
+        renderPackage(maybeResult.get(), response);
+    }
+
+    private void renderPackage(BuildBO result, HttpServletResponse response) throws IOException {
+        File file = result.getArtifactPath().toFile();
+        String mimeType = "application/gzip";
+
+        response.setContentType(mimeType);
+        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
+        response.setContentLength((int) file.length());
+
+        InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+        FileCopyUtils.copy(inputStream, response.getOutputStream());
+    }
 }
