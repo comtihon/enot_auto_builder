@@ -30,10 +30,10 @@ public class BuildRequest implements Task {
             if (repo.cloneRepo(configuration.getErlangVersion())) {
                 internalStatus = Status.BUILD;
                 repo.build(configuration.getKerlInstallations());
-                repo = loader.loadArtifacts(repo);
+                loader.loadArtifacts(repo);
                 internalStatus = Status.FINISHED;
             } else { // just save build result with error message
-                repo = loader.loadArtifacts(repo);
+                loader.loadArtifacts(repo);
             }
         } finally {
             try {

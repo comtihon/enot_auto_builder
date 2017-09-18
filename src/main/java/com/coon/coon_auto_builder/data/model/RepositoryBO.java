@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.springframework.data.domain.Persistable;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -13,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Entity
-@Table(name = "packages")
+@Table(name = "repository")
 public class RepositoryBO {
     @Id
     @Column(name = "url", length = 100, nullable = false)
@@ -34,7 +36,11 @@ public class RepositoryBO {
     @Transient
     private Map<String, BuildBO> builders;
 
-    RepositoryBO(String repoPath, String fullName, String ref, String url) {
+    public RepositoryBO() {
+
+    }
+
+    public RepositoryBO(String repoPath, String fullName, String ref, String url) {
         String[] splitted = fullName.split("/");
         this.namespace = splitted[0];
         this.name = splitted[1];
@@ -70,8 +76,20 @@ public class RepositoryBO {
 
     public boolean isBuildSucceed() {
         for (BuildBO builder : builders.values())
-            if (builder.isSuccess()) return true;
+            if (builder.getResult()) return true;
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "RepositoryBO{" +
+                "url='" + url + '\'' +
+                ", name='" + name + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", repoPath=" + repoPath +
+                ", ref='" + ref + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 
     boolean cloneRepo(String defaultErlang) {

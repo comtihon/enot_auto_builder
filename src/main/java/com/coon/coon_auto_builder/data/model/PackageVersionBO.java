@@ -13,36 +13,59 @@ public class PackageVersionBO {
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    private String id;
+    @Column(name = "version_id")
+    private String versionId;
 
-    @ManyToOne(targetEntity = PackageVersionBO.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = RepositoryBO.class)
     @JoinColumn
     private RepositoryBO repository;
 
     @Column(name = "ref", length = 100, nullable = false)
     private String ref;
 
-    @Column(name = "erl_vsn", length = 5, nullable = false)
-    private String erlVsn;
+    @Column(name = "erl_version", length = 5, nullable = false)
+    private String erlVersion;
 
     public PackageVersionBO() {
     }
 
-    public PackageVersionBO(String ref, String erlVsn, RepositoryBO repository) {
+    public PackageVersionBO(String ref, String erlVersion, RepositoryBO repository) {
         this.ref = ref;
-        this.erlVsn = erlVsn;
+        this.erlVersion = erlVersion;
         this.repository = repository;
+    }
+
+    @Override
+    public String toString() {
+        return "PackageVersionBO{" +
+                "versionId='" + versionId + '\'' +
+                ", repository=" + repository +
+                ", ref='" + ref + '\'' +
+                ", erlVersion='" + erlVersion + '\'' +
+                '}';
+    }
+
+    public void setVersionId(String versionId) {
+        this.versionId = versionId;
+    }
+
+    public String getVersionId() {
+        return versionId;
     }
 
     public String getRef() {
         return ref;
     }
 
-    public String getErlVsn() {
-        return erlVsn;
+    public String getErlVersion() {
+        return erlVersion;
     }
 
     public RepositoryBO getRepository() {
         return repository;
+    }
+
+    public void setRepository(RepositoryBO repository) {
+        this.repository = repository;
     }
 }

@@ -1,12 +1,11 @@
 package com.coon.coon_auto_builder.loader;
 
-import com.coon.coon_auto_builder.data.dao.service.PackageVersionDAOService;
-import com.coon.coon_auto_builder.data.dao.service.RepositoryDAOService;
+import com.coon.coon_auto_builder.data.dao.BuildDAOService;
+import com.coon.coon_auto_builder.data.dao.PackageVersionDAOService;
 import com.coon.coon_auto_builder.data.model.BuildBO;
 import com.coon.coon_auto_builder.data.model.PackageVersionBO;
 import com.coon.coon_auto_builder.data.model.RepositoryBO;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -20,10 +19,8 @@ public class FileLoader implements Loader {
     private final String artifactsPath;
 
     @Autowired
-    PackageVersionDAOService pavkageVersionDAO;
+    BuildDAOService buildDAO;
 
-    @Autowired
-    RepositoryDAOService repositoryDAO;
 
     FileLoader(String path) {
         String[] splitted = path.split("file:");
@@ -31,19 +28,15 @@ public class FileLoader implements Loader {
     }
 
     @Override
-    @Nullable
-    public RepositoryBO loadArtifacts(RepositoryBO repositoryBO) {
+    public void loadArtifacts(RepositoryBO repositoryBO) {
         try {
             copyArtifacts(repositoryBO);
             for (Map.Entry<String, BuildBO> result : repositoryBO.getBuilds().entrySet()) {
-                final PackageVersionBO vsn = new PackageVersionBO(repositoryBO.getRef(), result.getKey(), repositoryBO);
-                Optional<PackageVersionBO> mayBeVsn = pavkageVersionDAO.findByRefAndErlVersionAndRepositoryUrl(vsn);
-                result.getValue().setPackageVersion(mayBeVsn.orElse(vsn));
+                BuildBO build = result.getValue();
+                buildDAO.save(build);
             }
-            return repositoryDAO.save(repositoryBO);
         } catch (IOException e) {
             System.out.println(repositoryBO.getName() + " load failed: " + e.getMessage());
-            return null;
         }
     }
 
@@ -52,7 +45,7 @@ public class FileLoader implements Loader {
         for (Map.Entry<String, BuildBO> entry : repositoryBO.getBuilds().entrySet()) {
             String erlang = entry.getKey();
             BuildBO builder = entry.getValue();
-            if (builder.isSuccess()) {
+            if (builder.getResult()) {
                 dest = Paths.get(artifactsPath, repositoryBO.getName(),
                         repositoryBO.getNamespace(),
                         repositoryBO.getRef(),

@@ -22,18 +22,18 @@ public class BuildBO {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String buildId;
 
-    @ManyToOne(targetEntity = PackageVersionBO.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = PackageVersionBO.class)
     @JoinColumn
     private PackageVersionBO packageVersion;
 
     @Column(name = "result", length = 100, nullable = false)
-    private boolean result;
+    private boolean result = true;
 
     @Column(name = "message", columnDefinition = "text")
     private String message;
 
     @Column(name = "artifact_path", length = 100)
-    private Path artifactPath;
+    private String artifactPath;
 
     @CreatedDate
     @NotNull
@@ -45,46 +45,78 @@ public class BuildBO {
     @Transient
     private Path buildPath;
 
-    BuildBO(PackageVersionBO packageVersion, Path basePath) {
+    public BuildBO() {}
+
+    public BuildBO(PackageVersionBO packageVersion, Path basePath) {
         this.packageVersion = packageVersion;
         this.basePath = basePath;
-        this.buildPath = Paths.get(basePath.toString(), packageVersion.getErlVsn());
+        this.buildPath = Paths.get(basePath.toString(), packageVersion.getErlVersion());
     }
 
-    BuildBO(PackageVersionBO packageVersion, String failMessage) {
+    public BuildBO(PackageVersionBO packageVersion, String failMessage) {
         this.packageVersion = packageVersion;
         this.message = failMessage;
+        if(failMessage != null)
+            this.result = false;
     }
 
-    public boolean isSuccess() {
-        return message == null;
+    public boolean getResult() {
+        return result;
+    }
+
+    public void setBuildId(String buildId) {
+        this.buildId = buildId;
+    }
+
+    public String getBuildId() {
+        return buildId;
     }
 
     public void setArtifactPath(Path artifactPath) {
-        this.artifactPath = artifactPath;
+        this.artifactPath = artifactPath.toString();
     }
 
-    public void setPackageVersion(PackageVersionBO packageVersion) {
-        this.packageVersion = packageVersion;
+    public PackageVersionBO getPackageVersion() {
+        return packageVersion;
     }
 
     public Path getBuildPath() {
         return buildPath;
     }
 
-    public Path getArtifactPath() {
+    public String getArtifactPath() {
         return artifactPath;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return "BuildBO{" +
+                "buildId='" + buildId + '\'' +
+                ", packageVersion=" + packageVersion +
+                ", result=" + result +
+                ", message='" + message + '\'' +
+                ", artifactPath='" + artifactPath + '\'' +
+                ", createdDate=" + createdDate +
+                ", basePath=" + basePath +
+                ", buildPath=" + buildPath +
+                '}';
     }
 
     void build(String erlangExecutable, boolean copy) {
         if (erlangExecutable == null) {
             message = "no erlang installed";
+            result = false;
             return;
         }
         try {
             mayBeCopy(copy);
         } catch (IOException e) {
             message = "Can't copy from " + basePath + " to " + buildPath + ": " + e.getMessage();
+            result = false;
             return;
         }
         ProcessBuilder pb = new ProcessBuilder("coon", "package");
@@ -96,9 +128,11 @@ public class BuildBO {
             Process process = pb.start();
             if (process.waitFor() != 0) {
                 message = "build failed: " + CmdHelper.getProcessError(process);
+                result = false;
             }
         } catch (IOException | InterruptedException e) {
             message = "build failed: " + e.getMessage();
+            result = false;
         }
     }
 

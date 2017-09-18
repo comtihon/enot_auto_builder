@@ -18,7 +18,7 @@ public class PackageDTO {
         this.namespace = pack.getNamespace();
         this.name = pack.getName();
         this.ref = version.getRef();
-        this.erl = version.getErlVsn();
+        this.erl = version.getErlVersion();
         this.url = pack.getUrl();
     }
 

@@ -1,20 +1,25 @@
-package com.coon.coon_auto_builder.data.dao.service;
+package com.coon.coon_auto_builder.data.dao;
 
-import com.coon.coon_auto_builder.data.dao.RepositoryDAO;
 import com.coon.coon_auto_builder.data.model.RepositoryBO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@Component
+@Service
 public class RepositoryDAOService {
     @Autowired
     RepositoryDAO dao;
 
-    public RepositoryBO save(RepositoryBO pack) {
-        return dao.save(pack);
+    public RepositoryBO save(RepositoryBO repo) {
+        return dao.save(repo);
+    }
+
+    @Transactional
+    public RepositoryBO saveIfNotExists(RepositoryBO repo) {
+        return find(repo.getUrl()).orElse(save(repo));
     }
 
     public Optional<RepositoryBO> find(String resId) {

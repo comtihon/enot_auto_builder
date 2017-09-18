@@ -52,13 +52,7 @@ public class ServerConfiguration implements InitializingBean {
         return new BuildRequest();
     }
 
-    @Override
-    public String toString() {
-        return "ServerConfiguration{" +
-                "erlangVersion='" + erlangVersion + '\'' +
-                ", kerlExecutable='" + kerlExecutable + '\'' +
-                '}';
-    }
+    //TODO add HicariCP bean config
 
     @Override
     public void afterPropertiesSet() throws Exception {
