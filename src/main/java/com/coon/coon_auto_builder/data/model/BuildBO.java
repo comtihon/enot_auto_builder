@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.data.model;
 
+import com.coon.coon_auto_builder.data.dto.PackageDTO;
 import com.coon.coon_auto_builder.tool.CmdHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.hibernate.annotations.GenericGenerator;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Map;
 
 @Entity
@@ -22,8 +24,8 @@ public class BuildBO {
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String buildId;
 
-    @ManyToOne(targetEntity = PackageVersionBO.class)
-    @JoinColumn
+    @ManyToOne(targetEntity = PackageVersionBO.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "package_version_id")
     private PackageVersionBO packageVersion;
 
     @Column(name = "result", length = 100, nullable = false)
@@ -38,7 +40,7 @@ public class BuildBO {
     @CreatedDate
     @NotNull
     @Column(name = "created_date", nullable = false, updatable = false)
-    private ZonedDateTime createdDate = ZonedDateTime.now(); // TODO wrong format
+    private Date createdDate = new Date();
 
     @Transient
     private Path basePath;
@@ -72,6 +74,10 @@ public class BuildBO {
         return buildId;
     }
 
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
     public void setArtifactPath(Path artifactPath) {
         this.artifactPath = artifactPath.toString();
     }
@@ -90,6 +96,10 @@ public class BuildBO {
 
     public String getMessage() {
         return message;
+    }
+
+    public PackageDTO toDTO() {
+        return new PackageDTO(packageVersion);
     }
 
     @Override

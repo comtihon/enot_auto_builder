@@ -8,18 +8,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {HibernateTestConfig.class})
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class})
+@Transactional
 public class BuildDAOServiceTest {
 
     @Autowired
@@ -49,8 +51,9 @@ public class BuildDAOServiceTest {
     @Test
     public void saveMultipleBuilds() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
-        PackageVersionBO pv = new PackageVersionBO("1.0.0", "18", repo);
+        final String ref = "1.1.0";
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", ref, repoUrl);
+        PackageVersionBO pv = new PackageVersionBO(ref, "18", repo);
         BuildBO build = new BuildBO(pv, Paths.get("/path/to/artifact"));
         BuildBO buildOK = new BuildBO(pv, "build falied");
         buildDAOService.save(build);
@@ -96,20 +99,53 @@ public class BuildDAOServiceTest {
     @Test
     public void searchBuildByValues() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
-        PackageVersionBO pv = new PackageVersionBO("1.0.0", "18", repo);
-        PackageVersionBO pvOther = new PackageVersionBO("1.0.0", "19", repo);
+        final String ref = "1.2.0";
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", ref, repoUrl);
+        PackageVersionBO pv = new PackageVersionBO(ref, "18", repo);
+        PackageVersionBO pvOther = new PackageVersionBO(ref, "19", repo);
         BuildBO build = new BuildBO(pv, "build failed");
         BuildBO build2 = new BuildBO(pvOther, Paths.get("some path"));
         buildDAOService.save(build);
         buildDAOService.save(build2);
         Optional<BuildBO> maybeBuild = buildDAOService.findByValues(
-                "coon", "comtihon", "1.0.0", "18");
+                "coon", "comtihon", ref, "18");
         Assert.isTrue(!maybeBuild.isPresent(), "No successful builds should be found");
         BuildBO build3 = new BuildBO(pv, Paths.get("artifact"));
         buildDAOService.save(build3);
         maybeBuild = buildDAOService.findByValues(
-                "coon", "comtihon", "1.0.0", "18");
+                "coon", "comtihon", ref, "18");
         Assert.isTrue(maybeBuild.isPresent(), "Successful build should be found");
+    }
+
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
+    public void fetchByValues() throws Exception {
+        List<BuildBO> found = buildDAOService.fetchByValues(
+                "name1", "namespace1", "1.0.0", "18");
+        found.sort(Comparator.comparing(BuildBO::getBuildId));
+        Assert.isTrue(found.get(0).getBuildId().equals("build_id1"), "found first build");
+        Assert.isTrue(found.get(1).getBuildId().equals("build_id2"), "found second build");
+        Assert.isTrue(found.size() == 2, "Only two builds should be found");
+
+        found = buildDAOService.fetchByValues("name1", "namespace1", "1.0.0", null);
+        found.sort(Comparator.comparing(BuildBO::getBuildId));
+        Assert.isTrue(found.get(0).getBuildId().equals("build_id1"), "found first build");
+        Assert.isTrue(found.get(1).getBuildId().equals("build_id2"), "found second build");
+        Assert.isTrue(found.get(2).getBuildId().equals("build_id3"), "found third build");
+        Assert.isTrue(found.get(3).getBuildId().equals("build_id4"), "found fourth build");
+        Assert.isTrue(found.size() == 4, "Only two builds should be found");
+
+        found = buildDAOService.fetchByValues("name1", "namespace1", null, null);
+        found.sort(Comparator.comparing(BuildBO::getBuildId));
+        Assert.isTrue(found.get(0).getBuildId().equals("build_id1"), "found first build");
+        Assert.isTrue(found.get(1).getBuildId().equals("build_id2"), "found second build");
+        Assert.isTrue(found.get(2).getBuildId().equals("build_id3"), "found third build");
+        Assert.isTrue(found.get(3).getBuildId().equals("build_id4"), "found fourth build");
+        Assert.isTrue(found.get(4).getBuildId().equals("build_id5"), "found fifth build");
+        Assert.isTrue(found.size() == 5, "Only two builds should be found");
+
+        found = buildDAOService.fetchByValues("name2", "namespace2", null, null);
+        Assert.isTrue(found.get(0).getBuildId().equals("build_id6"), "found first build");
+        Assert.isTrue(found.size() == 1, "Only one build for second repository");
     }
 }

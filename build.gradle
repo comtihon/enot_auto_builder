@@ -31,7 +31,6 @@ dependencies {
     compile("org.springframework.integration:spring-integration-core")
     compile('com.zaxxer:HikariCP')
     compile('javax.mail:javax.mail-api')
-    compile('javax.mail:javax.mail')
     compile('com.h2database:h2:1.4.196')
     compile('javax:javaee-api:7.0')
     compile('commons-io:commons-io:2.5')

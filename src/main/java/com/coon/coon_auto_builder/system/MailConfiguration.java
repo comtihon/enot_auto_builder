@@ -33,7 +33,7 @@ public class MailConfiguration {
     private String user;
     @Value("${email.password}")
     private String pass;
-    @Value("${spring.service.host}")
+    @Value("${service.host}")
     private String serviceHost;
 
 

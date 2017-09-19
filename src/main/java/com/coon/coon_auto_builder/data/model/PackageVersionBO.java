@@ -16,8 +16,8 @@ public class PackageVersionBO {
     @Column(name = "version_id")
     private String versionId;
 
-    @ManyToOne(targetEntity = RepositoryBO.class)
-    @JoinColumn
+    @ManyToOne(targetEntity = RepositoryBO.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "repository_url")
     private RepositoryBO repository;
 
     @Column(name = "ref", length = 100, nullable = false)

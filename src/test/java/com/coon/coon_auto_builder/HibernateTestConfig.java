@@ -21,7 +21,7 @@ import java.util.Properties;
 @ConfigurationProperties
 @EnableJpaRepositories(basePackages = "com.coon.coon_auto_builder.data.dao")
 @ComponentScan("com.coon.coon_auto_builder.data")
-@PropertySource("application_test.properties")
+@PropertySource("application.properties")
 public class HibernateTestConfig {
 
     @Autowired

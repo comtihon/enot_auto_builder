@@ -2,6 +2,8 @@ package com.coon.coon_auto_builder.system;
 
 import com.coon.coon_auto_builder.data.model.BuildRequest;
 import com.coon.coon_auto_builder.tool.CmdHelper;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,7 +13,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,8 +56,6 @@ public class ServerConfiguration implements InitializingBean {
         return new BuildRequest();
     }
 
-    //TODO add HicariCP bean config
-
     @Override
     public void afterPropertiesSet() throws Exception {
         checkKerlInstalled();
@@ -70,8 +72,8 @@ public class ServerConfiguration implements InitializingBean {
         try {
             coonVersion = runCmd("coon -v");
         } catch (IOException | InterruptedException e) {
-            System.out.println("Calling coon error");
-            throw new RuntimeException("Calling coon error");
+            System.out.println("Calling coon error " + e.getMessage());
+            throw new RuntimeException("Calling coon error " + e.getMessage());
         }
     }
 
@@ -79,8 +81,8 @@ public class ServerConfiguration implements InitializingBean {
         try {
             kerlVersion = runCmd(kerlExecutable + " version");
         } catch (IOException | InterruptedException e) {
-            System.out.println("Calling kerl error");
-            throw new RuntimeException("Calling kerl error");
+            System.out.println("Calling kerl error " + e.getMessage());
+            throw new RuntimeException("Calling kerl error " + e.getMessage());
         }
     }
 

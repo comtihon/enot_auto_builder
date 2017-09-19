@@ -3,13 +3,17 @@ package com.coon.coon_auto_builder.data.dao;
 import com.coon.coon_auto_builder.HibernateTestConfig;
 import com.coon.coon_auto_builder.data.model.PackageVersionBO;
 import com.coon.coon_auto_builder.data.model.RepositoryBO;
+import org.hibernate.SessionFactory;
+import org.hibernate.exception.GenericJDBCException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -17,7 +21,7 @@ import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {HibernateTestConfig.class})
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class})
+@Transactional
 public class PackageVersionDAOServiceTest {
 
     @Autowired

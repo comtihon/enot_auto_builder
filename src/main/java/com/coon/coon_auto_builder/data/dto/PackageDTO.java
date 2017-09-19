@@ -14,12 +14,12 @@ public class PackageDTO {
 
     }
 
-    public PackageDTO(RepositoryBO pack, PackageVersionBO version) {
-        this.namespace = pack.getNamespace();
-        this.name = pack.getName();
+    public PackageDTO(PackageVersionBO version) {
+        this.namespace = version.getRepository().getNamespace();
+        this.name = version.getRepository().getName();
         this.ref = version.getRef();
         this.erl = version.getErlVersion();
-        this.url = pack.getUrl();
+        this.url = version.getRepository().getUrl();
     }
 
     public String getNamespace() {

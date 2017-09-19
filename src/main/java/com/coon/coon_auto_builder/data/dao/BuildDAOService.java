@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BuildDAOService {
@@ -27,7 +26,21 @@ public class BuildDAOService {
     }
 
     public Optional<BuildBO> findByValues(String name, String namespace, String ref, String erl) {
-        return Optional.ofNullable(dao.findByNameAndNamespaceAndRefAndErl(name, namespace, ref, erl));
+        List<BuildBO> builds = dao.findSuccessfullByNameAndNamespaceAndRefAndErl(name, namespace, ref, erl);
+        if(builds.size() == 0) {
+            return Optional.empty();
+        } else if(builds.size() == 1) {
+            return Optional.of(builds.get(0));
+        } else {
+            builds.sort(Comparator.comparing(BuildBO::getCreatedDate));
+            return Optional.of(builds.get(builds.size()));
+        }
+    }
+
+    public List<BuildBO> fetchByValues(String name, String namespace, String ref, String erl) {
+        if (ref == null) return dao.findSuccessfullByNameAndNamespace(name, namespace);
+        if (erl == null) return dao.findSuccessfullByNameAndNamespaceAndRef(name, namespace, ref);
+        return dao.findSuccessfullByNameAndNamespaceAndRefAndErl(name, namespace, ref, erl);
     }
 
     public Optional<BuildBO> find(String resId) {

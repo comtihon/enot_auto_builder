@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {HibernateTestConfig.class})
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class})
+@Transactional
 public class RepositoryDAOServiceTest {
 
     @Autowired

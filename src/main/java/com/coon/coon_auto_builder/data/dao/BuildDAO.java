@@ -6,6 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 public interface BuildDAO extends CrudRepository<BuildBO, String> {
     @Query("SELECT b from BuildBO b " +
             "join b.packageVersion pv " +
@@ -15,9 +17,31 @@ public interface BuildDAO extends CrudRepository<BuildBO, String> {
             "and r.namespace = :namespace " +
             "and pv.ref = :ref " +
             "and pv.erlVersion = :erl")
-    BuildBO findByNameAndNamespaceAndRefAndErl(
+    List<BuildBO> findSuccessfullByNameAndNamespaceAndRefAndErl(
             @Param("name") String name,
             @Param("namespace") String namespace,
             @Param("ref") String ref,
             @Param("erl") String erl);
+
+    @Query("SELECT b from BuildBO b " +
+            "join b.packageVersion pv " +
+            "join pv.repository r " +
+            "WHERE b.result = true " +
+            "and r.name = :name " +
+            "and r.namespace = :namespace " +
+            "and pv.ref = :ref")
+    List<BuildBO> findSuccessfullByNameAndNamespaceAndRef(
+            @Param("name") String name,
+            @Param("namespace") String namespace,
+            @Param("ref") String ref);
+
+    @Query("SELECT b from BuildBO b " +
+            "join b.packageVersion pv " +
+            "join pv.repository r " +
+            "WHERE b.result = true " +
+            "and r.name = :name " +
+            "and r.namespace = :namespace")
+    List<BuildBO> findSuccessfullByNameAndNamespace(
+            @Param("name") String name,
+            @Param("namespace") String namespace);
 }
