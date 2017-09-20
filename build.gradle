@@ -51,7 +51,7 @@ dependencies {
     compile('javax.mail:javax.mail-api')
     compile('javax:javaee-api:7.0')
     compile('commons-io:commons-io:2.5')
-    compile('org.jetbrains:annotations')
+    compile('org.jetbrains:annotations:15.0')
     compile('org.eclipse.jgit:org.eclipse.jgit:4.8.0.201706111038-r')
     compile("org.springframework.boot:spring-boot-devtools")
     runtime('org.postgresql:postgresql')
