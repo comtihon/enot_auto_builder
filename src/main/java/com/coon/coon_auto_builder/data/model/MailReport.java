@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.data.model;
 
 import com.coon.coon_auto_builder.system.Status;
-import org.eclipse.jgit.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.HashMap;

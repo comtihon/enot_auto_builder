@@ -4,14 +4,13 @@ import com.coon.coon_auto_builder.data.dto.PackageDTO;
 import com.coon.coon_auto_builder.tool.CmdHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -47,7 +46,8 @@ public class BuildBO {
     @Transient
     private Path buildPath;
 
-    public BuildBO() {}
+    public BuildBO() {
+    }
 
     public BuildBO(PackageVersionBO packageVersion, Path basePath) {
         this.packageVersion = packageVersion;
@@ -58,7 +58,7 @@ public class BuildBO {
     public BuildBO(PackageVersionBO packageVersion, String failMessage) {
         this.packageVersion = packageVersion;
         this.message = failMessage;
-        if(failMessage != null)
+        if (failMessage != null)
             this.result = false;
     }
 
@@ -66,20 +66,17 @@ public class BuildBO {
         return result;
     }
 
-    public void setBuildId(String buildId) {
-        this.buildId = buildId;
-    }
-
     public String getBuildId() {
         return buildId;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
+    public void setBuildId(String buildId) {
+        this.buildId = buildId;
     }
 
-    public void setArtifactPath(Path artifactPath) {
-        this.artifactPath = artifactPath.toString();
+    @NotNull
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
     public PackageVersionBO getPackageVersion() {
@@ -92,6 +89,10 @@ public class BuildBO {
 
     public String getArtifactPath() {
         return artifactPath;
+    }
+
+    public void setArtifactPath(Path artifactPath) {
+        this.artifactPath = artifactPath.toString();
     }
 
     public String getMessage() {
