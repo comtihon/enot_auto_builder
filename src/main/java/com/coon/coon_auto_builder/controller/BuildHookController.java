@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class BuildHookController {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private FraudDetector fraudDetector;
 
