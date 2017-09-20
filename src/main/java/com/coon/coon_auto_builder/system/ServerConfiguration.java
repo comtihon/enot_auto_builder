@@ -2,8 +2,8 @@ package com.coon.coon_auto_builder.system;
 
 import com.coon.coon_auto_builder.data.model.BuildRequest;
 import com.coon.coon_auto_builder.tool.CmdHelper;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,11 +11,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
-import javax.sql.DataSource;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableConfigurationProperties
 @ConfigurationProperties
 public class ServerConfiguration implements InitializingBean {
-
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Value("${default_erlang}")
     private String erlangVersion;
 
@@ -50,29 +48,23 @@ public class ServerConfiguration implements InitializingBean {
         return tempPath;
     }
 
-    @Bean
-    @Scope("prototype")
-    public BuildRequest buildRequest() {
-        return new BuildRequest();
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
         checkKerlInstalled();
         gatherKerlInstallations();
         checkCoonInstalled();
-        System.out.println("Coon version " + coonVersion);
-        System.out.println("Kerl version " + kerlVersion);
-        System.out.println("Kerl installations: ");
+        logger.info("Coon version " + coonVersion);
+        logger.info("Kerl version " + kerlVersion);
+        logger.info("Kerl installations: ");
         for (Map.Entry<String, String> entry : kerlInstallations.entrySet())
-            System.out.println(entry.getKey() + " " + entry.getValue());
+            logger.info(entry.getKey() + " " + entry.getValue());
     }
 
     private void checkCoonInstalled() {
         try {
             coonVersion = runCmd("coon -v");
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Calling coon error " + e.getMessage());
+        } catch (IOException | InterruptedException e) { //TODO do not fail if coon not found
+            logger.warn("Calling coon error " + e.getMessage());
             throw new RuntimeException("Calling coon error " + e.getMessage());
         }
     }
@@ -80,8 +72,8 @@ public class ServerConfiguration implements InitializingBean {
     private void checkKerlInstalled() {
         try {
             kerlVersion = runCmd(kerlExecutable + " version");
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Calling kerl error " + e.getMessage());
+        } catch (IOException | InterruptedException e) { //TODO do not fail if kerl not found
+            logger.warn("Calling kerl error " + e.getMessage());
             throw new RuntimeException("Calling kerl error " + e.getMessage());
         }
     }
@@ -91,7 +83,7 @@ public class ServerConfiguration implements InitializingBean {
         try {
             installations = runCmd(kerlExecutable + " list installations");
         } catch (IOException | InterruptedException e) {
-            System.out.println("Calling kerl error");
+            logger.error("Calling kerl error");
             throw new RuntimeException("Calling kerl error");
         }
         String[] lines = installations.split("\n");
@@ -101,6 +93,7 @@ public class ServerConfiguration implements InitializingBean {
         }
     }
 
+    @NotNull
     private String runCmd(String cmd) throws IOException, InterruptedException {
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();

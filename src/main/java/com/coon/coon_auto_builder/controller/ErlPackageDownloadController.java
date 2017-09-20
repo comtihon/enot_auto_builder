@@ -3,6 +3,8 @@ package com.coon.coon_auto_builder.controller;
 import com.coon.coon_auto_builder.data.dao.BuildDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageDTO;
 import com.coon.coon_auto_builder.data.model.BuildBO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -18,6 +20,7 @@ import java.util.Optional;
 
 @Controller
 public class ErlPackageDownloadController {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     BuildDAOService buildDao;
@@ -28,7 +31,7 @@ public class ErlPackageDownloadController {
                 request.getName(), request.getNamespace(), request.getRef(), request.getErl());
         if (!maybeResult.isPresent()) {
             String errorMessage = "No package for id " + request;
-            System.out.println(errorMessage);
+            logger.warn(errorMessage);
             OutputStream outputStream = response.getOutputStream();
             outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
             outputStream.close();
@@ -42,7 +45,7 @@ public class ErlPackageDownloadController {
         Optional<BuildBO> maybeResult = buildDao.find(id);
         if (!maybeResult.isPresent()) {
             String errorMessage = "No result for id " + id;
-            System.out.println(errorMessage);
+            logger.warn(errorMessage);
             OutputStream outputStream = response.getOutputStream();
             outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
             outputStream.close();

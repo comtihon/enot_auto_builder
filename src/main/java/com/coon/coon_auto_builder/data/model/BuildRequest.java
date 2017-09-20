@@ -4,13 +4,19 @@ import com.coon.coon_auto_builder.data.dto.BuildRequestDTO;
 import com.coon.coon_auto_builder.loader.Loader;
 import com.coon.coon_auto_builder.system.ServerConfiguration;
 import com.coon.coon_auto_builder.system.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.Transient;
 import java.io.IOException;
 
 public class BuildRequest implements Task {
     private Status internalStatus;
     private RepositoryBO repo;
+
+    @Transient
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ServerConfiguration configuration;
@@ -18,7 +24,11 @@ public class BuildRequest implements Task {
     @Autowired
     private Loader loader;
 
-    public void init(BuildRequestDTO dto) {
+    public BuildRequest() {
+
+    }
+
+    public BuildRequest(BuildRequestDTO dto) {
         internalStatus = Status.WAIT;
         repo = new RepositoryBO(configuration.getTempPath(), dto.getName(), dto.getRef(), dto.getUrl());
     }
@@ -39,7 +49,7 @@ public class BuildRequest implements Task {
             try {
                 repo.clean();
             } catch (IOException e) {
-                System.out.println("Failed to clean " + repo.getName() + ": " + e.getMessage());
+                logger.error("Failed to clean " + repo.getName() + ": " + e.getMessage());
             }
         }
     }

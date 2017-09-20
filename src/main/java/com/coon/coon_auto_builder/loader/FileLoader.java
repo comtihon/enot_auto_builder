@@ -6,6 +6,8 @@ import com.coon.coon_auto_builder.data.model.BuildBO;
 import com.coon.coon_auto_builder.data.model.PackageVersionBO;
 import com.coon.coon_auto_builder.data.model.RepositoryBO;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -16,6 +18,7 @@ import java.util.Optional;
 
 
 public class FileLoader implements Loader {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final String artifactsPath;
 
     @Autowired
@@ -36,7 +39,7 @@ public class FileLoader implements Loader {
                 buildDAO.save(build);
             }
         } catch (IOException e) {
-            System.out.println(repositoryBO.getName() + " load failed: " + e.getMessage());
+            logger.error(repositoryBO.getName() + " load failed: " + e.getMessage());
         }
     }
 
@@ -52,7 +55,7 @@ public class FileLoader implements Loader {
                         erlang,
                         repositoryBO.getName() + ".cp");
                 src = Paths.get(builder.getBuildPath().toString(), repositoryBO.getName() + ".cp");
-                System.out.println("Copy " + src + " to " + dest);
+                logger.debug("Copy " + src + " to " + dest);
                 FileUtils.copyFile(src.toFile(), dest.toFile());
                 builder.setArtifactPath(dest);
             }

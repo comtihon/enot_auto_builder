@@ -25,6 +25,10 @@ public class BuildRequestDTO {
         return repository.getCloneUrl();
     }
 
+    public RepositoryDTO getRepository() {
+        return repository;
+    }
+
     @Override
     public String toString() {
         return "BuildRequestDTO{" +

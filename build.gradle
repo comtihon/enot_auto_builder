@@ -22,6 +22,24 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    test_integration {
+        java {
+            compileClasspath = sourceSets.main.output + configurations.testRuntime
+            runtimeClasspath = output + compileClasspath
+            srcDir file('src/test_integration/java')
+        }
+        resources.srcDir file('src/test_integration/resources')
+    }
+}
+
+task test_integration(type: Test) {
+    testClassesDir = sourceSets.test_integration.output.classesDir
+    classpath = sourceSets.test_integration.runtimeClasspath
+}
+
+check.dependsOn test_integration
+
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-jdbc')
@@ -31,11 +49,11 @@ dependencies {
     compile("org.springframework.integration:spring-integration-core")
     compile('com.zaxxer:HikariCP')
     compile('javax.mail:javax.mail-api')
-    compile('com.h2database:h2:1.4.196')
     compile('javax:javaee-api:7.0')
     compile('commons-io:commons-io:2.5')
     compile('org.eclipse.jgit:org.eclipse.jgit:4.8.0.201706111038-r')
     compile("org.springframework.boot:spring-boot-devtools")
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('com.h2database:h2:1.4.196')
 }

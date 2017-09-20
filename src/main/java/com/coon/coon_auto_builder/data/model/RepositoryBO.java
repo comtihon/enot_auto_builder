@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +19,9 @@ import java.util.*;
 @Entity
 @Table(name = "repository")
 public class RepositoryBO {
+    @Transient
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Id
     @Column(name = "url", length = 100, nullable = false)
     private String url;
@@ -102,14 +107,15 @@ public class RepositoryBO {
                 .setURI(url)
                 .setDirectory(repoPath.toFile())
                 .setBranch(ref)
-                .call()) { //TODO change all println to log.debug
-            System.out.println("Cloned " + url + " to " + result.getRepository().getDirectory());
+                .call()) {
+            logger.debug("Cloned " + url + " to " + result.getRepository().getDirectory());
             RevCommit commit = result.getRepository().parseCommit(result.getRepository().findRef(ref).getObjectId());
             email = commit.getAuthorIdent().getEmailAddress();
             readConfig(defaultErlang);
             return true;
         } catch (IOException | GitAPIException e) {
             String msg = "clone failed " + e.getMessage();
+            logger.warn(msg);
             builders.put(defaultErlang, new BuildBO(new PackageVersionBO(ref, defaultErlang, this), msg));
             return false;
         }
