@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Persistable;
-import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.util.*;
 @Entity
 @Table(name = "repository")
 public class RepositoryBO {
+
     @Transient
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -29,6 +29,10 @@ public class RepositoryBO {
     private String name;
     @Column(name = "namespace", length = 100, nullable = false)
     private String namespace;
+
+    @OneToMany(targetEntity = PackageVersionBO.class, mappedBy = "repository",
+            cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<PackageVersionBO> versions;
 
     @Transient
     private Path repoPath; //Path where package is cloned
@@ -45,7 +49,7 @@ public class RepositoryBO {
 
     }
 
-    public RepositoryBO(String repoPath, String fullName, String ref, String url) {
+    public RepositoryBO(String repoPath, String fullName, String ref, String url, @Nullable List<String> erlVsns) {
         String[] splitted = fullName.split("/");
         this.namespace = splitted[0];
         this.name = splitted[1];
@@ -53,6 +57,7 @@ public class RepositoryBO {
         this.ref = ref;
         this.url = url;
         this.builders = new HashMap<>(); //TODO ConcurrentHashMap if read from other thread
+        erlangVersions = erlVsns;
     }
 
     public String getRef() {
@@ -79,7 +84,7 @@ public class RepositoryBO {
         return builders;
     }
 
-    public boolean isBuildSucceed() {
+    boolean isBuildSucceed() {
         for (BuildBO builder : builders.values())
             if (builder.getResult()) return true;
         return false;
@@ -91,9 +96,6 @@ public class RepositoryBO {
                 "url='" + url + '\'' +
                 ", name='" + name + '\'' +
                 ", namespace='" + namespace + '\'' +
-                ", repoPath=" + repoPath +
-                ", ref='" + ref + '\'' +
-                ", email='" + email + '\'' +
                 '}';
     }
 
@@ -111,7 +113,8 @@ public class RepositoryBO {
             logger.debug("Cloned " + url + " to " + result.getRepository().getDirectory());
             RevCommit commit = result.getRepository().parseCommit(result.getRepository().findRef(ref).getObjectId());
             email = commit.getAuthorIdent().getEmailAddress();
-            readConfig(defaultErlang);
+            if (erlangVersions == null)
+                readConfig(defaultErlang);
             return true;
         } catch (IOException | GitAPIException e) {
             String msg = "clone failed " + e.getMessage();

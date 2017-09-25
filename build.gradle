@@ -47,6 +47,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("org.springframework.integration:spring-integration-mail")
     compile("org.springframework.integration:spring-integration-core")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile('com.zaxxer:HikariCP')
     compile('javax.mail:javax.mail-api')
     compile('javax:javaee-api:7.0')
@@ -57,4 +58,5 @@ dependencies {
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.h2database:h2:1.4.196')
+    testCompile('org.mockito:mockito-all:1.10.19')
 }

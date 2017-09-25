@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Conflict was found</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<p>
+    Hello,
+</p>
+<p>
+    Your build caused a conflict:<br/>
+    Your build: <span th:text="${second.namespace}"/>/<span th:text="${second.name}"/> points to
+    <span th:text="${second.url}"/> <br/>.
+    Build request: <span th:text="${first.getName()}"/> points to
+    <span th:text="${first.getUrl()}"/> <br/>.
+</p>
+<p th:if="${delete}">
+    Your repository and all builds will be deleted, as build request points to an official github repository.
+</p>
+<p>
+    Regards, <br/>
+    <em>Coon</em>
+</p>
+</body>
+</html>

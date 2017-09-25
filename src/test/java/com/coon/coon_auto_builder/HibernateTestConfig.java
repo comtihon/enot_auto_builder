@@ -21,7 +21,7 @@ import java.util.Properties;
 @ConfigurationProperties
 @EnableJpaRepositories(basePackages = "com.coon.coon_auto_builder.data.dao")
 @ComponentScan("com.coon.coon_auto_builder.data")
-@PropertySource("application.properties")
+@PropertySource("classpath:application.properties")
 public class HibernateTestConfig {
 
     @Autowired
@@ -47,10 +47,9 @@ public class HibernateTestConfig {
     @Bean
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(env.getProperty("jdbc.driverClassName"));
-        dataSource.setUrl(env.getProperty("jdbc.url"));
-        dataSource.setUsername(env.getProperty("jdbc.user"));
-        dataSource.setPassword(env.getProperty("jdbc.pass"));
+        dataSource.setUrl(env.getProperty("spring.datasource.url"));
+        dataSource.setUsername(env.getProperty("spring.datasource.username"));
+        dataSource.setPassword(env.getProperty("spring.datasource.password"));
         return dataSource;
     }
 

@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.data.dto.BuildRequestDTO;
 import com.coon.coon_auto_builder.data.model.BuildRequest;
+import com.coon.coon_auto_builder.data.model.RepositoryBO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -25,7 +25,7 @@ public class ControllerConfig {
     @Bean
     @Scope("prototype")
     @Lazy
-    public BuildRequest buildRequest(BuildRequestDTO requestDTO) {
-        return new BuildRequest(requestDTO);
+    public BuildRequest buildRequest(RepositoryBO repo) {
+        return new BuildRequest(repo);
     }
 }

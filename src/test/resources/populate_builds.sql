@@ -7,14 +7,14 @@ insert into package_versions (version_id, repository_url, ref, erl_version) valu
 insert into package_versions (version_id, repository_url, ref, erl_version) values('version_id4', 'url2', '1.0.0', '18');
 
 insert into builds (build_id, package_version_id, result, message, artifact_path, created_date)
- values('build_id1', 'version_id1', 'true', 'artifact', 'path1', GETDATE());
+ values('build_id1', 'version_id1', 'true', 'artifact', 'path1', now());
 insert into builds (build_id, package_version_id, result, message, artifact_path, created_date)
- values('build_id2', 'version_id1', 'true', 'artifact', 'path2', GETDATE());
+ values('build_id2', 'version_id1', 'true', 'artifact', 'path2', now());
 insert into builds (build_id, package_version_id, result, message, artifact_path, created_date)
- values('build_id3', 'version_id2', 'true', 'artifact', 'path3', GETDATE());
+ values('build_id3', 'version_id2', 'true', 'artifact', 'path3', now());
 insert into builds (build_id, package_version_id, result, message, artifact_path, created_date)
- values('build_id4', 'version_id2', 'true', 'artifact', 'path4', GETDATE());
+ values('build_id4', 'version_id2', 'true', 'artifact', 'path4', now());
 insert into builds (build_id, package_version_id, result, message, artifact_path, created_date)
- values('build_id5', 'version_id3', 'true', 'artifact', 'path5', GETDATE());
+ values('build_id5', 'version_id3', 'true', 'artifact', 'path5', now());
 insert into builds (build_id, package_version_id, result, message, artifact_path, created_date)
- values('build_id6', 'version_id4', 'true', 'artifact', 'path6', GETDATE());
+ values('build_id6', 'version_id4', 'true', 'artifact', 'path6', now());

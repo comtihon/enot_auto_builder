@@ -36,7 +36,7 @@ public class BuildDAOServiceTest {
     @Test
     public void save() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
         PackageVersionBO pv = new PackageVersionBO("1.0.0", "18", repo);
         BuildBO build = new BuildBO(pv, "build falied");
         buildDAOService.save(build);
@@ -52,7 +52,7 @@ public class BuildDAOServiceTest {
     public void saveMultipleBuilds() throws Exception {
         final String repoUrl = "url";
         final String ref = "1.1.0";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", ref, repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", ref, repoUrl, null);
         PackageVersionBO pv = new PackageVersionBO(ref, "18", repo);
         BuildBO build = new BuildBO(pv, Paths.get("/path/to/artifact"));
         BuildBO buildOK = new BuildBO(pv, "build falied");
@@ -77,7 +77,7 @@ public class BuildDAOServiceTest {
     @Test
     public void saveDifferentBuilds() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
         PackageVersionBO pv1 = new PackageVersionBO("1.0.0", "18", repo);
         PackageVersionBO pv2 = new PackageVersionBO("1.0.0", "19", repo);
         BuildBO build1 = new BuildBO(pv1, Paths.get("/path/to/artifact"));
@@ -100,7 +100,7 @@ public class BuildDAOServiceTest {
     public void searchBuildByValues() throws Exception {
         final String repoUrl = "url";
         final String ref = "1.2.0";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", ref, repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", ref, repoUrl, null);
         PackageVersionBO pv = new PackageVersionBO(ref, "18", repo);
         PackageVersionBO pvOther = new PackageVersionBO(ref, "19", repo);
         BuildBO build = new BuildBO(pv, "build failed");

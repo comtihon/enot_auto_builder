@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class RepositoryDAOService {
+public class RepositoryDAOService implements DaoService<RepositoryBO>{
     @Autowired
     RepositoryDAO dao;
 
@@ -22,8 +22,20 @@ public class RepositoryDAOService {
         return find(repo.getUrl()).orElse(save(repo));
     }
 
+    @Override
     public Optional<RepositoryBO> find(String resId) {
         return Optional.ofNullable(dao.findOne(resId));
+    }
+
+    @Override
+    @Transactional
+    public void delete(String id) {
+        dao.delete(id);
+    }
+
+    @Override
+    public Optional<RepositoryBO> findByNameAndNamespace(String name, String namespace) {
+        return Optional.ofNullable(dao.findByNameAndNamespace(name, namespace));
     }
 
     public Collection<RepositoryBO> getAll() {

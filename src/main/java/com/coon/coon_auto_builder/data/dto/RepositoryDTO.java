@@ -8,11 +8,23 @@ public class RepositoryDTO {
     @JsonProperty("clone_url")
     private String cloneUrl;
 
-    String getFullName() {
+    public RepositoryDTO() {
+    }
+
+    public RepositoryDTO(String url) {
+        this.cloneUrl = url;
+    }
+
+    public RepositoryDTO(String name, String url) {
+        this.fullName = name;
+        this.cloneUrl = url;
+    }
+
+    public String getFullName() {
         return fullName;
     }
 
-    String getCloneUrl() {
+    public String getCloneUrl() {
         return cloneUrl;
     }
 

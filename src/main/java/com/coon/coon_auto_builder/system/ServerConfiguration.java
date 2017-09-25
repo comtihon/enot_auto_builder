@@ -28,6 +28,9 @@ public class ServerConfiguration implements InitializingBean {
     @Value("${temp_path}")
     private String tempPath;
 
+    @Value("${github_secret:null}")
+    private String gitubSecret;
+
     private String kerlVersion;
     private String coonVersion;
     private Map<String, String> kerlInstallations = new ConcurrentHashMap<>();
@@ -43,6 +46,10 @@ public class ServerConfiguration implements InitializingBean {
 
     public String getTempPath() {
         return tempPath;
+    }
+
+    public String getGitubSecret() {
+        return gitubSecret;
     }
 
     @Override

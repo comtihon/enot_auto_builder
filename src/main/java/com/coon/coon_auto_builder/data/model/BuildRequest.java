@@ -1,6 +1,5 @@
 package com.coon.coon_auto_builder.data.model;
 
-import com.coon.coon_auto_builder.data.dto.BuildRequestDTO;
 import com.coon.coon_auto_builder.loader.Loader;
 import com.coon.coon_auto_builder.system.ServerConfiguration;
 import com.coon.coon_auto_builder.system.Status;
@@ -28,9 +27,9 @@ public class BuildRequest implements Task {
 
     }
 
-    public BuildRequest(BuildRequestDTO dto) {
+    public BuildRequest(RepositoryBO repo) {
         internalStatus = Status.WAIT;
-        repo = new RepositoryBO(configuration.getTempPath(), dto.getName(), dto.getRef(), dto.getUrl());
+        this.repo = repo;
     }
 
     @Override

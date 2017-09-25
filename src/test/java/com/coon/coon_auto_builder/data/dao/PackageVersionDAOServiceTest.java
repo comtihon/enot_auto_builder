@@ -33,7 +33,7 @@ public class PackageVersionDAOServiceTest {
     @Test
     public void save() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
         PackageVersionBO pv = new PackageVersionBO("1.0.0", "18", repo);
         packageVersionDAOService.save(pv);
         Assert.notNull(pv.getVersionId(), "saved id should not be null");
@@ -46,7 +46,7 @@ public class PackageVersionDAOServiceTest {
     @Test
     public void saveExistentRepo() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
         PackageVersionBO pv1 = new PackageVersionBO("1.0.0", "18", repo);
         PackageVersionBO pv2 = new PackageVersionBO("1.0.0", "19", repo);
         packageVersionDAOService.save(pv1);
@@ -58,7 +58,7 @@ public class PackageVersionDAOServiceTest {
     @Test
     public void findByValues() throws Exception {
         final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl);
+        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
         PackageVersionBO pv1 = new PackageVersionBO("1.0.0", "18", repo);
         PackageVersionBO pv2 = new PackageVersionBO("1.0.0", "19", repo);
         packageVersionDAOService.save(pv1);

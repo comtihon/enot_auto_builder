@@ -1,10 +1,13 @@
 package com.coon.coon_auto_builder.data.model;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "package_versions")
@@ -26,8 +29,11 @@ public class PackageVersionBO {
     @Column(name = "erl_version", length = 5, nullable = false)
     private String erlVersion;
 
-    public PackageVersionBO() {
-    }
+    @OneToMany(targetEntity = BuildBO.class, fetch = FetchType.LAZY, mappedBy = "packageVersion",
+            cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<BuildBO> buildsRes;
+
+    public PackageVersionBO(){}
 
     public PackageVersionBO(String ref, String erlVersion, RepositoryBO repository) {
         this.ref = ref;

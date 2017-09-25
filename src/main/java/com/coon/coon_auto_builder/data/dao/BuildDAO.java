@@ -4,11 +4,11 @@ import com.coon.coon_auto_builder.data.model.BuildBO;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 public interface BuildDAO extends CrudRepository<BuildBO, String> {
+    //TODO select id only?
     @Query("SELECT b from BuildBO b " +
             "join b.packageVersion pv " +
             "join pv.repository r " +

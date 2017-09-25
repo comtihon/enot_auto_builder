@@ -20,7 +20,8 @@ public class MailReport {
 
     private Map<String, BuildBO> results;
 
-    MailReport(String to, String packageName, Status status, boolean successs, String ref, @Nullable RepositoryBO repository) {
+    MailReport(String to, String packageName, Status status,
+               boolean successs, String ref, @Nullable RepositoryBO repository) {
         this.to = to;
         this.packageName = packageName;
         this.status = status;
