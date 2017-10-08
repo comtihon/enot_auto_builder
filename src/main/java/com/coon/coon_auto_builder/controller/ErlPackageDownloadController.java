@@ -1,68 +1,45 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.data.dao.BuildDAOService;
-import com.coon.coon_auto_builder.data.dto.PackageDTO;
-import com.coon.coon_auto_builder.data.model.BuildBO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
+import com.coon.coon_auto_builder.data.dto.BuildDTO;
+import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
+import com.coon.coon_auto_builder.service.BuildSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.Optional;
+import javax.validation.Valid;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
-public class ErlPackageDownloadController {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+public class ErlPackageDownloadController extends AbstractController {
 
     @Autowired
-    BuildDAOService buildDao;
+    private BuildSearchService buildSearchService;
 
     @RequestMapping(value = "/get", method = RequestMethod.POST)
-    public void downloadBySearch(HttpServletResponse response, @RequestBody PackageDTO request) throws IOException {
-        Optional<BuildBO> maybeResult = buildDao.findByValues(
-                request.getName(), request.getNamespace(), request.getRef(), request.getErl());
-        if (!maybeResult.isPresent()) {
-            String errorMessage = "No package for id " + request;
-            logger.warn(errorMessage);
-            OutputStream outputStream = response.getOutputStream();
-            outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-            outputStream.close();
-            return;
+    public void downloadBySearch(HttpServletResponse response,
+                                 @Valid @RequestBody RepositoryDTO request) throws Exception {
+        CompletableFuture<ResponseDTO<List<BuildDTO>>> build = buildSearchService.fetchBuilds(request);
+        ResponseDTO<List<BuildDTO>> responseDTO = build.get();
+        if (responseDTO.isResult()) {
+            List<BuildDTO> found = responseDTO.getResponse();
+            found.sort(Comparator.comparing(BuildDTO::getCreatedDate));
+            renderPackage(new ResponseDTO<>(found.get(0)), response);
+        } else {
+            renderPackage(build.get(), response);
         }
-        renderPackage(maybeResult.get(), response);
     }
 
     @RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
-    public void downloadById(HttpServletResponse response, @PathVariable String id) throws IOException {
-        Optional<BuildBO> maybeResult = buildDao.find(id);
-        if (!maybeResult.isPresent()) {
-            String errorMessage = "No result for id " + id;
-            logger.warn(errorMessage);
-            OutputStream outputStream = response.getOutputStream();
-            outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-            outputStream.close();
-            return;
-        }
-        renderPackage(maybeResult.get(), response);
-    }
-
-    private void renderPackage(BuildBO result, HttpServletResponse response) throws IOException {
-        File file = new File(result.getArtifactPath());
-        String mimeType = "application/gzip";
-
-        response.setContentType(mimeType);
-        response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
-        response.setContentLength((int) file.length());
-
-        InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-        FileCopyUtils.copy(inputStream, response.getOutputStream());
+    public void downloadById(HttpServletResponse response, @PathVariable String id) throws Exception {
+        CompletableFuture<ResponseDTO> builds = buildSearchService.findBuild(id);
+        renderPackage(builds.get(), response);
     }
 }

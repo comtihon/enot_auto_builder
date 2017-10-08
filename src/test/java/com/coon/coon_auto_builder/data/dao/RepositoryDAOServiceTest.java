@@ -1,72 +1,74 @@
 package com.coon.coon_auto_builder.data.dao;
 
-import com.coon.coon_auto_builder.HibernateTestConfig;
-import com.coon.coon_auto_builder.data.model.BuildBO;
-import com.coon.coon_auto_builder.data.model.PackageVersionBO;
-import com.coon.coon_auto_builder.data.model.RepositoryBO;
+import com.coon.coon_auto_builder.data.entity.Build;
+import com.coon.coon_auto_builder.data.entity.PackageVersion;
+import com.coon.coon_auto_builder.data.entity.Repository;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {HibernateTestConfig.class})
+@RunWith(SpringRunner.class)
+@DataJpaTest
 @Transactional
 public class RepositoryDAOServiceTest {
 
     @Autowired
-    RepositoryDAOService repositoryDAO;
+    private RepositoryDAO repositoryDAO;
 
     @Autowired
-    PackageVersionDAOService packageVersionDAOService;
+    private PackageVersionDAO packageVersionDAO;
 
     @Autowired
-    BuildDAOService buildDAOService;
+    private BuildDAO buildDAO;
 
     @Test
     public void save() throws Exception {
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", "url", null);
-        Assert.notNull(repositoryDAO.save(repo), "saved instance should not be null");
-        Optional<RepositoryBO> find = repositoryDAO.find("url");
-        Assert.isTrue(find.isPresent(), "Repo should be found");
+        List<PackageVersion> versions = Collections.singletonList(new PackageVersion("1.0.0", "18"));
+        Repository repo = new Repository("url", "comtihon/coon", versions);
+        Assert.assertNotNull(repositoryDAO.save(repo));
+        Repository find = repositoryDAO.findOne("url");
+        Assert.assertNotNull(find);
     }
 
     @Test
     public void saveExistent() throws Exception {
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", "url", null);
-        Assert.notNull(repositoryDAO.save(repo), "saved instance should not be null");
-        repo = new RepositoryBO("path", "comtihon/coon", "1.1.0", "url", null);
-        Assert.notNull(repositoryDAO.save(repo), "saved instance should not be null");
-        Collection<RepositoryBO> repos = repositoryDAO.getAll();
-        Assert.isTrue(1 == repos.size(), "should be only one repo per path");
+        List<PackageVersion> versions1 = Collections.singletonList(new PackageVersion("1.0.0", "18"));
+        List<PackageVersion> versions2 = Collections.singletonList(new PackageVersion("1.1.0", "18"));
+        Repository repo = new Repository("url", "comtihon/coon", versions1);
+        Assert.assertNotNull(repositoryDAO.save(repo));
+        repo = new Repository("url", "comtihon/coon", versions2);
+        Assert.assertNotNull(repositoryDAO.save(repo));
+        Iterable<Repository> itr = repositoryDAO.findAll();
+        Assert.assertEquals(1, ((Collection<Repository>) itr).size());
     }
 
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
     public void cascadeDelete() throws Exception {
         final String url = "url1";
-        Optional<RepositoryBO> find = repositoryDAO.find(url);
-        Assert.isTrue(find.isPresent(), "Repo should be populated via populate_builds.sql");
+        Repository find = repositoryDAO.findOne(url);
+        Assert.assertNotNull(find);
         repositoryDAO.delete(url);
 
-        find = repositoryDAO.find(url);
-        Assert.isTrue(!find.isPresent(), "Repo should be deleted");
+        find = repositoryDAO.findOne(url);
+        Assert.assertNull(find);
 
-        Optional<PackageVersionBO> vsn = packageVersionDAOService.find("version_id1");
-        Assert.isTrue(!vsn.isPresent(), "all versions of repo should be deleted");
-        vsn = packageVersionDAOService.find("version_id2");
-        Assert.isTrue(!vsn.isPresent(), "all versions of repo should be deleted");
-        Optional<BuildBO> build = buildDAOService.find("build_id1");
-        Assert.isTrue(!build.isPresent(), "Build should be deleted");
-        build = buildDAOService.find("build_id2");
-        Assert.isTrue(!build.isPresent(), "Build should be deleted");
+        PackageVersion vsn = packageVersionDAO.findOne("version_id1");
+        Assert.assertNull(vsn);
+        vsn = packageVersionDAO.findOne("version_id2");
+        Assert.assertNull(vsn);
+        Build build = buildDAO.findOne("build_id1");
+        Assert.assertNull(build);
+        build = buildDAO.findOne("build_id2");
+        Assert.assertNull(build);
     }
 }

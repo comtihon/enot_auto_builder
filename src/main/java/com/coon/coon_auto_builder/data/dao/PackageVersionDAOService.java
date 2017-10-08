@@ -1,6 +1,6 @@
 package com.coon.coon_auto_builder.data.dao;
 
-import com.coon.coon_auto_builder.data.model.PackageVersionBO;
+import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,39 +11,35 @@ import java.util.Optional;
 @Service
 public class PackageVersionDAOService {
     @Autowired
-    PackageVersionDAO dao;
+    private PackageVersionDAO dao;
 
-    @Autowired
-    RepositoryDAOService repositoryDAOService;
-
-    public void save(PackageVersionBO pack) {
-        pack.setRepository(repositoryDAOService.saveIfNotExists(pack.getRepository()));
-        PackageVersionBO saved = dao.save(pack);
+    public void save(PackageVersion pack) {
+        PackageVersion saved = dao.save(pack);
         if (saved != null) {
             pack.setVersionId(saved.getVersionId());
         }
     }
 
     @Transactional
-    public void saveIfNotExists(PackageVersionBO pack) {
-        Optional<PackageVersionBO> found = findByRefAndErlVersionAndRepository(pack);
-        if(found.isPresent()) {
+    public void saveIfNotExists(PackageVersion pack) {
+        Optional<PackageVersion> found = findByRefAndErlVersionAndRepository(pack);
+        if (found.isPresent()) {
             pack.setVersionId(found.get().getVersionId());
         } else {
             save(pack);
         }
     }
 
-    public Optional<PackageVersionBO> find(String resId) {
+    public Optional<PackageVersion> find(String resId) {
         return Optional.ofNullable(dao.findOne(resId));
     }
 
-    public Collection<PackageVersionBO> getAll() {
-        Iterable<PackageVersionBO> itr = dao.findAll();
-        return (Collection<PackageVersionBO>) itr;
+    public Collection<PackageVersion> getAll() {
+        Iterable<PackageVersion> itr = dao.findAll();
+        return (Collection<PackageVersion>) itr;
     }
 
-    public Optional<PackageVersionBO> findByRefAndErlVersionAndRepository(PackageVersionBO versionBO) {
+    public Optional<PackageVersion> findByRefAndErlVersionAndRepository(PackageVersion versionBO) {
         return Optional.ofNullable(dao.findByRefAndErlVersionAndRepository(
                 versionBO.getRef(),
                 versionBO.getErlVersion(),

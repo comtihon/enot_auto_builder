@@ -1,31 +1,31 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.data.dao.BuildDAOService;
-import com.coon.coon_auto_builder.data.dto.PackageDTO;
-import com.coon.coon_auto_builder.data.model.BuildBO;
+import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
+import com.coon.coon_auto_builder.data.dto.BuildDTO;
+import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
+import com.coon.coon_auto_builder.service.BuildSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
-public class ErlPackageRestController {
+public class ErlPackageRestController extends AbstractController {
 
     @Autowired
-    BuildDAOService buildDao;
+    private BuildSearchService buildSearchService;
 
     @RequestMapping(path = "/search", method = RequestMethod.POST)
-    public List<PackageDTO> listBySearch(@RequestBody PackageDTO request) throws IOException {
-        List<BuildBO> builds = buildDao.fetchByValues(
-                request.getName(), request.getNamespace(), request.getRef(), request.getErl());
-        List<PackageDTO> response = new ArrayList<>(builds.size());
-        for (BuildBO build : builds)
-            response.add(build.toDTO());
-        return response;
+    public CompletableFuture<ResponseEntity<?>> listBySearch(
+            @Valid @RequestBody RepositoryDTO request) throws IOException {
+        CompletableFuture<ResponseDTO<List<BuildDTO>>> builds = buildSearchService.fetchBuilds(request);
+        return builds.thenApply(this::returnResult);
     }
 }

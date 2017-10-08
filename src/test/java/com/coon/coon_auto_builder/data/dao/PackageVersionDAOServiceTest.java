@@ -1,73 +1,58 @@
 package com.coon.coon_auto_builder.data.dao;
 
-import com.coon.coon_auto_builder.HibernateTestConfig;
-import com.coon.coon_auto_builder.data.model.PackageVersionBO;
-import com.coon.coon_auto_builder.data.model.RepositoryBO;
-import org.hibernate.SessionFactory;
-import org.hibernate.exception.GenericJDBCException;
+import com.coon.coon_auto_builder.data.entity.Build;
+import com.coon.coon_auto_builder.data.entity.PackageVersion;
+import com.coon.coon_auto_builder.data.entity.Repository;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.Collection;
-import java.util.Optional;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {HibernateTestConfig.class})
+@RunWith(SpringRunner.class)
+@DataJpaTest
 @Transactional
 public class PackageVersionDAOServiceTest {
 
     @Autowired
-    PackageVersionDAOService packageVersionDAOService;
+    private PackageVersionDAO packageVersionDAO;
 
     @Autowired
-    RepositoryDAOService repositoryDAOService;
+    private BuildDAO buildDAO;
 
     @Test
     public void save() throws Exception {
-        final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
-        PackageVersionBO pv = new PackageVersionBO("1.0.0", "18", repo);
-        packageVersionDAOService.save(pv);
-        Assert.notNull(pv.getVersionId(), "saved id should not be null");
-        Optional<PackageVersionBO> find = packageVersionDAOService.find(pv.getVersionId());
-        Assert.isTrue(find.isPresent(), "Version should be found");
-        Optional<RepositoryBO> repoSearch = repositoryDAOService.find(repoUrl);
-        Assert.isTrue(repoSearch.isPresent(), "Repo should be saved with version");
+        PackageVersion pv = new PackageVersion("1.0.0", "18");
+        packageVersionDAO.save(pv);
+        Assert.assertNotNull(pv.getVersionId());
+        PackageVersion find = packageVersionDAO.findOne(pv.getVersionId());
+        Assert.assertNotNull(find);
     }
 
     @Test
-    public void saveExistentRepo() throws Exception {
-        final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
-        PackageVersionBO pv1 = new PackageVersionBO("1.0.0", "18", repo);
-        PackageVersionBO pv2 = new PackageVersionBO("1.0.0", "19", repo);
-        packageVersionDAOService.save(pv1);
-        packageVersionDAOService.save(pv2);
-        Collection<RepositoryBO> repos = repositoryDAOService.getAll();
-        Assert.isTrue(1 == repos.size(), "should be only one repo per path");
-    }
-
-    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
     public void findByValues() throws Exception {
-        final String repoUrl = "url";
-        RepositoryBO repo = new RepositoryBO("path", "comtihon/coon", "1.0.0", repoUrl, null);
-        PackageVersionBO pv1 = new PackageVersionBO("1.0.0", "18", repo);
-        PackageVersionBO pv2 = new PackageVersionBO("1.0.0", "19", repo);
-        packageVersionDAOService.save(pv1);
-        packageVersionDAOService.save(pv2);
-        Optional<PackageVersionBO> found1 = packageVersionDAOService.findByRefAndErlVersionAndRepository(pv1);
-        Assert.isTrue(found1.isPresent(), "vsn1 was found by values");
-        Assert.isTrue(found1.get().getVersionId().equals(pv1.getVersionId()), "found version is pv1");
-        Optional<PackageVersionBO> found2 = packageVersionDAOService.findByRefAndErlVersionAndRepository(pv2);
-        Assert.isTrue(found2.isPresent(), "vsn2 was found by values");
-        Assert.isTrue(found2.get().getVersionId().equals(pv2.getVersionId()), "found version is pv2");
+        PackageVersion found1 =
+                packageVersionDAO.findByRefAndErlVersionAndRepository("1.0.0", "18", "url1");
+        Assert.assertNotNull(found1);
+    }
+
+    @Test
+    public void addBuild() {
+        PackageVersion pv = new PackageVersion("1.0.0", "18");
+        packageVersionDAO.save(pv);
+        pv.addBuild(new Build());
+        pv.addBuild(new Build());
+        packageVersionDAO.save(pv);
+        Iterable<Build> itr = buildDAO.findAll();
+        Assert.assertEquals(2, ((Collection<Build>) itr).size());
+        packageVersionDAO.delete(pv.getVersionId());
+        itr = buildDAO.findAll();
+        Assert.assertEquals(0, ((Collection<Build>) itr).size());
     }
 }

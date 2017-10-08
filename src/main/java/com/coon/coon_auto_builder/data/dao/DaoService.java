@@ -6,7 +6,7 @@ public interface DaoService<T> {
 
     Optional<T> findByNameAndNamespace(String name, String namespace);
 
-    Optional<T>find(String id);
+    Optional<T> find(String id);
 
     void delete(String id);
 }

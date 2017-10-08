@@ -1,6 +1,7 @@
 package com.coon.coon_auto_builder.data.dao;
 
-import com.coon.coon_auto_builder.data.model.RepositoryBO;
+import com.coon.coon_auto_builder.data.entity.PackageVersion;
+import com.coon.coon_auto_builder.data.entity.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,21 +10,27 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class RepositoryDAOService implements DaoService<RepositoryBO>{
+public class RepositoryDAOService implements DaoService<Repository> {
     @Autowired
-    RepositoryDAO dao;
+    private RepositoryDAO dao;
 
-    public RepositoryBO save(RepositoryBO repo) {
+    @Autowired
+    private PackageVersionDAOService packageVersionDAOService;
+
+    public Repository save(Repository repo) {
         return dao.save(repo);
     }
 
     @Transactional
-    public RepositoryBO saveIfNotExists(RepositoryBO repo) {
-        return find(repo.getUrl()).orElse(save(repo));
+    public Repository cascadeSave(Repository repo) {
+        for (PackageVersion version : repo.getVersions()) {
+            packageVersionDAOService.saveIfNotExists(version);
+        }
+        return save(repo);
     }
 
     @Override
-    public Optional<RepositoryBO> find(String resId) {
+    public Optional<Repository> find(String resId) {
         return Optional.ofNullable(dao.findOne(resId));
     }
 
@@ -34,12 +41,12 @@ public class RepositoryDAOService implements DaoService<RepositoryBO>{
     }
 
     @Override
-    public Optional<RepositoryBO> findByNameAndNamespace(String name, String namespace) {
+    public Optional<Repository> findByNameAndNamespace(String name, String namespace) {
         return Optional.ofNullable(dao.findByNameAndNamespace(name, namespace));
     }
 
-    public Collection<RepositoryBO> getAll() {
-        Iterable<RepositoryBO> itr = dao.findAll();
-        return (Collection<RepositoryBO>) itr;
+    public Collection<Repository> getAll() {
+        Iterable<Repository> itr = dao.findAll();
+        return (Collection<Repository>) itr;
     }
 }

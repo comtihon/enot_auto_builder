@@ -26,7 +26,19 @@ public class CoonAutoBuilderApplication {
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(cores * 2);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("BuildBO-");
+        executor.setThreadNamePrefix("Build-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean("searchExecutor")
+    public Executor asyncExecutor2() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        int cores = Runtime.getRuntime().availableProcessors();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(cores * 2);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("Search-");
         executor.initialize();
         return executor;
     }

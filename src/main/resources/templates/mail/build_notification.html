@@ -10,9 +10,7 @@
 </p>
 <p>
     <span th:text="${report.packageName}"/>-<span th:text="${report.ref}"/> build
-    <span th:text="${report.successs}? succeeded : failed"/>.<br/>
-    <span th:text="${#dates.format(report.buildDate)}"/>
-    build finished on status <span th:text="${report.status}"/>.
+    <span th:text="${report.successs}? succeeded : failed"/>.
 </p>
 <p>Build logs:</p>
 <table>
@@ -21,12 +19,14 @@
         <th>Log</th>
         <th>Success</th>
         <th>Download url</th>
+        <th>Date</th>
     </tr>
     <tr th:each="result : ${report.results}">
         <td th:text="${result.key}"></td>
         <td th:text="${result.value.message}"></td>
         <td th:text="${result.value.result}"></td>
         <td th:text="${result.value.result}? ${host + '/download/' + result.value.buildId} : 'no artifact'"></td>
+        <td th:text="${result.value.createdDate}"></td>
     </tr>
 </table>
 <p>
