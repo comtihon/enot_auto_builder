@@ -3,6 +3,7 @@ package com.coon.coon_auto_builder.config;
 import com.coon.coon_auto_builder.service.build.Builder;
 import com.coon.coon_auto_builder.tool.CmdHelper;
 import org.jetbrains.annotations.NotNull;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -55,6 +56,11 @@ public class ServerConfiguration implements InitializingBean {
 
     public String getGitubSecret() {
         return gitubSecret;
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 
     @Bean

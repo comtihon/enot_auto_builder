@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import java.lang.reflect.InvocationTargetException;
@@ -23,7 +22,6 @@ import java.util.concurrent.CompletableFuture;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Transactional
 public class BuildRequestValidatorTest {
     @Autowired
     private BuildRequestValidator validator;
@@ -33,6 +31,7 @@ public class BuildRequestValidatorTest {
 
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void validateRebuild() throws Exception {
         //Unknown build id - Fail
         BuildDTO request = new BuildDTO();
@@ -52,6 +51,7 @@ public class BuildRequestValidatorTest {
 
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void validateManualBuild() throws Exception {
         //save new - OK
         PackageVersionDTO pv = new PackageVersionDTO("1.0.0", "18");
@@ -69,17 +69,17 @@ public class BuildRequestValidatorTest {
         result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
         Assert.assertEquals(
-                "Request RepositoryDTO{ref='1.0.0', repository=RepositoryDTO{fullName='namespace1/name1', " +
-                        "cloneUrl='malformed_url'}} tries to overwrite RepositoryBO{url='url1', name='name1', " +
-                        "namespace='namespace1'}",
+                "Request RepositoryDTO{fullName='namespace1/name1', cloneUrl='malformed'} " +
+                        "tries to overwrite Repository{url='url1', name='name1', namespace='namespace1'}",
                 result.get().getResponse());
     }
 
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void validateGithubBuild() throws Exception {
         //no github url - Fail
-        String body = "{\"repository\":{\"clone_url\":\"url\",\"full_name\":\"namespace/name\"}," +
+        String body = "{\"clone_url\":\"url\",\"full_name\":\"namespace/name\"," +
                 "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}";
         RepositoryGithubDTO request = new RepositoryGithubDTO("signature", body);
         CompletableFuture<ResponseDTO> result = validator.validate(request);
@@ -87,7 +87,7 @@ public class BuildRequestValidatorTest {
         Assert.assertEquals("Url url doesn't point to github!", result.get().getResponse());
 
         //malformed github url - Fail
-        body = "{\"repository\":{\"clone_url\":\"https://github.com/a/b\",\"full_name\":\"namespace/name\"}," +
+        body = "{\"clone_url\":\"https://github.com/a/b\",\"full_name\":\"namespace/name\"," +
                 "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}";
         request = new RepositoryGithubDTO("signature", body);
         result = validator.validate(request);
@@ -95,7 +95,7 @@ public class BuildRequestValidatorTest {
         Assert.assertEquals("Malformed github url: https://github.com/a/b", result.get().getResponse());
 
         //wrong signature - Fail
-        body = "{\"repository\":{\"clone_url\":\"https://github.com/namespace/name\",\"full_name\":\"namespace/name\"}," +
+        body = "{\"clone_url\":\"https://github.com/namespace/name\",\"full_name\":\"namespace/name\"," +
                 "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}";
         request = new RepositoryGithubDTO("signature", body);
         result = validator.validate(request);

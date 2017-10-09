@@ -52,4 +52,13 @@ public class Repository {
         versions.add(version);
         version.setRepository(this);
     }
+
+    @Override
+    public String toString() {
+        return "Repository{" +
+                "url='" + url + '\'' +
+                ", name='" + name + '\'' +
+                ", namespace='" + namespace + '\'' +
+                '}';
+    }
 }
