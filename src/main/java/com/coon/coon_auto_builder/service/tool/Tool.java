@@ -1,12 +1,28 @@
 package com.coon.coon_auto_builder.service.tool;
 
-import org.jetbrains.annotations.Nullable;
+public abstract class Tool {
+    protected String message = "";
+    protected boolean ready = false;
+    protected String version;
 
-public interface Tool {
-    public boolean check();
+    public String getMessage() {
+        return message;
+    }
 
-    public boolean install();
+    public boolean isReady() {
+        return ready;
+    }
 
-    @Nullable
-    public String version();
+    public String getVersion() {
+        return version;
+    }
+
+    public abstract boolean check();
+
+    public abstract boolean install();
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "version='" + version + "'";
+    }
 }

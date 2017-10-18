@@ -31,13 +31,13 @@ public class ToolsConfiguration implements InitializingBean {
         Coon coon = coon();
         Kerl kerl = kerl();
         List<Tool> tools = Arrays.asList(coon, kerl);
-        tools.forEach(Tool::check);
-        //TODO logging
-        LOGGER.info("Coon version " + coonVersion);
-        LOGGER.info("Kerl version " + kerlVersion);
-        LOGGER.info("Kerl installations: ");
-        for (Map.Entry<String, String> entry : kerlInstallations.entrySet())
-            LOGGER.info(entry.getKey() + " " + entry.getValue());
+        tools.forEach(tool -> {
+            tool.check();
+            if (tool.isReady())
+                LOGGER.info("{}", tool);
+            else
+                LOGGER.info(tool.getClass().getName() + " not ready: " + tool.getMessage());
+        });
     }
 
     @Bean

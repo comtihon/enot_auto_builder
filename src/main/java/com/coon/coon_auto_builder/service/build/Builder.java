@@ -1,9 +1,9 @@
 package com.coon.coon_auto_builder.service.build;
 
-import com.coon.coon_auto_builder.config.ServerConfiguration;
 import com.coon.coon_auto_builder.data.dao.BuildDAOService;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
+import com.coon.coon_auto_builder.service.tool.Kerl;
 import com.coon.coon_auto_builder.tool.CmdHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class Builder {
     private BuildDAOService buildDAO;
 
     @Autowired
-    private ServerConfiguration configuration;
+    private Kerl kerl;
 
     public Builder(Path repoPath, String erlang) {
         this.repoPath = repoPath;
@@ -33,7 +33,7 @@ public class Builder {
     }
 
     public void buildVersion(boolean copy) throws Exception {
-        Map<String, String> compilers = configuration.getKerlInstallations();
+        Map<String, String> compilers = kerl.getErlInstallations();
         String erlangExecutable = compilers.get(erlang);
         if (erlangExecutable == null) {
             throw new Exception("no erlang installed");

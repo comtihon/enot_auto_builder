@@ -9,10 +9,9 @@ import java.io.IOException;
 
 import static com.coon.coon_auto_builder.tool.CmdHelper.runCmd;
 
-public class Coon implements Tool {
+public class Coon extends Tool {
     private static final Logger LOGGER = LoggerFactory.getLogger(ToolsConfiguration.class);
 
-    private String coonVersion;
 
     public Coon() {
     }
@@ -20,7 +19,8 @@ public class Coon implements Tool {
     @Override
     public boolean check() {
         try {
-            coonVersion = runCmd("coon -v");
+            version = runCmd("coon -v").trim();
+            ready = true;
             return true;
         } catch (IOException | InterruptedException e) {
             LOGGER.warn("Calling coon error " + e.getMessage());
@@ -32,11 +32,5 @@ public class Coon implements Tool {
     public boolean install() {
         //TODO
         return false;
-    }
-
-    @Override
-    @Nullable
-    public String version() {
-        return coonVersion;
     }
 }

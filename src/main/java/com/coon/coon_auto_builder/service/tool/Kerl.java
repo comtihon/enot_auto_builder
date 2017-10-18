@@ -10,12 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.coon.coon_auto_builder.tool.CmdHelper.runCmd;
 
-public class Kerl implements Tool {
+public class Kerl extends Tool {
     private static final Logger LOGGER = LoggerFactory.getLogger(ToolsConfiguration.class);
 
     private final String kerlExecutable;
-    private String kerlVersion;
-    private Map<String, String> kerlInstallations = new ConcurrentHashMap<>();
+    private Map<String, String> erlInstallations = new ConcurrentHashMap<>();
 
     public Kerl(String kerlExecutable) {
         this.kerlExecutable = kerlExecutable;
@@ -24,11 +23,13 @@ public class Kerl implements Tool {
     @Override
     public boolean check() {
         try {
-            kerlVersion = runCmd(kerlExecutable + " version");
+            version = runCmd(kerlExecutable + " version").trim();
             gatherKerlInstallations();
+            ready = true;
             return true;
         } catch (IOException | InterruptedException e) {
-            LOGGER.warn("Calling kerl error " + e.getMessage());
+            LOGGER.warn("Calling kerl error {}", e.getMessage());
+            message = e.getMessage();
             return false;
         }
     }
@@ -39,13 +40,17 @@ public class Kerl implements Tool {
         return false;
     }
 
-    @Override
-    public String version() {
-        return kerlVersion;
+    public Map<String, String> getErlInstallations() {
+        return erlInstallations;
     }
 
-    public Map<String, String> getKerlInstallations() {
-        return kerlInstallations;
+    @Override
+    public String toString() {
+        StringBuilder installations = new StringBuilder();
+        for (Map.Entry<String, String> entry : erlInstallations.entrySet())
+            installations.append(entry.getKey()).append(" ").append(entry.getValue()).append("\n");
+        return "Kerl version='" + version + "'" +
+                ", erlInstallations:\n" + installations.toString();
     }
 
     private void gatherKerlInstallations() throws IOException, InterruptedException {
@@ -53,7 +58,7 @@ public class Kerl implements Tool {
         String[] lines = installations.split("\n");
         for (String line : lines) {
             String[] installation = line.split(" ");
-            kerlInstallations.put(trimKey(installation[0]), installation[1]);
+            erlInstallations.put(trimKey(installation[0]), installation[1]);
         }
     }
 
