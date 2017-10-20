@@ -79,15 +79,15 @@ public class BuildRequestValidatorTest {
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void validateGithubBuild() throws Exception {
         //no github url - Fail
-        String body = "{\"clone_url\":\"url\",\"full_name\":\"namespace/name\"," +
-                "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}";
+        String body = "{\"repository\":{\"clone_url\":\"url\",\"full_name\":\"namespace/name\"}," +
+                "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}}";
         RepositoryGithubDTO request = new RepositoryGithubDTO("signature", body);
         CompletableFuture<ResponseDTO> result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
         Assert.assertEquals("Url url doesn't point to github!", result.get().getResponse());
 
         //malformed github url - Fail
-        body = "{\"clone_url\":\"https://github.com/a/b\",\"full_name\":\"namespace/name\"," +
+        body = "{\"repository\":{\"clone_url\":\"https://github.com/a/b\",\"full_name\":\"namespace/name\"}," +
                 "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}";
         request = new RepositoryGithubDTO("signature", body);
         result = validator.validate(request);
@@ -95,7 +95,7 @@ public class BuildRequestValidatorTest {
         Assert.assertEquals("Malformed github url: https://github.com/a/b", result.get().getResponse());
 
         //wrong signature - Fail
-        body = "{\"clone_url\":\"https://github.com/namespace/name\",\"full_name\":\"namespace/name\"," +
+        body = "{\"repository\":{\"clone_url\":\"https://github.com/namespace/name\",\"full_name\":\"namespace/name\"}," +
                 "\"ref\":\"1.0.0\", \"ref_type\":\"tag\"}";
         request = new RepositoryGithubDTO("signature", body);
         result = validator.validate(request);

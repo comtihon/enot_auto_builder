@@ -24,6 +24,8 @@ public class RepositoryDAOService implements DaoService<Repository> {
     @Transactional
     public Repository cascadeSave(Repository repo) {
         for (PackageVersion version : repo.getVersions()) {
+            Optional<PackageVersion> exists = packageVersionDAOService.findByRefAndErlVersionAndRepository(version);
+            exists.ifPresent(packageVersion -> version.setVersionId(packageVersion.getVersionId()));
             packageVersionDAOService.saveIfNotExists(version);
         }
         return save(repo);

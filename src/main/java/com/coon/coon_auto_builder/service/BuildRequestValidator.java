@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class BuildRequestValidator extends AbstractService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildSearchService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildRequestValidator.class);
 
     @Autowired
     private ServerConfiguration configuration;

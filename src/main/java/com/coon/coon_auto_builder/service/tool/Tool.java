@@ -1,9 +1,12 @@
 package com.coon.coon_auto_builder.service.tool;
 
-public abstract class Tool {
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+
+public abstract class Tool implements HealthIndicator {
     protected String message = "";
-    protected boolean ready = false;
-    protected String version;
+    boolean ready = false;
+    String version;
 
     public String getMessage() {
         return message;
@@ -24,5 +27,12 @@ public abstract class Tool {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "version='" + version + "'";
+    }
+
+    @Override
+    public Health health() {
+        if (ready)
+            return Health.up().withDetail("Version", version).build();
+        return Health.down().withDetail("Error", message).build();
     }
 }

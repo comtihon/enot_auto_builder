@@ -20,18 +20,15 @@ POST __/buildAsync__ - build request
 BODY:
 
     {
-        repository: 
-        {
-            full_name: <fullName>,
-            clone_url: <cloneUrl>,
-            versions: 
-            [
-                {
-                    ref: <ref>,
-                    erl_version: <erlVersion>
-                }
-            ]
-        }
+        full_name: <fullName>,
+        clone_url: <cloneUrl>,
+        versions: 
+        [
+            {
+                ref: <ref>,
+                erl_version: <erlVersion>
+            }
+        ]
     }
 Where:  
 `fullName` is a fullname of a repository, containing namespace and repo name. Ex. "comtihon/coon"  
@@ -68,17 +65,14 @@ POST __/search__ - get a list of builds, available for download.
 BODY:
 
     {
-        repository: 
-        {
-            full_name: <fullName>,
-            versions: 
-            [
-                {
-                    ref: <ref>,
-                    erl_version: <erlVersion>
-                }
-            ]
-        }
+        full_name: <fullName>,
+        versions: 
+        [
+            {
+                ref: <ref>,
+                erl_version: <erlVersion>
+            }
+        ]
     }
 Where:  
 `ref` and `erlVersion` and `versions` are optional.  
@@ -90,15 +84,12 @@ BODY:
 
 
     {
-        repository: 
-        {
-            full_name: <fullName>,
-            versions: 
-            [
-                {
-                    ref: <ref>,
-                    erl_version: <erlVersion>
-                }
-            ]
-        }
+        full_name: <fullName>,
+        versions: 
+        [
+            {
+                ref: <ref>,
+                erl_version: <erlVersion>
+            }
+        ]
     }

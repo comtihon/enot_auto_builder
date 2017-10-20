@@ -10,7 +10,6 @@ import com.coon.coon_auto_builder.data.entity.Repository;
 import com.coon.coon_auto_builder.service.GitService;
 import com.coon.coon_auto_builder.service.MailSenderService;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
-import com.coon.coon_auto_builder.service.dto.MailReportDTO;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.slf4j.Logger;
@@ -55,17 +54,15 @@ public class BuildService {
                 try {
                     results.addAll(buildRef(repo, versions, ref));
                 } catch (Exception e) {
+                    e.printStackTrace();
                     results.add(formError(ref, "unknown", e.getMessage()));
                 }
             }
-        } catch (Exception e) {
-            results.add(formError("unknown", "unknown", e.getMessage()));
-            e.printStackTrace();
-            LOGGER.error("Build failed {} for repo {}", e.getMessage(), repo);
         } finally {
             Repository repository = new Repository(repo.getCloneUrl(), repo.getFullName(), results);
             repositoryDAOService.cascadeSave(repository);
             mailSender.sendReport(repository);
+            cleanClonedRepos(repo, versions.keySet());
         }
     }
 
@@ -95,23 +92,27 @@ public class BuildService {
         CloneResult cloned = gitService.cloneRepo(repo.getFullName(), repo.getCloneUrl(), ref);
         List<String> erlangs = formErlangForVersions(versions, ref, cloned.getCloned());
         List<PackageVersion> results = new ArrayList<>();
+        if (erlangs.isEmpty()) {
+            LOGGER.warn("Nothing to build for {}", repo);
+            PackageVersion errored = formError(ref, "unknown", "No Erlang version found for this repo.");
+            errored.setEmail(cloned.getEmail());
+            results.add(errored);
+            return results;
+        }
         for (String erlang : erlangs) {
             PackageVersion version = new PackageVersion(ref, erlang);
             version.setEmail(cloned.getEmail()); // can have different emails for different refs
-            Builder builder = appContext.getBean(Builder.class, erlang, cloned.getCloned());
+            Builder builder = appContext.getBean(Builder.class, cloned.getCloned(), erlang);
             try {
                 builder.buildVersion(erlangs.size() != 1);
                 String artifact = loader.loadArtifact(builder.withName(repo.getFullName()).withRef(ref));
                 version.addBuild(builder.getBuild(artifact, ""));
             } catch (Exception e) {
+                e.printStackTrace();
                 version.addBuild(builder.getBuild(null, e.getMessage()));
             }
             results.add(version);
         }
-        LOGGER.warn("Nothing to build for {}", repo);
-        PackageVersion errored = formError(ref, "unknown", "No Erlang version found for this repo.");
-        errored.setEmail(cloned.getEmail());
-        results.add(errored);
         return results;
     }
 
@@ -138,5 +139,15 @@ public class BuildService {
         build.setMessage(reason);
         version.addBuild(build);
         return version;
+    }
+
+    private void cleanClonedRepos(RepositoryDTO repo, Set<String> refs) {
+        List<Path> cloned = gitService.getClonedPaths(repo.getFullName(), refs);
+        for (Path path : cloned)
+            try {
+                FileHelper.deleteDir(path);
+            } catch (IOException e) {
+                LOGGER.warn("Can't clean {} for {}", path, repo);
+            }
     }
 }

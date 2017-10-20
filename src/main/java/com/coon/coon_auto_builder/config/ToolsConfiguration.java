@@ -36,7 +36,7 @@ public class ToolsConfiguration implements InitializingBean {
             if (tool.isReady())
                 LOGGER.info("{}", tool);
             else
-                LOGGER.info(tool.getClass().getName() + " not ready: " + tool.getMessage());
+                LOGGER.info(tool.getClass().getSimpleName() + " not ready: " + tool.getMessage());
         });
     }
 

@@ -17,7 +17,7 @@ public class BuildDTO implements Validatable {
 
     private boolean result = true;
 
-    private String message;
+    private String message = "";
 
     @JsonProperty("artifact_path")
     private String artifactPath;

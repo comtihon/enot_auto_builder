@@ -28,10 +28,11 @@ public class RepositoryGithubDTO extends RepositoryDTO {
         this.body = body;
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(body);
-        this.fullName = rootNode.path("full_name").asText();
-        this.cloneUrl = rootNode.path("clone_url").asText();
+        JsonNode repoNode = rootNode.path("repository");
         PackageVersionDTO pv = new PackageVersionDTO(rootNode.path("ref").asText());
         this.refType = rootNode.path("ref_type").asText();
+        this.fullName = repoNode.path("full_name").asText();
+        this.cloneUrl = repoNode.path("clone_url").asText();
         this.versions = Collections.singletonList(pv);
     }
 
@@ -39,7 +40,12 @@ public class RepositoryGithubDTO extends RepositoryDTO {
     public void basicValidation(String secret) throws Exception {
         if (!isGithub(this.cloneUrl))
             throw new Exception("Url " + this.cloneUrl + " doesn't point to github!");
-        if (!isGithubMatch(this.cloneUrl, this.fullName))
+        String cloneUrl;
+        if (this.cloneUrl.endsWith(".git"))
+            cloneUrl = this.cloneUrl.substring(0, this.cloneUrl.length() - 4);
+        else
+            cloneUrl = this.cloneUrl;
+        if (!isGithubMatch(cloneUrl, this.fullName))
             throw new Exception("Malformed github url: " + this.cloneUrl);
         checkSignature(secret);
     }

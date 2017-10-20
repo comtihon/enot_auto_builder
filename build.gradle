@@ -22,6 +22,10 @@ repositories {
     mavenCentral()
 }
 
+springBoot {
+	buildInfo()
+}
+
 sourceSets {
     test_integration {
         java {

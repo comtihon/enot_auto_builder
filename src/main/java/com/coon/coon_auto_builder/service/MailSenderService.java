@@ -7,6 +7,8 @@ import com.coon.coon_auto_builder.data.entity.Repository;
 import com.coon.coon_auto_builder.service.dto.MailReportDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.mail.MailHeaders;
 import org.springframework.messaging.Message;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 @Service
 public class MailSenderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailSenderService.class);
 
     @Autowired
     private MailConfiguration configuration;
@@ -42,7 +45,7 @@ public class MailSenderService {
      * @param repository with versions and builds information
      */
     public void sendReport(Repository repository) {
-        mails(repository).values().forEach(this::send);
+        mails(repository).values().stream().filter(report -> report.getTo() != null).forEach(this::send);
     }
 
     private Map<String, MailReportDTO> mails(Repository repository) {
@@ -75,6 +78,7 @@ public class MailSenderService {
                 .setHeader(MailHeaders.TO, report.getTo())
                 .setHeader(MailHeaders.FROM, configuration.getUser())
                 .build();
+        LOGGER.debug("Send report to {}", report.getTo());
         smtpChannel.send(message);
     }
 }

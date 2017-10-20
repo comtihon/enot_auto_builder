@@ -1,8 +1,9 @@
 package com.coon.coon_auto_builder.service.tool;
 
-import com.coon.coon_auto_builder.config.ToolsConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
@@ -10,8 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.coon.coon_auto_builder.tool.CmdHelper.runCmd;
 
+@Component
 public class Kerl extends Tool {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToolsConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Kerl.class);
 
     private final String kerlExecutable;
     private Map<String, String> erlInstallations = new ConcurrentHashMap<>();
@@ -51,6 +53,14 @@ public class Kerl extends Tool {
             installations.append(entry.getKey()).append(" ").append(entry.getValue()).append("\n");
         return "Kerl version='" + version + "'" +
                 ", erlInstallations:\n" + installations.toString();
+    }
+
+    @Override
+    public Health health() {
+        if (ready)
+            return Health.up().withDetail("Version", version)
+                    .withDetail("ErlVersions", erlInstallations.keySet()).build();
+        return Health.down().withDetail("Error", message).build();
     }
 
     private void gatherKerlInstallations() throws IOException, InterruptedException {

@@ -1,6 +1,5 @@
 package com.coon.coon_auto_builder.tool;
 
-import com.coon.coon_auto_builder.config.ToolsConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class CmdHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToolsConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmdHelper.class);
 
     @NotNull
     public static String runCmd(String cmd) throws IOException, InterruptedException {

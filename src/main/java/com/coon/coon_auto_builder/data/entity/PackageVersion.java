@@ -22,7 +22,7 @@ public class PackageVersion {
     @Column(name = "ref", length = 100, nullable = false)
     private String ref;
 
-    @Column(name = "erl_version", length = 5, nullable = false)
+    @Column(name = "erl_version", length = 10, nullable = false)
     private String erlVersion;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -17,7 +17,7 @@ public class Repository {
     private String namespace;
 
     @OneToMany(mappedBy = "repository",
-            cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+            cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PackageVersion> versions = new ArrayList<>();
 
     public Repository() {

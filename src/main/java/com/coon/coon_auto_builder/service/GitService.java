@@ -8,19 +8,27 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.metrics.GaugeService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class GitService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildSearchService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitService.class);
 
     @Autowired
     private ServerConfiguration configuration;
+
+    @Autowired
+    private GaugeService gaugeService;
+
 
     /**
      * /**
@@ -33,10 +41,11 @@ public class GitService {
      * @throws Exception if unable to clone
      */
     public CloneResult cloneRepo(String fullName, String url, String ref) throws Exception {
-        Path repoPath = Paths.get(configuration.getTempPath(), fullName, ref);
+        Path repoPath = repoPath(fullName, ref);
         if (!repoPath.toFile().mkdirs()) {
             String msg = "clone failed, can't create " + repoPath;
             LOGGER.warn(msg);
+            this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);
             throw new Exception(msg);
         }
         try (Git result = Git.cloneRepository()
@@ -45,11 +54,23 @@ public class GitService {
                 .setBranch(ref)
                 .call()) {
             LOGGER.debug("Cloned {} to {}", url, result.getRepository().getDirectory());
+            this.gaugeService.submit(Metrics.CLONE_OK.toString(), 1.0);
             RevCommit commit = result.getRepository().parseCommit(result.getRepository().findRef(ref).getObjectId());
             return new CloneResult(commit.getAuthorIdent().getEmailAddress(), repoPath);
         } catch (IOException | GitAPIException e) {
             LOGGER.warn("clone failed {}", e.getMessage());
+            this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);
             throw e;
         }
+    }
+
+    public List<Path> getClonedPaths(String fullName, Set<String> refs) {
+        List<Path> paths = new ArrayList<>(refs.size());
+        refs.forEach(ref -> paths.add(repoPath(fullName, ref)));
+        return paths;
+    }
+
+    private Path repoPath(String fullName, String ref) {
+        return Paths.get(configuration.getTempPath(), fullName, ref);
     }
 }
