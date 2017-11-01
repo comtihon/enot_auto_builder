@@ -1,0 +1,7 @@
+FROM alpine
+
+RUN apk update && apk add collectd
+
+COPY collectd.conf /etc/collectd.conf
+
+ENTRYPOINT ["/usr/sbin/collectd", "-f"]

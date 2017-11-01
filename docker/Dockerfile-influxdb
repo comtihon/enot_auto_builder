@@ -1,0 +1,3 @@
+FROM influxdb:1.3-alpine
+
+RUN apk update && apk add collectd
