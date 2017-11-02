@@ -1,7 +1,7 @@
-FROM alpine
+FROM base/archlinux
 
-RUN apk update && apk add collectd
+RUN pacman -Sy collectd yajl --noconfirm
 
 COPY collectd.conf /etc/collectd.conf
 
-ENTRYPOINT ["/usr/sbin/collectd", "-f"]
+ENTRYPOINT ["collectd", "-f"]
