@@ -7,7 +7,6 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath('se.transmode.gradle:gradle-docker:1.2')
     }
 }
 
@@ -15,8 +14,6 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'docker'
-
 
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
@@ -26,7 +23,7 @@ repositories {
 }
 
 jar {
-    baseName = 'com.coon.coon_auto_builder'
+    baseName = 'coon_auto_builder'
     version = version
 }
 
@@ -48,17 +45,6 @@ sourceSets {
 task test_integration(type: Test) {
     testClassesDir = sourceSets.test_integration.output.classesDir
     classpath = sourceSets.test_integration.runtimeClasspath
-}
-
-task buildDocker(type: Docker, dependsOn: build) {
-    applicationName = jar.baseName
-    dockerfile = file('Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into "${stageDir}/target"
-        }
-    }
 }
 
 check.dependsOn test_integration

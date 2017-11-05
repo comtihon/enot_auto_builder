@@ -3,6 +3,8 @@
 !gradle/wrapper/gradle-wrapper.jar
 out
 logs
+builder-data
+postgres-data
 
 ### STS ###
 .apt_generated
@@ -24,3 +26,4 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+/builder-data/

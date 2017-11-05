@@ -10,6 +10,8 @@ services:
       - POSTGRES_DB=coon_packages
     ports:
       - "5433:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
   influxdb:
     build:
       context: ./docker/
@@ -33,15 +35,17 @@ services:
     depends_on:
       - influxdb
   builder:
-    image: com.coon.coon_auto_builder:0.0.1-SNAPSHOT
+    image: comtihon/coon_auto_builder
     ports:
       - "8080:8080"
       - "8081:8081"
     depends_on:
       - postgres
     environment:
-      - EMAIL_USER=foo
-      - EMAIL_PASSWORD=bar
+      - EMAIL_USER=coon.builder@gmail.com
+      - EMAIL_PASSWORD=nbhjy21nhyN
+    volumes:
+      - ./builder-data:/coon/artifacts
   collectd:
     build:
       context: ./docker/
