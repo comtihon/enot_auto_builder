@@ -5,8 +5,8 @@ import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryGithubDTO;
 import com.coon.coon_auto_builder.data.dto.Validatable;
-import com.coon.coon_auto_builder.service.build.BuildService;
 import com.coon.coon_auto_builder.service.BuildRequestValidator;
+import com.coon.coon_auto_builder.service.build.BuildService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +61,7 @@ public class BuildController extends AbstractController {
         CompletableFuture<ResponseDTO> validation = validator.validate(body);
         ResponseDTO validated = validation.get();
         if (validated.isResult())
-            manager.buildAsync((RepositoryDTO)validated.getResponse());
+            manager.buildAsync((RepositoryDTO) validated.getResponse());
         return validation.thenApply(this::returnResult);
     }
 }

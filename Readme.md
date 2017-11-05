@@ -61,6 +61,32 @@ BODY:
 Where:  
 `refType` is a type of reference. Only `tag` is supported.
 ## Search
+GET __/search__ - search for packages.  
+PARAMETERS:  
+`name` - package name  
+`namespace` - package's namespace (GitHub fork name)  
+`version` - package's version  
+`erl_version` - Erlang version  
+RESPONSE:  
+
+    {
+        "result" : <result>,
+        "response" : 
+        [
+            {
+                "build_id" : <build_id>,
+                "namespace" : <namespace>,
+                "name" : <name>,
+                "success" : <success>,
+                "path" : <path>,
+                "build_date" : <date>,
+                "version" : <version>,
+                "erl_version" : <erl_version>
+             }
+             ...
+        ]
+    }
+
 POST __/builds__ - get a list of builds, available for download. Skip errored builds.    
 BODY:
 
@@ -121,3 +147,10 @@ BODY:
             }
         ]
     }
+    
+GET __/build_log/__ - get build's log.  
+PARAMETERS:  
+`build_id` - id of a build.  
+RESPONSE:
+
+    raw txt log

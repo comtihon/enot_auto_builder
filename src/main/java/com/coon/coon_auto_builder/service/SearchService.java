@@ -1,5 +1,7 @@
 package com.coon.coon_auto_builder.service;
 
+import com.coon.coon_auto_builder.controller.AbstractController;
+import com.coon.coon_auto_builder.controller.dto.PackageDTO;
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dao.BuildDAOService;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
@@ -7,6 +9,7 @@ import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
+import com.coon.coon_auto_builder.data.entity.Repository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -31,6 +34,27 @@ public class SearchService extends AbstractService {
     private BuildDAOService buildDao;
 
     @Async("searchExecutor")
+    public CompletableFuture<ResponseDTO<List<PackageDTO>>> searchPackages(
+            String name, String namespace, String ref, String erlVsn) {
+        LOGGER.debug("Search {}", name, namespace, ref, erlVsn);
+        List<Build> builds = buildDao.findAllByValues(name, namespace, ref, erlVsn);
+        List<PackageDTO> packages = new ArrayList<>(builds.size());
+        for (Build build : builds) {
+            Repository repo = build.getPackageVersion().getRepository();
+            PackageDTO packageDTO = new PackageDTO(build.getBuildId(), repo.getName(), repo.getNamespace());
+            packageDTO.setBuildDate(build.getCreatedDate());
+            packageDTO.setSuccess(build.isResult());
+            if (build.isResult()) {
+                packageDTO.setPath(AbstractController.DOWNLOAD_ID + "/" + build.getBuildId());
+            } else {
+                packageDTO.setPath(AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId());
+            }
+            packages.add(packageDTO);
+        }
+        return CompletableFuture.completedFuture(ok(packages));
+    }
+
+    @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<BuildDTO>>> fetchBuilds(RepositoryDTO request) {
         LOGGER.debug("Fetch {}", request);
         List<Build> builds = findBuilds(request);
@@ -45,7 +69,7 @@ public class SearchService extends AbstractService {
         LOGGER.debug("Search {}", request);
         List<Build> builds = findBuilds(request);
         Set<PackageVersion> versions = new HashSet<>();
-        for(Build b : builds)
+        for (Build b : builds)
             versions.add(b.getPackageVersion());
         Type listType = new TypeToken<List<PackageVersionDTO>>() {
         }.getType();

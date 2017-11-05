@@ -62,4 +62,20 @@ public class BuildDAOServiceTest {
         Assert.assertEquals("build_id6", found.get(0).getBuildId());
         Assert.assertEquals(1, found.size());
     }
+
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:builds.sql")
+    public void searchByName() {
+        List<Build> found = buildDAO.findByName("ba");
+        Assert.assertEquals(3, found.size());
+        found.sort(Comparator.comparing(Build::getBuildId));
+        Assert.assertEquals("build_id2", found.get(0).getBuildId());
+        Assert.assertEquals("build_id3", found.get(1).getBuildId());
+        Assert.assertEquals("build_id5", found.get(2).getBuildId());
+        found = buildDAO.findByName("bar");
+        Assert.assertEquals(2, found.size());
+        found.sort(Comparator.comparing(Build::getBuildId));
+        Assert.assertEquals("build_id2", found.get(0).getBuildId());
+        Assert.assertEquals("build_id5", found.get(1).getBuildId());
+    }
 }

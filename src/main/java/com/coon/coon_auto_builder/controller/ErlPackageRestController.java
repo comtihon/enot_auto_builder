@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.controller;
 
+import com.coon.coon_auto_builder.controller.dto.PackageDTO;
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
@@ -7,10 +8,7 @@ import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -22,6 +20,17 @@ public class ErlPackageRestController extends AbstractController {
 
     @Autowired
     private SearchService searchService;
+
+    @RequestMapping(path = "/search", method = RequestMethod.GET)
+    public CompletableFuture<ResponseEntity<?>> listPackagesBySearch(
+            @RequestParam String name,
+            @RequestParam String namespace,
+            @RequestParam String version,
+            @RequestParam String erl_version) {
+        CompletableFuture<ResponseDTO<List<PackageDTO>>> packages = searchService.searchPackages(
+                name, namespace, version, erl_version);
+        return packages.thenApply(this::returnResult);
+    }
 
     @RequestMapping(path = "/builds", method = RequestMethod.POST)
     public CompletableFuture<ResponseEntity<?>> listBuildsBySearch(

@@ -45,4 +45,23 @@ public interface BuildDAO extends CrudRepository<Build, String> {
     List<Build> findSuccessfullByNameAndNamespace(
             @Param("name") String name,
             @Param("namespace") String namespace);
+
+    @Query("SELECT b from Build b " +
+            "join b.packageVersion pv " +
+            "join pv.repository r " +
+            "WHERE r.name like %:name% ")
+    List<Build> findByName(@Param("name") String name);
+
+    @Query("SELECT b from Build b " +
+            "join b.packageVersion pv " +
+            "join pv.repository r " +
+            "WHERE r.name = :name " +
+            "and r.namespace = :namespace " +
+            "and pv.ref = :ref " +
+            "and pv.erlVersion = :erl")
+    List<Build> findByNameAndNamespaceAndRefAndErl(
+            @Param("name") String name,
+            @Param("namespace") String namespace,
+            @Param("ref") String ref,
+            @Param("erl") String erl);
 }

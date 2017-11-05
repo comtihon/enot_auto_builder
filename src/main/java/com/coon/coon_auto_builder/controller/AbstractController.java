@@ -13,7 +13,11 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-abstract class AbstractController {
+public abstract class AbstractController {
+
+    public static final String BUILD_LOG = "/build_log";
+    public static final String DOWNLOAD_ID = "/download/{id}";
+    //TODO all controllers to constants
 
     private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
