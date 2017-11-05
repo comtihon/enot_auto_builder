@@ -34,6 +34,7 @@ public class PackageVersionDTO {
         return ref;
     }
 
+    @Nullable
     public String getErlVersion() {
         return erlVersion;
     }

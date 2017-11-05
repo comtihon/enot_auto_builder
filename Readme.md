@@ -20,13 +20,13 @@ POST __/buildAsync__ - build request
 BODY:
 
     {
-        full_name: <fullName>,
-        clone_url: <cloneUrl>,
-        versions: 
+        "full_name": <fullName>,
+        "clone_url": <cloneUrl>,
+        "versions": 
         [
             {
-                ref: <ref>,
-                erl_version: <erlVersion>
+                "ref": <ref>,
+                "erl_version": <erlVersion>
             }
         ]
     }
@@ -40,7 +40,7 @@ POST __/rebuild__ - request a specific build to be rebuilt
 BODY:
 
     {
-        build_id : <buildId>
+        "build_id" : <buildId>
     }
 Where:
 `buildId` is an id of a build for rebuild
@@ -50,32 +50,60 @@ Header: `x-hub-signature` with request signature.
 BODY:
 
     {
-        repository: 
+        "repository": 
         {
-            full_name: <fullName>
-            clone_url: <cloneUrl>
+            "full_name": <fullName>
+            "clone_url": <cloneUrl>
         },
-        ref: <ref>,
-        ref_type: <refType>
+        "ref": <ref>,
+        "ref_type": <refType>
     }
 Where:  
 `refType` is a type of reference. Only `tag` is supported.
-## Download
-POST __/search__ - get a list of builds, available for download.  
+## Search
+POST __/builds__ - get a list of builds, available for download. Skip errored builds.    
 BODY:
 
     {
-        full_name: <fullName>,
-        versions: 
+        "full_name": <fullName>,
+        "versions": 
         [
             {
-                ref: <ref>,
-                erl_version: <erlVersion>
+                "ref": <ref>,
+                "erl_version": <erlVersion>
             }
         ]
     }
 Where:  
 `ref` and `erlVersion` and `versions` are optional.  
+RESPONSE:
+
+    {
+        "result": <boolean_result>,
+        "response":
+        [
+            {"build_id" : <Id>, "result" : true, "message" : "", "artifact_path" : <Path>, "created_date" : <Date>}
+            ...
+        ]
+    }
+Where:  
+`response` will be just string error message in case of `result` is not __true__.  
+
+POST __/versions__ - get a list of versions, available for download. Skip versions without successful builds.  
+BODY: same as `/builds`  
+RESPONSE:
+
+    {
+        "result": <boolean_result>,
+        "response":
+        [
+            {"versionId" : <Id>, "ref" : <ref>, "erl_version" : <Erl>}
+            ...
+        ]
+    }
+
+## Download
+
 GET __/download/{id}__ - download artifact by id.  
 
 POST __/get__ - try to download artifact by name, ref and version. If there is multiple - the last built
@@ -84,12 +112,12 @@ BODY:
 
 
     {
-        full_name: <fullName>,
-        versions: 
+        "full_name": <fullName>,
+        "versions": 
         [
             {
-                ref: <ref>,
-                erl_version: <erlVersion>
+                "ref": <ref>,
+                "erl_version": <erlVersion>
             }
         ]
     }

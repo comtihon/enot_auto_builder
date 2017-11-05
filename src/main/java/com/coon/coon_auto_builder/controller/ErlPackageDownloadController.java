@@ -3,7 +3,7 @@ package com.coon.coon_auto_builder.controller;
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
-import com.coon.coon_auto_builder.service.BuildSearchService;
+import com.coon.coon_auto_builder.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,12 +21,12 @@ import java.util.concurrent.CompletableFuture;
 public class ErlPackageDownloadController extends AbstractController {
 
     @Autowired
-    private BuildSearchService buildSearchService;
+    private SearchService searchService;
 
     @RequestMapping(value = "/get", method = RequestMethod.POST)
     public void downloadBySearch(HttpServletResponse response,
                                  @Valid @RequestBody RepositoryDTO request) throws Exception {
-        CompletableFuture<ResponseDTO<List<BuildDTO>>> build = buildSearchService.fetchBuilds(request);
+        CompletableFuture<ResponseDTO<List<BuildDTO>>> build = searchService.fetchBuilds(request);
         ResponseDTO<List<BuildDTO>> responseDTO = build.get();
         if (responseDTO.isResult()) {
             List<BuildDTO> found = responseDTO.getResponse();
@@ -39,7 +39,7 @@ public class ErlPackageDownloadController extends AbstractController {
 
     @RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
     public void downloadById(HttpServletResponse response, @PathVariable String id) throws Exception {
-        CompletableFuture<ResponseDTO> builds = buildSearchService.findBuild(id);
+        CompletableFuture<ResponseDTO> builds = searchService.findBuild(id);
         renderPackage(builds.get(), response);
     }
 }

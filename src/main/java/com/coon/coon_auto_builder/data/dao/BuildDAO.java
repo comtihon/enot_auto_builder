@@ -10,7 +10,6 @@ import java.util.List;
 
 @Repository
 public interface BuildDAO extends CrudRepository<Build, String> {
-    //TODO select id only?
     @Query("SELECT b from Build b " +
             "join b.packageVersion pv " +
             "join pv.repository r " +
