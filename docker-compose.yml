@@ -42,8 +42,8 @@ services:
     depends_on:
       - postgres
     environment:
-      - EMAIL_USER=coon.builder@gmail.com
-      - EMAIL_PASSWORD=nbhjy21nhyN
+      - EMAIL_USER=foo
+      - EMAIL_PASSWORD=bar
     volumes:
       - ./builder-data:/coon/artifacts
   collectd:
