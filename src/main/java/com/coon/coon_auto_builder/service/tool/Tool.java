@@ -26,7 +26,7 @@ public abstract class Tool implements HealthIndicator {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "version='" + version + "'";
+        return getClass().getSimpleName() + " version='" + version + "'";
     }
 
     @Override

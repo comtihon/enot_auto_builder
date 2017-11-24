@@ -1,9 +1,12 @@
 FROM openjdk:8-jdk-alpine
 RUN apk update \
-    && apk add curl gcc perl libc-dev make ncurses ncurses-dev openssl openssl-dev
+    && apk add curl gcc perl libc-dev make ncurses ncurses-dev openssl openssl-dev git
 
 RUN curl -O https://raw.githubusercontent.com/kerl/kerl/master/kerl \
     && chmod a+x kerl
+
+ENV JAVA_OPTS=""
+ENV HOME="/"
 
 RUN ./kerl build 19.3 19.3 \
     && ./kerl install 19.3 ~/kerl/19.3
@@ -13,9 +16,6 @@ RUN ./kerl build 20.0 20.0 \
 
 RUN apk add python3 \
     && pip3 install coon
-
-ENV JAVA_OPTS=""
-ENV HOME="/"
 
 COPY src src
 COPY build.gradle .

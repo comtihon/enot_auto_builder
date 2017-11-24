@@ -32,6 +32,9 @@ services:
     volumes:
       - "./docker/run_grafana.sh:/run_grafana.sh"
     entrypoint: /run_grafana.sh
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:/grafana
+      - GF_SECURITY_ADMIN_PASSWORD=secret
     depends_on:
       - influxdb
   builder:
@@ -42,8 +45,8 @@ services:
     depends_on:
       - postgres
     environment:
-      - EMAIL_USER=foo
-      - EMAIL_PASSWORD=bar
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
     volumes:
       - ./builder-data:/coon/artifacts
   collectd:

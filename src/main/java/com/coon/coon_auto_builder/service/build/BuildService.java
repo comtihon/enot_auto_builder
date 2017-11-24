@@ -61,8 +61,8 @@ public class BuildService {
         } finally {
             Repository repository = new Repository(repo.getCloneUrl(), repo.getFullName(), results);
             repositoryDAOService.cascadeSave(repository);
-            mailSender.sendReport(repository);
             cleanClonedRepos(repo, versions.keySet());
+            mailSender.sendReport(repository);
         }
     }
 
