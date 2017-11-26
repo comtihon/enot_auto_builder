@@ -1,4 +1,4 @@
-# Coon build and load server [![Build Status](https://travis-ci.org/comtihon/coon_auto_builder.svg?branch=master)](https://travis-ci.org/comtihon/coon_auto_builder)[![Docker Automated build](https://img.shields.io/docker/build/comtihon/coon_auto_builder.svg)]()  
+# Coon build and load server [![Build Status](https://travis-ci.org/comtihon/coon_auto_builder.svg?branch=master)](https://travis-ci.org/comtihon/coon_auto_builder)[![Docker Automated build](https://img.shields.io/docker/build/comtihon/coon_auto_builder.svg)](https://hub.docker.com/r/comtihon/coon_auto_builder)  
 Automated service for building and storing Erlang packages. Can be treat as a maven/pip for Erlang.  
 This service is a replacement for deprecated [octocoon](https://github.com/comtihon/octocoon).  
 
