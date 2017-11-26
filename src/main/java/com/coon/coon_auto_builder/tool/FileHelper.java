@@ -3,6 +3,7 @@ package com.coon.coon_auto_builder.tool;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,22 +25,30 @@ public class FileHelper {
     /**
      * Get list of erlang versions from coonfig.json
      *
-     * @param repoPath      path to the cloned repo
-     * @param defaultErlang default erlang
+     * @param repoPath path to the cloned repo
      * @return erlangs from configuration
      * @throws IOException in case of configuration absence.
      */
-    public static List<String> readConfig(Path repoPath, String defaultErlang) throws IOException {
+    public static Map<String, Object> readConfig(Path repoPath) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        Map config = mapper.readValue(Paths.get(repoPath.toString(), "coonfig.json").toFile(), Map.class);
-        return new ArrayList<>(Arrays.asList(parseErlangVsns(config, defaultErlang)));
+        File config = Paths.get(repoPath.toString(), "coonfig.json").toFile();
+        return mapper.readValue(config, Map.class);
     }
 
-    private static String[] parseErlangVsns(Map config, String defaultErlang) {
+    public static List<String> parseErlangVsns(Map config, String defaultErlang) {
+        String[] erlangs;
         if (config.containsKey("erlang")) {
-            return (String[]) config.get("erlang");
+            erlangs = (String[]) config.get("erlang");
+        } else
+            erlangs = new String[]{defaultErlang};
+        return new ArrayList<>(Arrays.asList(erlangs));
+    }
+
+    public static String parseName(Map config) {
+        if (config.containsKey("name")) {
+            return (String) config.get("name");
         }
-        return new String[]{defaultErlang};
+        return null;
     }
 
 }

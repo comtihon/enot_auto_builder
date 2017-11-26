@@ -15,7 +15,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2'
 sourceCompatibility = 1.8
 
 repositories {
@@ -53,10 +53,10 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-jdbc')
     compile('org.springframework.boot:spring-boot-starter-web')
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.springframework.integration:spring-integration-mail")
-    compile("org.springframework.integration:spring-integration-core")
-    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+    compile('org.springframework.integration:spring-integration-mail')
+    compile('org.springframework.integration:spring-integration-core')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('com.zaxxer:HikariCP')
     compile('org.modelmapper:modelmapper:1.1.0')
     compile('javax.mail:javax.mail-api')
@@ -64,7 +64,8 @@ dependencies {
     compile('commons-io:commons-io:2.5')
     compile('org.jetbrains:annotations:15.0')
     compile('org.eclipse.jgit:org.eclipse.jgit:4.8.0.201706111038-r')
-    compile("org.springframework.boot:spring-boot-devtools")
+    compile('org.springframework.boot:spring-boot-devtools')
+    compile('com.github.metadave:etp:0.4')
     runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.h2database:h2:1.4.196')

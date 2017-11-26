@@ -5,24 +5,32 @@ import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.service.Metrics;
 import com.coon.coon_auto_builder.service.tool.Kerl;
 import com.coon.coon_auto_builder.tool.CmdHelper;
+import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.GaugeService;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Builder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
+
     private final Path repoPath;
     private Path buildPath;
     private String erlang;
     private String ref;
     private String name;
     private String namespace;
+    // Name of the coon package. Should be based on application name from .app file
+    private String packageName;
 
     @Autowired
     private Kerl kerl;
@@ -77,6 +85,23 @@ public class Builder {
         return buildPath;
     }
 
+    /**
+     * @return path to Erlang application configuration file. Usually ebin/Project.app
+     */
+    public Path getAppConfPath() throws IOException {
+        List<Path> appConfigs = Files.walk(Paths.get(buildPath.toString(), "ebin"))
+                .filter(file -> file.endsWith(".app"))
+                .collect(Collectors.toList());
+        if (appConfigs.size() == 0) {
+            LOGGER.warn("No .app file found for {}!", name);
+            return null;
+        }
+        if (appConfigs.size() > 1) {
+            LOGGER.warn("More than one .app file for {}!", name);
+        }
+        return appConfigs.get(0);
+    }
+
     public String getErlang() {
         return erlang;
     }
@@ -91,6 +116,23 @@ public class Builder {
 
     public String getNamespace() {
         return namespace;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(Map projectConf) throws IOException {
+        String name = FileHelper.parseName(projectConf);
+        if (name == null || name.isEmpty()) {
+            // no name specified in project config. try to find .app manually
+            Path appConf = getAppConfPath();
+            if (appConf != null)
+                name = ErlangHelper.getApplicationName(appConf);
+        }
+        if (name == null)
+            name = getName();
+        packageName = name;
     }
 
     Builder withName(String fullName) {

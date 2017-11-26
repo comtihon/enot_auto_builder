@@ -11,6 +11,7 @@ import com.coon.coon_auto_builder.service.GitService;
 import com.coon.coon_auto_builder.service.MailSenderService;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
 import com.coon.coon_auto_builder.service.loader.Loader;
+import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +91,9 @@ public class BuildService {
     private List<PackageVersion> buildRef(
             RepositoryDTO repo, Map<String, List<String>> versions, String ref) throws Exception {
         CloneResult cloned = gitService.cloneRepo(repo.getFullName(), repo.getCloneUrl(), ref);
-        List<String> erlangs = formErlangForVersions(versions, ref, cloned.getCloned());
+        Path repoPath = cloned.getCloned();
+        Map<String, Object> projectConf = new HashMap<>();
+        List<String> erlangs = formErlangForVersions(projectConf, versions, ref, repoPath);
         List<PackageVersion> results = new ArrayList<>();
         if (erlangs.isEmpty()) {
             LOGGER.warn("Nothing to build for {}", repo);
@@ -102,10 +105,10 @@ public class BuildService {
         for (String erlang : erlangs) {
             PackageVersion version = new PackageVersion(ref, erlang);
             version.setEmail(cloned.getEmail()); // can have different emails for different refs
-            Builder builder = appContext.getBean(Builder.class, cloned.getCloned(), erlang);
+            Builder builder = appContext.getBean(Builder.class, repoPath, erlang);
             try {
                 builder.buildVersion(erlangs.size() != 1);
-                String artifact = loader.loadArtifact(builder.withName(repo.getFullName()).withRef(ref));
+                String artifact = loadPackage(builder, projectConf, repo, repoPath, ref);
                 version.addBuild(builder.getBuild(artifact, ""));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -125,11 +128,15 @@ public class BuildService {
      * @return Erlang versions to build with
      * @throws IOException in case of missing configuration in clone repo
      */
-    private List<String> formErlangForVersions(
-            Map<String, List<String>> versions, String ref, Path repoPath) throws IOException {
+    private List<String> formErlangForVersions(Map<String, Object> projectConf,
+                                               Map<String, List<String>> versions,
+                                               String ref,
+                                               Path repoPath) throws IOException {
         List<String> erlangs = versions.get(ref);
-        if (erlangs.isEmpty())
-            erlangs = FileHelper.readConfig(repoPath, configuration.getErlangVersion());
+        if (erlangs.isEmpty()) {
+            projectConf.putAll(FileHelper.readConfig(repoPath));
+            erlangs = FileHelper.parseErlangVsns(projectConf, configuration.getErlangVersion());
+        }
         return erlangs;
     }
 
@@ -139,6 +146,18 @@ public class BuildService {
         build.setMessage(reason);
         version.addBuild(build);
         return version;
+    }
+
+    private String loadPackage(Builder builder,
+                               Map<String, Object> projectConf,
+                               RepositoryDTO repo,
+                               Path repoPath,
+                               String ref) throws IOException {
+        if (projectConf.isEmpty()) { // can be empty if not used in formErlangForVersions
+            projectConf.putAll(FileHelper.readConfig(repoPath));
+        }
+        builder.setPackageName(projectConf);
+        return loader.loadArtifact(builder.withName(repo.getFullName()).withRef(ref));
     }
 
     private void cleanClonedRepos(RepositoryDTO repo, Set<String> refs) {

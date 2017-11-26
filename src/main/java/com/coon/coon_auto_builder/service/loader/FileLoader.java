@@ -2,6 +2,7 @@ package com.coon.coon_auto_builder.service.loader;
 
 import com.coon.coon_auto_builder.service.Metrics;
 import com.coon.coon_auto_builder.service.build.Builder;
+import com.coon.coon_auto_builder.tool.ErlangHelper;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +37,8 @@ public class FileLoader implements Loader {
                 build.getNamespace(),
                 build.getRef(),
                 build.getErlang(),
-                build.getName() + ".cp");
-        src = Paths.get(build.getBuildPath().toString(), build.getName() + ".cp");
+                build.getPackageName() + ".cp");
+        src = Paths.get(build.getBuildPath().toString(), build.getPackageName() + ".cp");
         LOGGER.debug("Copy " + src + " to " + dest);
         try {
             FileUtils.copyFile(src.toFile(), dest.toFile());
