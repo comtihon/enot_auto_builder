@@ -59,6 +59,7 @@ public class Repository {
                 "url='" + url + '\'' +
                 ", name='" + name + '\'' +
                 ", namespace='" + namespace + '\'' +
+                ", versions='" + versions + '\'' +
                 '}';
     }
 }

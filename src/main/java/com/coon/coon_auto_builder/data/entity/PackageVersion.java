@@ -84,4 +84,13 @@ public class PackageVersion {
         build.setPackageVersion(this);
         buildsRes.add(build);
     }
+
+    @Override
+    public String toString() {
+        return "PackageVersion{" +
+                "ref='" + ref + '\'' +
+                ", erlVersion='" + erlVersion + '\'' +
+                ", buildsRes=" + buildsRes +
+                '}';
+    }
 }

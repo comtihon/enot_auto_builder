@@ -37,9 +37,9 @@ public class PackageVersionDAOServiceTest {
     @Test
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
     public void findByValues() throws Exception {
-        PackageVersion found1 =
+        String found1Id =
                 packageVersionDAO.findByRefAndErlVersionAndRepository("1.0.0", "18", "url1");
-        Assert.assertNotNull(found1);
+        Assert.assertNotNull(found1Id);
     }
 
     @Test

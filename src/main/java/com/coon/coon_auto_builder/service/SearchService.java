@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -34,6 +35,7 @@ public class SearchService extends AbstractService {
     private BuildDAOService buildDao;
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO<List<PackageDTO>>> searchPackages(
             String name, String namespace, String ref, String erlVsn) {
         LOGGER.debug("Search {}", name, namespace, ref, erlVsn);
@@ -45,7 +47,7 @@ public class SearchService extends AbstractService {
             packageDTO.setBuildDate(build.getCreatedDate());
             packageDTO.setSuccess(build.isResult());
             if (build.isResult()) {
-                packageDTO.setPath(AbstractController.DOWNLOAD_ID + "/" + build.getBuildId());
+                packageDTO.setPath(AbstractController.DOWNLOAD_ID.replace("{id}",build.getBuildId()));
             } else {
                 packageDTO.setPath(AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId());
             }

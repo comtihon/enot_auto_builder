@@ -3,8 +3,8 @@ package com.coon.coon_auto_builder.service.build;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.service.Metrics;
+import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Kerl;
-import com.coon.coon_auto_builder.tool.CmdHelper;
 import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.slf4j.Logger;
@@ -36,6 +36,9 @@ public class Builder {
     private Kerl kerl;
 
     @Autowired
+    private Coon coon;
+
+    @Autowired
     private GaugeService gaugeService;
 
     public Builder(Path repoPath, String erlang) {
@@ -56,17 +59,8 @@ public class Builder {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
             throw new Exception("Can't copy from " + repoPath + " to " + buildPath + ": " + e.getMessage());
         }
-        ProcessBuilder pb = new ProcessBuilder("coon", "package");
-        pb.directory(buildPath.toFile());
-        Map<String, String> env = pb.environment();
-        String path = env.get("PATH");
-        env.put("PATH", Paths.get(erlangExecutable, "bin").toString() + ":" + path);
         try {
-            Process process = pb.start();
-            if (process.waitFor() != 0) {
-                this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
-                throw new Exception("build failed: " + CmdHelper.getProcessError(process));
-            }
+            coon.build(buildPath, erlangExecutable);
             this.gaugeService.submit(Metrics.BUILD_OK.toString(), 1.0);
         } catch (IOException | InterruptedException e) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
@@ -147,10 +141,19 @@ public class Builder {
         return this;
     }
 
+    /**
+     * In case of builder need to build only one erlang version - it will be built
+     * in the current (cloned) directory.
+     * In case of several versions - cloned directory will be copied to /ErlVsn/ subdir
+     * before build.
+     * @param copy need to copy
+     * @throws IOException
+     */
     private void mayBeCopy(boolean copy) throws IOException {
-        if (copy)
+        if (copy) {
+            buildPath = Paths.get(repoPath.toString(), erlang);
             FileHelper.copyToBuildDir(repoPath, buildPath);
-        else
+        } else
             buildPath = repoPath;
     }
 }

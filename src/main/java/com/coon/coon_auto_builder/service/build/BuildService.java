@@ -11,7 +11,6 @@ import com.coon.coon_auto_builder.service.GitService;
 import com.coon.coon_auto_builder.service.MailSenderService;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
 import com.coon.coon_auto_builder.service.loader.Loader;
-import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,10 +69,13 @@ public class BuildService {
     private Map<String, List<String>> formVersions(List<PackageVersionDTO> packageVersions) {
         Map<String, List<String>> versions = new HashMap<>();
         for (PackageVersionDTO version : packageVersions) {
-            if (versions.containsKey(version.getRef())) {
-                versions.get(version.getRef()).add(version.getErlVersion());
+            String erlVersion = version.getErlVersion();
+            if (versions.containsKey(version.getRef()) && erlVersion != null) {
+                versions.get(version.getRef()).add(erlVersion);
+            } else if (erlVersion != null) {
+                versions.put(version.getRef(), new ArrayList<>(Collections.singletonList(erlVersion)));
             } else {
-                versions.put(version.getRef(), new ArrayList<>(Collections.singletonList(version.getErlVersion())));
+                versions.put(version.getRef(), new ArrayList<>());
             }
         }
         return versions;

@@ -22,9 +22,9 @@ public class PackageVersionDAOService {
 
     @Transactional
     public void saveIfNotExists(PackageVersion pack) {
-        Optional<PackageVersion> found = findByRefAndErlVersionAndRepository(pack);
+        Optional<String> found = findIdByRefAndErlVersionAndRepository(pack);
         if (found.isPresent()) {
-            pack.setVersionId(found.get().getVersionId());
+            pack.setVersionId(found.get());
         } else {
             save(pack);
         }
@@ -39,7 +39,7 @@ public class PackageVersionDAOService {
         return (Collection<PackageVersion>) itr;
     }
 
-    public Optional<PackageVersion> findByRefAndErlVersionAndRepository(PackageVersion versionBO) {
+    public Optional<String> findIdByRefAndErlVersionAndRepository(PackageVersion versionBO) {
         return Optional.ofNullable(dao.findByRefAndErlVersionAndRepository(
                 versionBO.getRef(),
                 versionBO.getErlVersion(),

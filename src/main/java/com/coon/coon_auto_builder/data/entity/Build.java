@@ -78,4 +78,12 @@ public class Build {
     public void setBuildId(String buildId) {
         this.buildId = buildId;
     }
+
+    @Override
+    public String toString() {
+        return "Build{" +
+                "result=" + result +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }
