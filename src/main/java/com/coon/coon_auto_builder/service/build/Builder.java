@@ -79,21 +79,8 @@ public class Builder {
         return buildPath;
     }
 
-    /**
-     * @return path to Erlang application configuration file. Usually ebin/Project.app
-     */
-    public Path getAppConfPath() throws IOException {
-        List<Path> appConfigs = Files.walk(Paths.get(buildPath.toString(), "ebin"))
-                .filter(file -> file.endsWith(".app"))
-                .collect(Collectors.toList());
-        if (appConfigs.size() == 0) {
-            LOGGER.warn("No .app file found for {}!", name);
-            return null;
-        }
-        if (appConfigs.size() > 1) {
-            LOGGER.warn("More than one .app file for {}!", name);
-        }
-        return appConfigs.get(0);
+    void setBuildPath(Path buildPath) {
+        this.buildPath = buildPath;
     }
 
     public String getErlang() {
@@ -116,7 +103,12 @@ public class Builder {
         return packageName;
     }
 
-    public void setPackageName(Map projectConf) throws IOException {
+    void detectPackageName(Map<String, Object> projectConf) {
+        if (projectConf.isEmpty()) // can be empty if not used in formErlangForVersions
+            try {
+                projectConf.putAll(FileHelper.readConfig(repoPath));
+            } catch (IOException ignored) {
+            }
         String name = FileHelper.parseName(projectConf);
         if (name == null || name.isEmpty()) {
             // no name specified in project config. try to find .app manually
@@ -142,10 +134,34 @@ public class Builder {
     }
 
     /**
+     * @return path to Erlang application configuration file. Usually ebin/Project.app
+     */
+    private Path getAppConfPath() {
+        List<Path> appConfigs;
+        try {
+            appConfigs = Files.walk(Paths.get(buildPath.toString(), "ebin"))
+                    .filter(file -> file.getFileName().toString().endsWith(".app"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            LOGGER.warn("No ebin dir found in {} for {}!", buildPath, name);
+            return null;
+        }
+        if (appConfigs.size() == 0) {
+            LOGGER.warn("No .app file found for {}!", name);
+            return null;
+        }
+        if (appConfigs.size() > 1) {
+            LOGGER.warn("More than one .app file for {}!", name);
+        }
+        return appConfigs.get(0);
+    }
+
+    /**
      * In case of builder need to build only one erlang version - it will be built
      * in the current (cloned) directory.
      * In case of several versions - cloned directory will be copied to /ErlVsn/ subdir
      * before build.
+     *
      * @param copy need to copy
      * @throws IOException
      */

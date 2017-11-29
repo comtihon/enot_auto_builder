@@ -86,11 +86,26 @@ public class PackageVersion {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PackageVersion version = (PackageVersion) o;
+
+        return versionId != null ? versionId.equals(version.versionId) : version.versionId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return versionId != null ? versionId.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         return "PackageVersion{" +
-                "ref='" + ref + '\'' +
+                "id='" + versionId + '\'' +
+                ", ref='" + ref + '\'' +
                 ", erlVersion='" + erlVersion + '\'' +
-                ", buildsRes=" + buildsRes +
                 '}';
     }
 }

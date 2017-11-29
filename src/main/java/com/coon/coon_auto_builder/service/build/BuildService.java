@@ -1,6 +1,7 @@
 package com.coon.coon_auto_builder.service.build;
 
 import com.coon.coon_auto_builder.config.ServerConfiguration;
+import com.coon.coon_auto_builder.data.dao.PackageVersionDAOService;
 import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -43,24 +45,26 @@ public class BuildService {
     private RepositoryDAOService repositoryDAOService;
 
     @Autowired
+    private PackageVersionDAOService pvDAOService;
+
+    @Autowired
     private Loader loader;
 
     @Async("taskExecutor")
+    @Transactional
     public void buildAsync(RepositoryDTO repo) {
+        Repository repository = repositoryDAOService.getOrCreate(repo.getCloneUrl(), repo.getFullName());
         Map<String, List<String>> versions = formVersions(repo.getVersions());
-        List<PackageVersion> results = new ArrayList<>();
         try {
             for (String ref : versions.keySet()) {
                 try {
-                    results.addAll(buildRef(repo, versions, ref));
+                    buildRef(repository, versions, ref);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    results.add(formError(ref, "unknown", e.getMessage()));
+                    repository.addVersion(formError(ref, "unknown", repo.getCloneUrl(), e.getMessage()));
                 }
             }
         } finally {
-            Repository repository = new Repository(repo.getCloneUrl(), repo.getFullName(), results);
-            repositoryDAOService.cascadeSave(repository);
             cleanClonedRepos(repo, versions.keySet());
             mailSender.sendReport(repository);
         }
@@ -87,38 +91,35 @@ public class BuildService {
      * @param repo     repository to build
      * @param versions versions from build request
      * @param ref      ref being build
-     * @return list of all builds
      * @throws Exception in case of cloning repo or reading configuration
      */
-    private List<PackageVersion> buildRef(
-            RepositoryDTO repo, Map<String, List<String>> versions, String ref) throws Exception {
-        CloneResult cloned = gitService.cloneRepo(repo.getFullName(), repo.getCloneUrl(), ref);
+    private void buildRef(
+            Repository repo, Map<String, List<String>> versions, String ref) throws Exception {
+        CloneResult cloned = gitService.cloneRepo(repo.getFullName(), repo.getUrl(), ref);
         Path repoPath = cloned.getCloned();
         Map<String, Object> projectConf = new HashMap<>();
         List<String> erlangs = formErlangForVersions(projectConf, versions, ref, repoPath);
-        List<PackageVersion> results = new ArrayList<>();
         if (erlangs.isEmpty()) {
-            LOGGER.warn("Nothing to build for {}", repo);
-            PackageVersion errored = formError(ref, "unknown", "No Erlang version found for this repo.");
+            LOGGER.warn("Nothing to build for {}, versions {}", repo, versions);
+            PackageVersion errored =
+                    formError(ref, "unknown", repo.getUrl(), "No Erlang version found for this repo.");
             errored.setEmail(cloned.getEmail());
-            results.add(errored);
-            return results;
+            repo.addVersion(errored);
         }
         for (String erlang : erlangs) {
-            PackageVersion version = new PackageVersion(ref, erlang);
+            PackageVersion version = pvDAOService.getOrCreate(ref, erlang, repo.getUrl());
             version.setEmail(cloned.getEmail()); // can have different emails for different refs
             Builder builder = appContext.getBean(Builder.class, repoPath, erlang);
             try {
                 builder.buildVersion(erlangs.size() != 1);
-                String artifact = loadPackage(builder, projectConf, repo, repoPath, ref);
+                String artifact = loadPackage(builder, projectConf, repo, ref);
                 version.addBuild(builder.getBuild(artifact, ""));
             } catch (Exception e) {
                 e.printStackTrace();
                 version.addBuild(builder.getBuild(null, e.getMessage()));
             }
-            results.add(version);
+            repo.addVersion(version);
         }
-        return results;
     }
 
     /**
@@ -133,18 +134,21 @@ public class BuildService {
     private List<String> formErlangForVersions(Map<String, Object> projectConf,
                                                Map<String, List<String>> versions,
                                                String ref,
-                                               Path repoPath) throws IOException {
+                                               Path repoPath) {
         List<String> erlangs = versions.get(ref);
         if (erlangs.isEmpty()) {
-            projectConf.putAll(FileHelper.readConfig(repoPath));
+            try {
+                projectConf.putAll(FileHelper.readConfig(repoPath));
+            } catch (IOException ignored) {
+            }
             erlangs = FileHelper.parseErlangVsns(projectConf, configuration.getErlangVersion());
         }
         return erlangs;
     }
 
-    private PackageVersion formError(String ref, String erl, String reason) {
-        PackageVersion version = new PackageVersion(ref, erl);
-        Build build = new Build(version, false, "");
+    private PackageVersion formError(String ref, String erl, String url, String reason) {
+        PackageVersion version = pvDAOService.getOrCreate(ref, erl, url);
+        Build build = new Build(false, "");
         build.setMessage(reason);
         version.addBuild(build);
         return version;
@@ -152,13 +156,9 @@ public class BuildService {
 
     private String loadPackage(Builder builder,
                                Map<String, Object> projectConf,
-                               RepositoryDTO repo,
-                               Path repoPath,
+                               Repository repo,
                                String ref) throws IOException {
-        if (projectConf.isEmpty()) { // can be empty if not used in formErlangForVersions
-            projectConf.putAll(FileHelper.readConfig(repoPath));
-        }
-        builder.setPackageName(projectConf);
+        builder.detectPackageName(projectConf);
         return loader.loadArtifact(builder.withName(repo.getFullName()).withRef(ref));
     }
 

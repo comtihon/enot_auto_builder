@@ -37,6 +37,10 @@ public class Build {
     public Build() {
     }
 
+    public Build(boolean result, String artifactPath) {
+        this(null, result, artifactPath);
+    }
+
     public Build(PackageVersion packageVersion, boolean result, String artifactPath) {
         this.packageVersion = packageVersion;
         this.result = result;

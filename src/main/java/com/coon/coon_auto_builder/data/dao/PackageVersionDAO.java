@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PackageVersionDAO extends CrudRepository<PackageVersion, String> {
-    @Query("SELECT pv.versionId FROM PackageVersion pv WHERE pv.ref = :ref and pv.erlVersion = :erl and pv.repository.url = :url")
-    String findByRefAndErlVersionAndRepository(
+    @Query("SELECT pv FROM PackageVersion pv WHERE pv.ref = :ref and pv.erlVersion = :erl and pv.repository.url = :url")
+    PackageVersion findByRefAndErlVersionAndRepository(
             @Param("ref") String ref,
             @Param("erl") String erl,
             @Param("url") String url);

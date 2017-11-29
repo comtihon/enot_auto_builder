@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -32,7 +33,7 @@ public class RepositoryDAOServiceTest {
 
     @Test
     public void save() throws Exception {
-        List<PackageVersion> versions = Collections.singletonList(new PackageVersion("1.0.0", "18"));
+        Set<PackageVersion> versions = Collections.singleton(new PackageVersion("1.0.0", "18"));
         Repository repo = new Repository("url", "comtihon/coon", versions);
         Assert.assertNotNull(repositoryDAO.save(repo));
         Repository find = repositoryDAO.findOne("url");
@@ -41,8 +42,8 @@ public class RepositoryDAOServiceTest {
 
     @Test
     public void saveExistent() throws Exception {
-        List<PackageVersion> versions1 = Collections.singletonList(new PackageVersion("1.0.0", "18"));
-        List<PackageVersion> versions2 = Collections.singletonList(new PackageVersion("1.1.0", "18"));
+        Set<PackageVersion> versions1 = Collections.singleton(new PackageVersion("1.0.0", "18"));
+        Set<PackageVersion> versions2 = Collections.singleton(new PackageVersion("1.1.0", "18"));
         Repository repo = new Repository("url", "comtihon/coon", versions1);
         Assert.assertNotNull(repositoryDAO.save(repo));
         repo = new Repository("url", "comtihon/coon", versions2);

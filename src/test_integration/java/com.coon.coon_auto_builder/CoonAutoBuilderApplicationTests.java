@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder;
 
-import com.coon.coon_auto_builder.controller.dto.PackageDTO;
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
+import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.service.GitService;
@@ -58,6 +58,9 @@ public class CoonAutoBuilderApplicationTests {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private RepositoryDAOService repositoryDAOService;
+
     @Value("${default_erlang}")
     private String erlangVersion;
 
@@ -112,11 +115,13 @@ public class CoonAutoBuilderApplicationTests {
     @After
     public void tearDown() throws IOException {
         FileUtils.deleteDirectory(new File("test/tmp"));
+        repositoryDAOService.getAll().forEach(repo -> repositoryDAOService.delete(repo.getUrl()));
     }
 
     /**
      * Add order to build test repository with default Erlang.
      * Search built package after build completed.
+     *
      * @throws InterruptedException in latch await
      */
     @Test
@@ -164,11 +169,6 @@ public class CoonAutoBuilderApplicationTests {
         Assert.assertTrue(responseDTO.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
         Assert.assertEquals(3, packages.size());
-    }
-
-    @Test
-    public void testOtherNameBuild() {
-
     }
 
     // Create application with name/coonfig.json and name/ebin/name.app
