@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<html lang="en" xmlns="http://www.springframework.org/schema/mvc">
 <head>
     <title>CoonHub</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -21,35 +21,33 @@
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <button class="btn btn-outline-success" type="submit">Add</button>
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Add</button>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="https://justtech.blog/tag/coon/">Documentation</a>
             </li>
         </ul>
-        <form class="form-inline col-lg-0">
+        <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search">
-            <button class="btn btn-outline-success col-sm-0" type="submit">Search</button>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
     </div>
 </nav>
 
 
 <main role="main" class="container">
-    <div class="starter-template">
+    <div class="starter-template" data-bind="visible: !$root.searchDone()">
         <h1>Welcome to Coon Hub</h1>
         <p class="lead">Here we store prebuilt Erlang packages, just like Maven does for java ;).<br>
-        To find package use Search button above. To add your package use Add button above.
+        To find package use Search [top right corner]. To add your package use Add [top left corner].
         </p>
-        <p>ViewModels object searchDone1: <span data-bind="text: $root.justTestText"></span> </p>
-        <p>ViewModels object searchDone2: <span data-bind="text: justTestText"></span> </p>
-        <p>ViewModels object searchDone3: <span data-bind="text: searchDone"></span> </p>
     </div>
     <!--<div class="starter-template">-->
         <!--<input type='text' id='package_search'>-->
     <!--</div>-->
     <!--<input type='button' id='link' value='Search' onClick='javascript:search()'>-->
-    <div class="starter-template" >
+    <div class="starter-template" data-bind="visible: $root.searchDone">
+        <h1>Search results for package name: <span data-bind="text: justTestText"></span> </h1>
     <!--<div class="starter-template" data-bind="visible: $root.searchDone ">-->
         <table class="packages">
             <thead>
@@ -74,11 +72,17 @@
 
 <!--we place it at the end to optimize page load speed-->
 <!--additional libs-->
-<script type="text/javascript" th:src="@{/js/lib/jquery.min.js}" ></script>
-<script type="text/javascript" th:src="@{/js/lib/popper.min.js}" ></script>
-<script type="text/javascript" th:src="@{/js/lib/bootstrap.min.js}" ></script>
-<script type="text/javascript" th:src="@{/js/lib/knockout.min.js}" ></script>
-<script type="text/javascript" th:src="@{/js/lib/knockout.mapping.min.js}" ></script>
-<script type="text/javascript" th:src="@{/js/src/search.js}" ></script>
+
+<script type="text/javascript" src="/js/lib/popper.min.js"></script>
+
+<script type="text/javascript" src="/js/lib/jquery.min.js"></script>
+
+<script type="text/javascript" src="/js/lib/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="/js/lib/knockout.min.js"></script>
+
+<script type="text/javascript" src="/js/lib/knockout.mapping.min.js"></script>
+
+<script type="text/javascript" src="/js/src/search.js"></script>
 </body>
 </html>

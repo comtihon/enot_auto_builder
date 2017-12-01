@@ -14,9 +14,9 @@ function ErlPackage(build_id, namespace, name, success, build_date, path, versio
 
 function PackageViewModel() {
     var self = this;
-    self.justTestText = "im here";
-    console.log(self.justTestText);
-    self.searchDone = ko.observable(true);
+    self.searchFor = ko.observable("");
+    console.log(self.searchFor);
+    self.searchDone = ko.observable(false);
     console.log(self.searchDone);
 
     self.packages = ko.observableArray([]);
@@ -24,9 +24,12 @@ function PackageViewModel() {
         alert(msg);
     }
     self.toggleTableVisible = function() {
+     self.searchDone(!self.searchDone());
     }
     
     self.simpleSearch = function(input_name) {
+        self.searchFor(input_name);
+        self.toggleTableVisible();
         $.ajax({
           url: "/packages",
           type: "get", //send it through get method
