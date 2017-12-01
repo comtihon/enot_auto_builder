@@ -1,12 +1,84 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
 <head>
     <title>CoonHub</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/css/main.css" rel="stylesheet">
 </head>
+
 <body>
-<script src="js/search.js"></script>
-<input type='text' id='package_search'>
-<input type='button' id='link' value='Search' onClick='javascript:search()'>
+<!--navigation bar-->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">CoonHub</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <button class="btn btn-outline-success" type="submit">Add</button>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://justtech.blog/tag/coon/">Documentation</a>
+            </li>
+        </ul>
+        <form class="form-inline col-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search">
+            <button class="btn btn-outline-success col-sm-0" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
+
+<main role="main" class="container">
+    <div class="starter-template">
+        <h1>Welcome to Coon Hub</h1>
+        <p class="lead">Here we store prebuilt Erlang packages, just like Maven does for java ;).<br>
+        To find package use Search button above. To add your package use Add button above.
+        </p>
+        <p>ViewModels object searchDone1: <span data-bind="text: $root.justTestText"></span> </p>
+        <p>ViewModels object searchDone2: <span data-bind="text: justTestText"></span> </p>
+        <p>ViewModels object searchDone3: <span data-bind="text: searchDone"></span> </p>
+    </div>
+    <!--<div class="starter-template">-->
+        <!--<input type='text' id='package_search'>-->
+    <!--</div>-->
+    <!--<input type='button' id='link' value='Search' onClick='javascript:search()'>-->
+    <div class="starter-template" >
+    <!--<div class="starter-template" data-bind="visible: $root.searchDone ">-->
+        <table class="packages">
+            <thead>
+            <tr><th>Namespace</th><th>Package</th><th>Version</th><th>Erlang Version</th><th>Build Date</th><th>Build Status</th><th>Action</th></tr>
+            </thead>
+            <tbody data-bind="foreach: packages">
+            <tr data-bind="tag: build_id">
+                <td data-bind="text: $data.namespace"></td>
+                <td data-bind="text: $data.name"></td>
+                <td data-bind="text: $data.version"></td>
+                <td data-bind="text: erl_version"></td>
+                <td data-bind="text: build_date"></td>
+                <td data-bind="text: success"></td>
+                <td data-bind="text: $data.path"></td>
+                <!--<input type='button' id='link' value='Search' onClick='javascript:search()'>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</main><!-- /.container -->
+
+<!--we place it at the end to optimize page load speed-->
+<!--additional libs-->
+<script type="text/javascript" th:src="@{/js/lib/jquery.min.js}" ></script>
+<script type="text/javascript" th:src="@{/js/lib/popper.min.js}" ></script>
+<script type="text/javascript" th:src="@{/js/lib/bootstrap.min.js}" ></script>
+<script type="text/javascript" th:src="@{/js/lib/knockout.min.js}" ></script>
+<script type="text/javascript" th:src="@{/js/lib/knockout.mapping.min.js}" ></script>
+<script type="text/javascript" th:src="@{/js/src/search.js}" ></script>
 </body>
 </html>
