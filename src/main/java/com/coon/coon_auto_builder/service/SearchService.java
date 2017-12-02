@@ -51,6 +51,23 @@ public class SearchService extends AbstractService {
             }
             packages.add(packageDTO);
         }
+        //TODO remove test data
+        PackageDTO ok = new PackageDTO();
+        ok.setBuildId("1");
+        ok.setSuccess(true);
+        ok.setName("test");
+        ok.setNamespace("comtihon");
+        ok.setPath("/path/to/artifact.cp");
+        ok.setBuildDate(new Date());
+        PackageDTO fail = new PackageDTO();
+        fail.setBuildId("2");
+        fail.setSuccess(false);
+        fail.setName("other");
+        fail.setNamespace("comtihon");
+        fail.setPath("/path/to/log");
+        fail.setBuildDate(new Date());
+        packages.add(ok);
+        packages.add(fail);
         return CompletableFuture.completedFuture(ok(packages));
     }
 

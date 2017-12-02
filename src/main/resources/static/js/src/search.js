@@ -1,4 +1,4 @@
-
+(function($) {
 //class to represent erlang package row in searсh package grid
 function ErlPackage(build_id, namespace, name, success, build_date, path, version, erl_version) {
     var self = this;
@@ -24,17 +24,17 @@ function PackageViewModel() {
         alert(msg);
     }
     self.toggleTableVisible = function() {
-     self.searchDone(!self.searchDone());
+        if (!self.searchDone()) {
+            self.searchDone(!self.searchDone());
+        }
     }
     
-    self.simpleSearch = function(input_name) {
-        self.searchFor(input_name);
+    self.simpleSearch = function() {
         self.toggleTableVisible();
-        $.ajax({
-          url: "/packages",
-          type: "get", //send it through get method
+        jQuery.get({
+          url: "/search",
           data: {
-            name: input_name.trim()
+            name: self.searchFor().trim()
           },
           dataType: 'json',
           success: function(data) {
@@ -52,9 +52,8 @@ function PackageViewModel() {
     }
     self.complexSearch = function(namespace, name, version, erl_version) {
 //            FIXME code duplication, extract base method
-            $.ajax({
+            jQuery.get({
               url: "/packages",
-              type: "get", //send it through get method
               data: {
                 name: name.trim(),
                 namespace: namespace.trim(),
@@ -77,5 +76,8 @@ function PackageViewModel() {
     }
 }
 
+
 // Activates knockout.js
 ko.applyBindings(new PackageViewModel());
+
+})(jQuery)

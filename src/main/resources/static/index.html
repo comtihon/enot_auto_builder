@@ -28,8 +28,8 @@
             </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search" data-bind='value: searchFor, valueUpdate: "afterkeydown"'>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-bind="click: $root.simpleSearch">Search</button>
         </form>
     </div>
 </nav>
@@ -47,7 +47,7 @@
     <!--</div>-->
     <!--<input type='button' id='link' value='Search' onClick='javascript:search()'>-->
     <div class="starter-template" data-bind="visible: $root.searchDone">
-        <h1>Search results for package name: <span data-bind="text: justTestText"></span> </h1>
+        <h1>Search results for package name: <span data-bind="text: $root.searchFor()"></span> </h1>
     <!--<div class="starter-template" data-bind="visible: $root.searchDone ">-->
         <table class="packages">
             <thead>
@@ -58,9 +58,9 @@
                 <td data-bind="text: $data.namespace"></td>
                 <td data-bind="text: $data.name"></td>
                 <td data-bind="text: $data.version"></td>
-                <td data-bind="text: erl_version"></td>
-                <td data-bind="text: build_date"></td>
-                <td data-bind="text: success"></td>
+                <td data-bind="text: $data.erl_version"></td>
+                <td data-bind="text: $data.build_date"></td>
+                <td data-bind="text: $data.success"></td>
                 <td data-bind="text: $data.path"></td>
                 <!--<input type='button' id='link' value='Search' onClick='javascript:search()'>-->
             </tr>

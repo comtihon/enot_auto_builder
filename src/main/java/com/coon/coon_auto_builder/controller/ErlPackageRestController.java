@@ -24,9 +24,9 @@ public class ErlPackageRestController extends AbstractController {
     @RequestMapping(path = "/search", method = RequestMethod.GET)
     public CompletableFuture<ResponseEntity<?>> listPackagesBySearch(
             @RequestParam String name,
-            @RequestParam String namespace,
-            @RequestParam String version,
-            @RequestParam String erl_version) {
+            @RequestParam(required = false) String namespace,
+            @RequestParam(required = false) String version,
+            @RequestParam(required = false) String erl_version) {
         CompletableFuture<ResponseDTO<List<PackageDTO>>> packages = searchService.searchPackages(
                 name, namespace, version, erl_version);
         return packages.thenApply(this::returnResult);
