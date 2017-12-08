@@ -5,6 +5,7 @@ import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
 import com.coon.coon_auto_builder.service.dto.MailReportDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -24,9 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class MailSenderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MailSenderService.class);
-
     @Autowired
     private MailConfiguration configuration;
 
@@ -78,7 +78,7 @@ public class MailSenderService {
                 .setHeader(MailHeaders.TO, report.getTo())
                 .setHeader(MailHeaders.FROM, configuration.getUser())
                 .build();
-        LOGGER.debug("Send report to {}", report.getTo());
+        log.debug("Send report to {}", report.getTo());
         smtpChannel.send(message);
     }
 }

@@ -1,19 +1,18 @@
 package com.coon.coon_auto_builder.tool;
 
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+@Slf4j
 public class CmdHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CmdHelper.class);
 
-    @NotNull
+    @NonNull
     public static String runCmd(String cmd) throws IOException, InterruptedException {
-        LOGGER.debug("run {}", cmd);
+        log.debug("run {}", cmd);
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         return getProcessOutput(p);

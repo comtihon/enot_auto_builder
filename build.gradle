@@ -26,12 +26,24 @@ jar {
     baseName = 'coon_auto_builder'
     version = version
 }
+ext {
+    metaModelsSourcesDir = file('src/generated/java')
+}
 
 springBoot {
     buildInfo()
 }
 
+configurations {
+    querydslapt
+}
+
 sourceSets {
+    main {
+        java {
+            srcDir metaModelsSourcesDir
+        }
+    }
     test_integration {
         java {
             compileClasspath = sourceSets.main.output + configurations.testRuntime
@@ -42,11 +54,36 @@ sourceSets {
     }
 }
 
+task querymodels(type: JavaCompile, group: 'build') {
+    doFirst {
+        delete metaModelsSourcesDir
+        metaModelsSourcesDir.mkdirs()
+    }
+
+    classpath = configurations.compile + configurations.querydslapt
+    destinationDir = metaModelsSourcesDir
+
+    source = sourceSets.main.java
+    options.compilerArgs = [
+            "-proc:only",
+            "-processor", "com.querydsl.apt.jpa.JPAAnnotationProcessor",
+            "-s", metaModelsSourcesDir.toString()
+    ]
+}
+
 task test_integration(type: Test) {
     testClassesDir = sourceSets.test_integration.output.classesDir
     classpath = sourceSets.test_integration.runtimeClasspath
 }
 
+idea {
+    module {
+        sourceDirs += metaModelsSourcesDir
+        generatedSourceDirs += metaModelsSourcesDir
+    }
+}
+
+compileJava.dependsOn querymodels
 check.dependsOn test_integration
 
 dependencies {
@@ -62,11 +99,15 @@ dependencies {
     compile('javax.mail:javax.mail-api')
     compile('javax:javaee-api:7.0')
     compile('commons-io:commons-io:2.5')
-    compile('org.jetbrains:annotations:15.0')
     compile('org.eclipse.jgit:org.eclipse.jgit:4.8.0.201706111038-r')
     compile('org.springframework.boot:spring-boot-devtools')
     compile('com.github.metadave:etp:0.4')
+    compile('com.querydsl:querydsl-jpa:4.1.4')
+    compile('org.projectlombok:lombok:1.16.18')
+    compile('com.querydsl:querydsl-apt:4.1.4')
+
     runtime('org.postgresql:postgresql')
+
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.h2database:h2:1.4.196')
     testCompile('org.mockito:mockito-all:1.10.19')

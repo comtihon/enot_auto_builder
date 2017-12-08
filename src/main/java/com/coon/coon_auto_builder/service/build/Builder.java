@@ -7,8 +7,9 @@ import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Kerl;
 import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.GaugeService;
 
@@ -20,16 +21,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class Builder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
-
     private final Path repoPath;
+    @Getter
+    @Setter
     private Path buildPath;
+    @Getter
     private String erlang;
+    @Getter
     private String ref;
+    @Getter
     private String name;
+    @Getter
     private String namespace;
     // Name of the coon package. Should be based on application name from .app file
+    @Getter
     private String packageName;
 
     @Autowired
@@ -75,34 +82,6 @@ public class Builder {
         return build;
     }
 
-    public Path getBuildPath() {
-        return buildPath;
-    }
-
-    void setBuildPath(Path buildPath) {
-        this.buildPath = buildPath;
-    }
-
-    public String getErlang() {
-        return erlang;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public String getPackageName() {
-        return packageName;
-    }
-
     void detectPackageName(Map<String, Object> projectConf) {
         if (projectConf.isEmpty()) // can be empty if not used in formErlangForVersions
             try {
@@ -143,15 +122,15 @@ public class Builder {
                     .filter(file -> file.getFileName().toString().endsWith(".app"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            LOGGER.warn("No ebin dir found in {} for {}!", buildPath, name);
+            log.warn("No ebin dir found in {} for {}!", buildPath, name);
             return null;
         }
         if (appConfigs.size() == 0) {
-            LOGGER.warn("No .app file found for {}!", name);
+            log.warn("No .app file found for {}!", name);
             return null;
         }
         if (appConfigs.size() > 1) {
-            LOGGER.warn("More than one .app file for {}!", name);
+            log.warn("More than one .app file for {}!", name);
         }
         return appConfigs.get(0);
     }

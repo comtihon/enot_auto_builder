@@ -8,7 +8,7 @@ import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.dto.Validatable;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.Repository;
-import org.jetbrains.annotations.Nullable;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +16,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class BuildRequestValidator extends AbstractService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildRequestValidator.class);
 
     @Autowired
     private ServerConfiguration configuration;
@@ -54,7 +54,7 @@ public class BuildRequestValidator extends AbstractService {
             RepositoryDTO vaildated = request.onRebuild(build.orElse(null));
             return CompletableFuture.completedFuture(ok(vaildated));
         } catch (Exception e) {
-            LOGGER.warn("Validation failed: request {}, error {}", request, e.getMessage());
+            log.warn("Validation failed: request {}, error {}", request, e.getMessage());
             e.printStackTrace();
             return CompletableFuture.completedFuture(fail(e.getMessage()));
         }

@@ -1,7 +1,7 @@
 package com.coon.coon_auto_builder.data.entity;
 
+import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -9,6 +9,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "builds")
+@Data
 public class Build {
     @Id
     @Column(name = "build_id")
@@ -30,7 +31,6 @@ public class Build {
     private String artifactPath;
 
     @CreatedDate
-    @NotNull
     @Column(name = "created_date", nullable = false, updatable = false)
     private Date createdDate = new Date();
 
@@ -47,46 +47,11 @@ public class Build {
         this.artifactPath = artifactPath;
     }
 
-    public String getArtifactPath() {
-        return artifactPath;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public String getBuildId() {
-        return buildId;
-    }
-
-    public PackageVersion getPackageVersion() {
-        return packageVersion;
-    }
-
-    public void setPackageVersion(PackageVersion packageVersion) {
-        this.packageVersion = packageVersion;
-    }
-
-    public boolean isResult() {
-        return result;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setBuildId(String buildId) {
-        this.buildId = buildId;
-    }
-
     @Override
     public String toString() {
         return "Build{" +
-                "result=" + result +
+                "id=" + buildId +
+                ", result=" + result +
                 ", message='" + message + '\'' +
                 '}';
     }

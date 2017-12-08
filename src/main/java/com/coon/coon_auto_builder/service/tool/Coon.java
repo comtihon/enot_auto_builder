@@ -1,8 +1,8 @@
 package com.coon.coon_auto_builder.service.tool;
 
 import com.coon.coon_auto_builder.tool.CmdHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,12 +13,9 @@ import java.util.Map;
 import static com.coon.coon_auto_builder.tool.CmdHelper.runCmd;
 
 @Component
+@NoArgsConstructor
+@Slf4j
 public class Coon extends Tool {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Coon.class);
-
-
-    public Coon() {
-    }
 
     public void build(Path buildPath, String erlangExecutable) throws Exception {
         ProcessBuilder pb = new ProcessBuilder("coon", "package");
@@ -39,7 +36,7 @@ public class Coon extends Tool {
             ready = true;
             return true;
         } catch (IOException | InterruptedException e) {
-            LOGGER.warn("Calling coon error " + e.getMessage());
+            log.warn("Calling coon error " + e.getMessage());
             message = e.getMessage();
             return false;
         }

@@ -2,6 +2,7 @@ package com.coon.coon_auto_builder.service;
 
 import com.coon.coon_auto_builder.config.ServerConfiguration;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -19,9 +20,8 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class GitService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitService.class);
 
     @Autowired
     private ServerConfiguration configuration;
@@ -44,7 +44,7 @@ public class GitService {
         Path repoPath = repoPath(fullName, ref);
         if (!repoPath.toFile().mkdirs()) {
             String msg = "clone failed, can't create " + repoPath;
-            LOGGER.warn(msg);
+            log.warn(msg);
             this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);
             throw new Exception(msg);
         }
@@ -53,12 +53,12 @@ public class GitService {
                 .setDirectory(repoPath.toFile())
                 .setBranch(ref)
                 .call()) {
-            LOGGER.debug("Cloned {} to {}", url, result.getRepository().getDirectory());
+            log.debug("Cloned {} to {}", url, result.getRepository().getDirectory());
             this.gaugeService.submit(Metrics.CLONE_OK.toString(), 1.0);
             RevCommit commit = result.getRepository().parseCommit(result.getRepository().findRef(ref).getObjectId());
             return new CloneResult(commit.getAuthorIdent().getEmailAddress(), repoPath);
         } catch (IOException | GitAPIException e) {
-            LOGGER.warn("clone failed {}", e.getMessage());
+            log.warn("clone failed {}", e.getMessage());
             this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);
             throw e;
         }

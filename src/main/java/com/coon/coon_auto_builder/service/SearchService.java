@@ -10,6 +10,7 @@ import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -24,10 +25,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class SearchService extends AbstractService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
-
     @Autowired
     private ModelMapper modelMapper;
 
@@ -38,8 +37,8 @@ public class SearchService extends AbstractService {
     @Transactional
     public CompletableFuture<ResponseDTO<List<PackageDTO>>> searchPackages(
             String name, String namespace, String ref, String erlVsn) {
-        LOGGER.debug("Search {}", name, namespace, ref, erlVsn);
-        List<Build> builds = buildDao.findAllByValues(name, namespace, ref, erlVsn);
+        log.debug("Search {}", name, namespace, ref, erlVsn);
+        List<Build> builds = buildDao.findBy(name, namespace, ref, erlVsn, false);
         List<PackageDTO> packages = new ArrayList<>(builds.size());
         for (Build build : builds) {
             Repository repo = build.getPackageVersion().getRepository();
@@ -58,7 +57,7 @@ public class SearchService extends AbstractService {
 
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<BuildDTO>>> fetchBuilds(RepositoryDTO request) {
-        LOGGER.debug("Fetch {}", request);
+        log.debug("Fetch {}", request);
         List<Build> builds = findBuilds(request);
         Type listType = new TypeToken<List<BuildDTO>>() {
         }.getType();
@@ -68,7 +67,7 @@ public class SearchService extends AbstractService {
 
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<PackageVersionDTO>>> searchVersions(RepositoryDTO request) {
-        LOGGER.debug("Search {}", request);
+        log.debug("Search {}", request);
         List<Build> builds = findBuilds(request);
         Set<PackageVersion> versions = new HashSet<>();
         for (Build b : builds)
@@ -81,7 +80,7 @@ public class SearchService extends AbstractService {
 
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO> findBuild(String build_id) {
-        LOGGER.debug("Find {}", build_id);
+        log.debug("Find {}", build_id);
         Optional<Build> find = buildDao.find(build_id);
         if (find.isPresent()) {
             BuildDTO dto = modelMapper.map(find.get(), BuildDTO.class);
@@ -95,11 +94,11 @@ public class SearchService extends AbstractService {
         List<PackageVersionDTO> versions = request.getVersions();
         List<Build> builds = new ArrayList<>();
         if (versions.isEmpty()) {
-            builds.addAll(buildDao.fetchByValues(splitted[1], splitted[0]));
+            builds.addAll(buildDao.findBy(splitted[1], splitted[0]));
         } else {
             for (PackageVersionDTO pv : versions) {
-                builds.addAll(buildDao.fetchByValues(
-                        splitted[1], splitted[0], pv.getRef(), pv.getErlVersion()));
+                builds.addAll(buildDao.findBy(
+                        splitted[1], splitted[0], pv.getRef(), pv.getErlVersion(), true));
             }
         }
         return builds;

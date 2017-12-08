@@ -2,26 +2,26 @@ package com.coon.coon_auto_builder.service.dto;
 
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.service.Status;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Data
 public class MailReportDTO {
 
+    @NonNull
     private String to;
+    @NonNull
     private String packageName;
+    @NonNull
     private String ref;
 
     private boolean successs;
 
     private Map<String, BuildDTO> results = new HashMap<>();
-
-    public MailReportDTO(String email, String packageName, String ref) {
-        this.to = email;
-        this.packageName = packageName;
-        this.ref = ref;
-    }
 
     public void addBuilds(String erlang, List<BuildDTO> builds) {
         for (BuildDTO build : builds)
@@ -35,26 +35,6 @@ public class MailReportDTO {
                 successs = false;
                 break;
             }
-    }
-
-    public String getPackageName() {
-        return packageName;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public boolean isSuccesss() {
-        return successs;
-    }
-
-    public Map<String, BuildDTO> getResults() {
-        return results;
-    }
-
-    public String getTo() {
-        return to;
     }
 
     public String getSubject() {

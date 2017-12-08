@@ -3,7 +3,8 @@ package com.coon.coon_auto_builder.data.dto;
 import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.Repository;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public interface Validatable {
     void onConflict(Repository found, RepositoryDAOService service) throws Exception;

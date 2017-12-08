@@ -4,6 +4,8 @@ import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.entity.Repository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,8 @@ import java.util.Collections;
 /**
  * Request from github
  */
+@Slf4j
 public class RepositoryGithubDTO extends RepositoryDTO {
-    private final static Logger LOGGER = LoggerFactory.getLogger(RepositoryGithubDTO.class);
     private String signature;
     private String body;
 
@@ -53,7 +55,7 @@ public class RepositoryGithubDTO extends RepositoryDTO {
     @Override
     public void onConflict(Repository found, RepositoryDAOService service) throws Exception {
         if (found != null) { // if there is a repo with same namespace but different url
-            LOGGER.warn("Found collision " + this + " with previously saved " + found);
+            log.warn("Found collision " + this + " with previously saved " + found);
             service.delete(found.getUrl());
             //TODO should we notify malformed repo owner?
         }
@@ -77,7 +79,7 @@ public class RepositoryGithubDTO extends RepositoryDTO {
         Mac mac = initMac(secret);
         final char[] hash = Hex.encodeHex(mac.doFinal(body.getBytes()));
         final String expected = "sha1=" + String.valueOf(hash);
-        LOGGER.debug("Comparing {} and {}", expected, signature);
+        log.debug("Comparing {} and {}", expected, signature);
         if (!expected.equals(signature))
             throw new Exception("Wrong signature for " + this.fullName);
     }

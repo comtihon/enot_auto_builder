@@ -1,17 +1,23 @@
 package com.coon.coon_auto_builder.data.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "package_versions")
-@Configurable(autowire = Autowire.BY_TYPE)
+@Configurable(autowire = Autowire.BY_TYPE)  //TODO do I need this?
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(of = {"versionId"})
 public class PackageVersion {
     @Id
     @GeneratedValue(generator = "uuid")
@@ -33,71 +39,17 @@ public class PackageVersion {
     private List<Build> buildsRes = new ArrayList<>();
 
     @Transient
+    @Nullable
     private String email; //email of last commit for this ref.
-
-    public PackageVersion() {
-    }
 
     public PackageVersion(String ref, String erlVersion) {
         this.ref = ref;
         this.erlVersion = erlVersion;
     }
 
-    public String getVersionId() {
-        return versionId;
-    }
-
-    public void setVersionId(String versionId) {
-        this.versionId = versionId;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public String getErlVersion() {
-        return erlVersion;
-    }
-
-    public Repository getRepository() {
-        return repository;
-    }
-
-    public void setRepository(Repository repository) {
-        this.repository = repository;
-    }
-
-    public List<Build> getBuildsRes() {
-        return buildsRes;
-    }
-
-    @Nullable
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public void addBuild(Build build) {
         build.setPackageVersion(this);
         buildsRes.add(build);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PackageVersion version = (PackageVersion) o;
-
-        return versionId != null ? versionId.equals(version.versionId) : version.versionId == null;
-    }
-
-    @Override
-    public int hashCode() {
-        return versionId != null ? versionId.hashCode() : 0;
     }
 
     @Override

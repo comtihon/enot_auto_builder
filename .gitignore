@@ -5,6 +5,7 @@ out
 logs
 builder-data
 postgres-data
+src/generated/
 
 ### STS ###
 .apt_generated

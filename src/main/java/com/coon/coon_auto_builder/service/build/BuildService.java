@@ -13,6 +13,7 @@ import com.coon.coon_auto_builder.service.MailSenderService;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.tool.FileHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 @Service
+@Slf4j
 public class BuildService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildService.class);
-
     @Autowired
     private ApplicationContext appContext;
 
@@ -100,7 +100,7 @@ public class BuildService {
         Map<String, Object> projectConf = new HashMap<>();
         List<String> erlangs = formErlangForVersions(projectConf, versions, ref, repoPath);
         if (erlangs.isEmpty()) {
-            LOGGER.warn("Nothing to build for {}, versions {}", repo, versions);
+            log.warn("Nothing to build for {}, versions {}", repo, versions);
             PackageVersion errored =
                     formError(ref, "unknown", repo.getUrl(), "No Erlang version found for this repo.");
             errored.setEmail(cloned.getEmail());
@@ -168,7 +168,7 @@ public class BuildService {
             try {
                 FileHelper.deleteDir(path);
             } catch (IOException e) {
-                LOGGER.warn("Can't clean {} for {}", path, repo);
+                log.warn("Can't clean {} for {}", path, repo);
             }
     }
 }
