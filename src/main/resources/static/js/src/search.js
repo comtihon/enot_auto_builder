@@ -19,7 +19,7 @@ function PackageViewModel() {
     self.searchDone = ko.observable(false);
     console.log(self.searchDone);
 
-    self.packages = ko.observableArray([]);
+    self.packages = ko.observableArray();
     self.err_msg = function(msg) {
         alert(msg);
     }
@@ -31,22 +31,18 @@ function PackageViewModel() {
     
     self.simpleSearch = function() {
         self.toggleTableVisible();
-        jQuery.get({
+        $.get({
           url: "/search",
           data: {
             name: self.searchFor().trim()
           },
           dataType: 'json',
-          success: function(data) {
-              if (!data[0].result) {
-                ko.mapping.fromJS(data[0].response, self.packages);
+          success: function(reply) {
+              if (reply.result) {
+                ko.mapping.fromJS(reply.response, {}, self.packages);
               } else {
-                self.err_msg(data[0].response);
+                self.err_msg(reply.response);
               }
-          },
-          error: function(xhr) {
-            self.err_msg(xhr);
-            //Do Something better to handle error
           }
         });
     }
