@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.data.entity;
 
+import com.coon.coon_auto_builder.controller.dto.PackageDTO;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;

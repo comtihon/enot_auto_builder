@@ -13,8 +13,6 @@ import com.coon.coon_auto_builder.data.entity.Repository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -42,14 +40,21 @@ public class SearchService extends AbstractService {
         List<PackageDTO> packages = new ArrayList<>(builds.size());
         for (Build build : builds) {
             Repository repo = build.getPackageVersion().getRepository();
-            PackageDTO packageDTO = new PackageDTO(build.getBuildId(), repo.getName(), repo.getNamespace());
-            packageDTO.setBuildDate(build.getCreatedDate());
-            packageDTO.setSuccess(build.isResult());
-            if (build.isResult()) {
-                packageDTO.setPath(AbstractController.DOWNLOAD_ID.replace("{id}",build.getBuildId()));
-            } else {
-                packageDTO.setPath(AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId());
-            }
+            String path;
+            if (build.isResult())
+                path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
+            else
+                path = AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId();
+            PackageDTO packageDTO =
+                    new PackageDTO(
+                            build.getBuildId(),
+                            repo.getNamespace(),
+                            repo.getName(),
+                            build.isResult(),
+                            path,
+                            build.getPackageVersion().getErlVersion(),
+                            build.getPackageVersion().getRef(),
+                            build.getCreatedDate());
             packages.add(packageDTO);
         }
         return CompletableFuture.completedFuture(ok(packages));

@@ -8,22 +8,17 @@ import lombok.Setter;
 
 import java.util.Date;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class PackageDTO {
     @JsonProperty("build_id")
-    private String buildId;
-    private String namespace;
-    private String name;
-    private boolean success;
-    private String path;
+    private final String buildId;
+    private final String namespace;
+    private final String name;
+    private final boolean success;
+    private final String path;
+    @JsonProperty("erl_version")
+    private final String erlangVersion;
+    private final String version;
     @JsonProperty("build_date")
-    private Date buildDate;
-
-    public PackageDTO(String buildId, String name, String namespace) {
-        this.namespace = namespace;
-        this.name = name;
-        this.buildId = buildId;
-    }
+    private final Date buildDate;
 }
