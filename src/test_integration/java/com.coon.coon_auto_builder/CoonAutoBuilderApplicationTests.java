@@ -164,13 +164,12 @@ public class CoonAutoBuilderApplicationTests {
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
         Assert.assertTrue(responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
-        startSearch.await(10, TimeUnit.SECONDS);
+        startSearch.await(20, TimeUnit.SECONDS);
         ResponseDTO searchResponse =
                 this.restTemplate.getForObject(
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
         Assert.assertTrue(responseDTO.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
-        log.warn("-----------> {}", packages);
         Assert.assertEquals(3, packages.size());
     }
 
