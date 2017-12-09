@@ -11,6 +11,7 @@ import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.loader.LoaderFactory;
 import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Kerl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -43,6 +44,7 @@ import static org.mockito.Matchers.any;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Slf4j
 public class CoonAutoBuilderApplicationTests {
 
     private static final String NORMAL_CONF = "{\"name\":\"test\",\"fullname\":\"comtihon/test\",\"app_vsn\":\"1.0.0\"}";
@@ -168,6 +170,7 @@ public class CoonAutoBuilderApplicationTests {
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
         Assert.assertTrue(responseDTO.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
+        log.warn("-----------> {}", packages);
         Assert.assertEquals(3, packages.size());
     }
 

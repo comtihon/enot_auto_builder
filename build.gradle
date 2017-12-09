@@ -83,6 +83,12 @@ idea {
     }
 }
 
+test_integration {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+}
+
 compileJava.dependsOn querymodels
 check.dependsOn test_integration
 
