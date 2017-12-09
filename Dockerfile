@@ -9,7 +9,7 @@ COPY build.gradle .
 COPY settings.gradle .
 COPY gradlew .
 COPY gradle gradle
-RUN ./gradlew build -i
+RUN ./gradlew build
 RUN cp build/libs/coon_auto_builder-*.jar ${HOME}/app.jar
 
 ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar ${HOME}/app.jar
