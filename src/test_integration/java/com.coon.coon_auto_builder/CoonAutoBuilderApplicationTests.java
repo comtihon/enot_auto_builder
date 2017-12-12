@@ -4,6 +4,9 @@ import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
+import com.coon.coon_auto_builder.data.entity.Build;
+import com.coon.coon_auto_builder.data.entity.PackageVersion;
+import com.coon.coon_auto_builder.data.entity.Repository;
 import com.coon.coon_auto_builder.service.GitService;
 import com.coon.coon_auto_builder.service.MailSenderService;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
@@ -86,6 +89,8 @@ public class CoonAutoBuilderApplicationTests {
 
     private CountDownLatch startSearch;
 
+    private List notified;
+
     @Before
     public void setUp() throws Exception {
         //mock repo clone
@@ -102,6 +107,8 @@ public class CoonAutoBuilderApplicationTests {
         Mockito.when(loader.loadArtifact(any())).thenReturn("path/to/artifact/test.cp");
         //mock email sending
         Mockito.doAnswer((Answer<Void>) invocation -> {
+            Object[] args = invocation.getArguments();
+            notified = (List) args[0];
             startSearch.countDown();
             return null;
         }).when(mailSender).sendReport(any());
@@ -150,6 +157,9 @@ public class CoonAutoBuilderApplicationTests {
         Assert.assertEquals("comtihon", packageDTO.get("namespace"));
         Assert.assertTrue((Boolean) packageDTO.get("success"));
         Assert.assertEquals("/download/" + packageDTO.get("build_id"), packageDTO.get("path"));
+        Assert.assertNotNull(notified); //notification was sent with proper version
+        Assert.assertEquals(1, notified.size());
+        Assert.assertEquals(((Build)notified.get(0)).getBuildId(), packageDTO.get("build_id"));
     }
 
     @Test

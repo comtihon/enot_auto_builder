@@ -2,14 +2,13 @@ package com.coon.coon_auto_builder.service;
 
 import com.coon.coon_auto_builder.config.MailConfiguration;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
+import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
-import com.coon.coon_auto_builder.data.entity.Repository;
 import com.coon.coon_auto_builder.service.dto.MailReportDTO;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.mail.MailHeaders;
 import org.springframework.messaging.Message;
@@ -37,32 +36,44 @@ public class MailSenderService {
     private TemplateEngine emailTemplateEngine;
 
     @Autowired
+    @Setter //for test
     private ModelMapper modelMapper;
 
     /**
      * Send report with all builds information.
      *
-     * @param repository with versions and builds information
+     * @param builds builds information
      */
-    public void sendReport(Repository repository) {
-        mails(repository).values().stream().filter(report -> report.getTo() != null).forEach(this::send);
+    public void sendReport(List<Build> builds) {
+        builds.stream()
+                .filter(build -> build.getPackageVersion().getEmail() != null)
+                .collect(HashMap::new, this::addBuild, this::mergeBuilds)
+                .values()
+                .forEach(this::send);
     }
 
-    private Map<String, MailReportDTO> mails(Repository repository) {
-        Map<String, MailReportDTO> mails = new HashMap<>();
-        Type listType = new TypeToken<List<BuildDTO>>() {
-        }.getType();
-        for (PackageVersion version : repository.getVersions()) {
-            if (mails.containsKey(version.getEmail())) {
-                List<BuildDTO> dtos = modelMapper.map(version.getBuildsRes(), listType);
-                mails.get(version.getEmail()).addBuilds(version.getErlVersion(), dtos);
-            } else {
-                MailReportDTO report = new MailReportDTO(version.getEmail(), repository.getName(), version.getRef());
-                report.addBuilds(version.getErlVersion(), modelMapper.map(version.getBuildsRes(), listType));
-                mails.put(version.getEmail(), report);
-            }
+    void addBuild(HashMap<String, MailReportDTO> acc, Build build) {
+        BuildDTO dto = modelMapper.map(build, BuildDTO.class);
+        PackageVersion pv = build.getPackageVersion();
+        String email = pv.getEmail();
+        if (acc.containsKey(email))
+            acc.get(email).addBuild(pv.getErlVersion(), dto);
+        else {
+            MailReportDTO report = new MailReportDTO(email, pv.getRepository().getName(), pv.getRef());
+            report.addBuild(pv.getErlVersion(), dto);
+            acc.put(email, report);
         }
-        return mails;
+    }
+
+    void mergeBuilds(HashMap<String, MailReportDTO> acc1, HashMap<String, MailReportDTO> acc2) {
+        acc2.forEach(
+                (e, m) ->
+                        acc1.merge(e, m,
+                                (v1, v2) ->
+                                {
+                                    v1.getResults().putAll(v2.getResults());
+                                    return v1;
+                                }));
     }
 
     private void send(MailReportDTO report) {

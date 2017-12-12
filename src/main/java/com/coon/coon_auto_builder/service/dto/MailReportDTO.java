@@ -1,12 +1,10 @@
 package com.coon.coon_auto_builder.service.dto;
 
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
-import com.coon.coon_auto_builder.service.Status;
 import lombok.Data;
 import lombok.NonNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -23,9 +21,8 @@ public class MailReportDTO {
 
     private Map<String, BuildDTO> results = new HashMap<>();
 
-    public void addBuilds(String erlang, List<BuildDTO> builds) {
-        for (BuildDTO build : builds)
-            this.results.put(erlang, build);
+    public void addBuild(String erlang, BuildDTO build) {
+        results.put(erlang, build);
     }
 
     public void calculateSuccess() {
