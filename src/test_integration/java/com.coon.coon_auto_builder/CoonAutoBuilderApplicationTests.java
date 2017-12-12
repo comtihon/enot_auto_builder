@@ -145,7 +145,7 @@ public class CoonAutoBuilderApplicationTests {
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
         Assert.assertTrue(responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
-        startSearch.await(10, TimeUnit.SECONDS);
+        startSearch.await(30, TimeUnit.SECONDS);
         ResponseDTO searchResponse =
                 this.restTemplate.getForObject(
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
@@ -174,7 +174,7 @@ public class CoonAutoBuilderApplicationTests {
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
         Assert.assertTrue(responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
-        startSearch.await(20, TimeUnit.SECONDS);
+        startSearch.await(30, TimeUnit.SECONDS);
         ResponseDTO searchResponse =
                 this.restTemplate.getForObject(
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
