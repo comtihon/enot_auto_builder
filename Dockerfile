@@ -8,7 +8,7 @@ COPY src src
 COPY build.gradle .
 COPY settings.gradle .
 COPY gradlew .
-COPY gradle gradle
+COPY gradle gradle -x test_integration
 RUN ./gradlew build
 RUN cp build/libs/coon_auto_builder-*.jar ${HOME}/app.jar
 
