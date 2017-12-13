@@ -1,11 +1,11 @@
 package com.coon.coon_auto_builder.data.entity;
 
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "builds")
@@ -13,9 +13,7 @@ import java.util.Date;
 public class Build {
     @Id
     @Column(name = "build_id")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    private String buildId;
+    private String buildId = UUID.randomUUID().toString();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_version_id")
