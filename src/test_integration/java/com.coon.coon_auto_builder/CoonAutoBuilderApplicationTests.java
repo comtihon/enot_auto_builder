@@ -5,10 +5,9 @@ import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
-import com.coon.coon_auto_builder.data.entity.PackageVersion;
-import com.coon.coon_auto_builder.data.entity.Repository;
 import com.coon.coon_auto_builder.service.GitService;
 import com.coon.coon_auto_builder.service.MailSenderService;
+import com.coon.coon_auto_builder.service.build.Builder;
 import com.coon.coon_auto_builder.service.dto.CloneResult;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.loader.LoaderFactory;
@@ -103,8 +102,11 @@ public class CoonAutoBuilderApplicationTests {
         //mock repo build
         Mockito.doNothing().when(coon).build(any(), any());
         //mock package loading
-        Mockito.when(loaderFactory.createInstance()).thenReturn(repositoryBO -> "path/to/artifact/test.cp");
-        Mockito.when(loader.loadArtifact(any())).thenReturn("path/to/artifact/test.cp");
+        Mockito.doAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            Builder repo = (Builder)args[0];
+            return repo.getName() + "/" + repo.getErlang() + "/" + repo.getName() + ".cp";
+        }).when(loader).loadArtifact(any());
         //mock email sending
         Mockito.doAnswer((Answer<Void>) invocation -> {
             Object[] args = invocation.getArguments();

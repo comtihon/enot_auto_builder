@@ -56,6 +56,7 @@ public class Build {
                 "id=" + buildId +
                 ", result=" + result +
                 ", message='" + message + '\'' +
+                ", artifactPath='" + artifactPath + '\'' +
                 '}';
     }
 }

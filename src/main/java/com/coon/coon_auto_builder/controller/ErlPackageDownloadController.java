@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Controller
@@ -32,15 +30,8 @@ public class ErlPackageDownloadController extends AbstractController {
     @RequestMapping(value = "/get", method = RequestMethod.POST)
     public void downloadBySearch(HttpServletResponse response,
                                  @Valid @RequestBody RepositoryDTO request) throws Exception {
-        CompletableFuture<ResponseDTO<List<BuildDTO>>> build = searchService.fetchBuilds(request);
-        ResponseDTO<List<BuildDTO>> responseDTO = build.get();
-        if (responseDTO.isResult()) {
-            List<BuildDTO> found = responseDTO.getResponse();
-            found.sort(Comparator.comparing(BuildDTO::getCreatedDate));
-            renderPackage(new ResponseDTO<>(found.get(0)), response);
-        } else {
-            renderPackage(build.get(), response);
-        }
+        CompletableFuture<ResponseDTO> build = searchService.fetchBuild(request);
+        renderPackage(build.get(), response);
     }
 
     @RequestMapping(value = DOWNLOAD_ID, method = RequestMethod.GET)

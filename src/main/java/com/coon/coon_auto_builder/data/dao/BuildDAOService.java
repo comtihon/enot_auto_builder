@@ -5,7 +5,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,15 +17,6 @@ public class BuildDAOService implements DaoService<Build> {
     @Autowired
     private BuildDAO dao;
 
-    @Transactional
-    public void save(Build pack) {
-
-        Build saved = dao.save(pack);
-        if (saved != null) {
-            pack.setBuildId(saved.getBuildId());
-        }
-    }
-
     public Optional<Build> findBy(@NonNull String name, String namespace, String ref, String erl) {
         return Optional.ofNullable(dao.findOneBy(predicateFindBy(name, namespace, ref, erl, true)));
     }
@@ -36,7 +26,7 @@ public class BuildDAOService implements DaoService<Build> {
     }
 
     /**
-     * Find all (including non-successful) builds
+     * Find all builds
      *
      * @param name      package name
      * @param namespace package namespace
@@ -46,6 +36,10 @@ public class BuildDAOService implements DaoService<Build> {
      */
     public List<Build> findBy(String name, String namespace, String ref, String erl, boolean onlySuccessful) {
         return dao.findBy(predicateFindBy(name, namespace, ref, erl, onlySuccessful));
+    }
+
+    public List<Build> findByGroupByPackage(String name, String namespace, String ref, String erl, boolean onlySuccessful) {
+        return dao.findBy(predicateFindBy(name, namespace, ref, erl, onlySuccessful), build.artifactPath);
     }
 
     @Override

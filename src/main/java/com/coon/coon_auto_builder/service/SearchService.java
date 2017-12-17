@@ -36,7 +36,7 @@ public class SearchService extends AbstractService {
     public CompletableFuture<ResponseDTO<List<PackageDTO>>> searchPackages(
             String name, String namespace, String ref, String erlVsn) {
         log.debug("Search {}", name, namespace, ref, erlVsn);
-        List<Build> builds = buildDao.findBy(name, namespace, ref, erlVsn, false);
+        List<Build> builds = buildDao.findByGroupByPackage(name, namespace, ref, erlVsn, false);
         List<PackageDTO> packages = new ArrayList<>(builds.size());
         for (Build build : builds) {
             Repository repo = build.getPackageVersion().getRepository();
@@ -58,6 +58,22 @@ public class SearchService extends AbstractService {
             packages.add(packageDTO);
         }
         return CompletableFuture.completedFuture(ok(packages));
+    }
+
+    @Async("searchExecutor")
+    public CompletableFuture<ResponseDTO> fetchBuild(RepositoryDTO request) {
+        log.debug("Fetch {}", request);
+        String[] splitted = request.getFullName().split("/");
+        PackageVersionDTO versionDTO = request.getVersions().get(0);
+        Optional<Build> found =
+                buildDao.findBy(
+                        splitted[1],
+                        splitted[0],
+                        versionDTO.getRef(),
+                        versionDTO.getErlVersion());
+        if(found.isPresent())
+            return CompletableFuture.completedFuture(ok(modelMapper.map(found.get(), BuildDTO.class)));
+        return CompletableFuture.completedFuture(fail("No such build"));
     }
 
     @Async("searchExecutor")
