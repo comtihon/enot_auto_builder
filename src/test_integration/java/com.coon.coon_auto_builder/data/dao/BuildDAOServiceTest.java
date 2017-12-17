@@ -22,7 +22,7 @@ public class BuildDAOServiceTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void findBy() {
-        List<Build> builds = buildDAOService.findBy("name1", "namespace1");
+        List<Build> builds = buildDAOService.findBy("name1", "namespace1", null, null, true);
         Assert.assertEquals(5, builds.size());
         builds = buildDAOService.findBy("name1", "namespace1", "1.0.0", null, true);
         Assert.assertEquals(4, builds.size());

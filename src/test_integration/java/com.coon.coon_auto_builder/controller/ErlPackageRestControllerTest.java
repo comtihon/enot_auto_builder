@@ -1,6 +1,7 @@
 package com.coon.coon_auto_builder.controller;
 
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
+import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,14 +56,70 @@ public class ErlPackageRestControllerTest {
         Assert.assertEquals("build_id3", packages.get(1).get("build_id"));
         Assert.assertEquals("build_id2", packages.get(2).get("build_id"));
         Assert.assertEquals("build_id1", packages.get(3).get("build_id"));
-
-
     }
 
     @Test
-    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:populate_builds.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void testBuildsFetch() {
-        //TODO
+        RepositoryDTO repo = new RepositoryDTO();
+        repo.setFullName("namespace1/name1");
+        ResponseDTO buildsNoVersions =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/builds", repo, ResponseDTO.class);
+        Assert.assertTrue(buildsNoVersions.isResult());
+        List<LinkedHashMap> packages = (List<LinkedHashMap>) buildsNoVersions.getResponse();
+        Assert.assertEquals(4, packages.size());
+    }
+
+    /**
+     * In case of multiple builds with same version only last successfull should be fetched
+     */
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_builds.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
+    public void testBuildMultipleFetch() {
+        RepositoryDTO repo = new RepositoryDTO();
+        repo.setFullName("namespace1/name1");
+        ResponseDTO buildsNoVersions =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/builds", repo, ResponseDTO.class);
+        Assert.assertTrue(buildsNoVersions.isResult());
+        List<LinkedHashMap> packages = (List<LinkedHashMap>) buildsNoVersions.getResponse();
+        Assert.assertEquals(2, packages.size());
+        Assert.assertEquals("build_id4", packages.get(0).get("build_id"));
+        Assert.assertEquals("build_id1", packages.get(1).get("build_id"));
+    }
+
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
+    public void testFetchVersions() {
+        RepositoryDTO repo = new RepositoryDTO();
+        repo.setFullName("namespace1/name1");
+        ResponseDTO buildsNoVersions =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/versions", repo, ResponseDTO.class);
+        Assert.assertTrue(buildsNoVersions.isResult());
+        List<LinkedHashMap> packages = (List<LinkedHashMap>) buildsNoVersions.getResponse();
+        Assert.assertEquals(3, packages.size());
+        Assert.assertEquals("version_id4", packages.get(0).get("version_id"));
+        Assert.assertEquals("version_id3", packages.get(1).get("version_id"));
+        Assert.assertEquals("version_id2", packages.get(2).get("version_id"));
+    }
+
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_builds.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
+    public void testFetchMultipleVersions() {
+        RepositoryDTO repo = new RepositoryDTO();
+        repo.setFullName("namespace1/name1");
+        ResponseDTO buildsNoVersions =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/versions", repo, ResponseDTO.class);
+        Assert.assertTrue(buildsNoVersions.isResult());
+        List<LinkedHashMap> packages = (List<LinkedHashMap>) buildsNoVersions.getResponse();
+        Assert.assertEquals(1, packages.size());
+        Assert.assertEquals("version_id1", packages.get(0).get("version_id"));
     }
 }

@@ -21,10 +21,6 @@ public class BuildDAOService implements DaoService<Build> {
         return Optional.ofNullable(dao.findOneBy(predicateFindBy(name, namespace, ref, erl, true)));
     }
 
-    public List<Build> findBy(String name, String namespace) {
-        return findBy(name, namespace, null, null, true);
-    }
-
     /**
      * Find all builds
      *

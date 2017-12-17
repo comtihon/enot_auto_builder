@@ -79,7 +79,7 @@ public class SearchService extends AbstractService {
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<BuildDTO>>> fetchBuilds(RepositoryDTO request) {
         log.debug("Fetch {}", request);
-        List<Build> builds = findBuilds(request);
+        List<Build> builds = findBuilds(request, false); //TODO change DB request
         Type listType = new TypeToken<List<BuildDTO>>() {
         }.getType();
         List<BuildDTO> found = modelMapper.map(builds, listType);
@@ -89,7 +89,7 @@ public class SearchService extends AbstractService {
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<PackageVersionDTO>>> searchVersions(RepositoryDTO request) {
         log.debug("Search {}", request);
-        List<Build> builds = findBuilds(request);
+        List<Build> builds = findBuilds(request, true);
         Set<PackageVersion> versions = new HashSet<>();
         for (Build b : builds)
             versions.add(b.getPackageVersion());
@@ -110,16 +110,17 @@ public class SearchService extends AbstractService {
         return CompletableFuture.completedFuture(fail("No build for id"));
     }
 
-    private List<Build> findBuilds(RepositoryDTO request) {
+    private List<Build> findBuilds(RepositoryDTO request, boolean onlySuccessfull) {
         String[] splitted = request.getFullName().split("/");
         List<PackageVersionDTO> versions = request.getVersions();
         List<Build> builds = new ArrayList<>();
         if (versions.isEmpty()) {
-            builds.addAll(buildDao.findBy(splitted[1], splitted[0]));
+            builds.addAll(buildDao.findByGroupByPackage(
+                    splitted[1], splitted[0], null, null, onlySuccessfull));
         } else {
             for (PackageVersionDTO pv : versions) {
-                builds.addAll(buildDao.findBy(
-                        splitted[1], splitted[0], pv.getRef(), pv.getErlVersion(), true));
+                builds.addAll(buildDao.findByGroupByPackage(
+                        splitted[1], splitted[0], pv.getRef(), pv.getErlVersion(), onlySuccessfull));
             }
         }
         return builds;

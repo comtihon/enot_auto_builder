@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class PackageVersionDTO {
     @Nullable
+    @JsonProperty("version_id")
     private String versionId;
 
     private String ref;
