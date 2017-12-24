@@ -56,9 +56,9 @@ public class Kerl extends Tool {
     @Override
     public Health health() {
         if (ready)
-            return Health.up().withDetail("Version", version)
-                    .withDetail("ErlVersions", erlInstallations.keySet()).build();
-        return Health.down().withDetail("Error", message).build();
+            return Health.up().withDetail("version", version)
+                    .withDetail("erl_versions", erlInstallations.keySet()).build();
+        return Health.down().withDetail("error", message).build();
     }
 
     private void gatherKerlInstallations() throws IOException, InterruptedException {

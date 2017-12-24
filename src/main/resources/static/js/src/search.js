@@ -12,6 +12,22 @@ function ErlPackage(build_id, namespace, name, success, build_date, path, versio
     self.erl_version = ko.observable(erl_version);
 }
 
+function checkTool(tool) {
+    if (tool.hasOwnProperty('version')) {
+        return tool.version;
+    } else if (tool.status == 'UP') {
+        return 'UP';
+    } else {
+        return tool.error;
+    }
+}
+
+function fillTools(reply, self) {
+    self.coon(checkTool(reply.coon));
+    self.kerl(checkTool(reply.kerl));
+    self.db(checkTool(reply.db));
+}
+
 function PackageViewModel() {
     var self = this;
     self.searchFor = ko.observable("");
@@ -19,7 +35,7 @@ function PackageViewModel() {
     self.searchDone = ko.observable(false);
     console.log(self.searchDone);
 
-    self.packages = ko.observableArray([]);
+    self.packages = ko.observableArray();
     self.err_msg = function(msg) {
         alert(msg);
     }
@@ -28,25 +44,41 @@ function PackageViewModel() {
             self.searchDone(!self.searchDone());
         }
     }
+    self.version = ko.observable('not available');
+    self.coon = ko.observable('not available');
+    self.kerl = ko.observable('not available');
+    self.db = ko.observable('not available');
+        $.get({
+                url: '/info', //TODO ability to get on 8081 port
+                dataType: 'json',
+                success:
+                    function(reply) {
+                                        self.version(reply.build.version);
+                                    }
+              });
+        $.get({
+                url: '/health',
+                dataType: 'json',
+                success: function(reply) {fillTools(reply, self);}
+              }).fail(function(jqXHR) {
+                                        reply = JSON.parse(jqXHR.responseText);
+                                        fillTools(reply, self);
+                                     });
     
     self.simpleSearch = function() {
         self.toggleTableVisible();
-        jQuery.get({
+        $.get({
           url: "/search",
           data: {
             name: self.searchFor().trim()
           },
           dataType: 'json',
-          success: function(data) {
-              if (!data[0].result) {
-                ko.mapping.fromJS(data[0].response, self.packages);
+          success: function(reply) {
+              if (reply.result) {
+                ko.mapping.fromJS(reply.response, {}, self.packages);
               } else {
-                self.err_msg(data[0].response);
+                self.err_msg(reply.response);
               }
-          },
-          error: function(xhr) {
-            self.err_msg(xhr);
-            //Do Something better to handle error
           }
         });
     }

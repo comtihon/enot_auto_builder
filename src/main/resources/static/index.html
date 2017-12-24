@@ -42,6 +42,12 @@
         To find package use Search [top right corner]. To add your package use Add [top left corner].
         </p>
     </div>
+    <div data-bind="visible: !$root.searchDone()">
+        <p> Server version: <strong data-bind="text: $root.version">not installed</strong></p>
+        <p> Database: <strong data-bind="text: $root.db">not available</strong></p>
+        <p> Coon version: <strong data-bind="text: $root.coon">not installed</strong></p>
+        <p> Kerl version: <strong data-bind="text: $root.kerl">not installed</strong></p>
+    </div>
     <!--<div class="starter-template">-->
         <!--<input type='text' id='package_search'>-->
     <!--</div>-->
