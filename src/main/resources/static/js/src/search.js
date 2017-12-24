@@ -44,6 +44,12 @@ function PackageViewModel() {
             self.searchDone(!self.searchDone());
         }
     }
+    self.cleanUp = function() {
+        self.searchFor("");
+        self.searchDone(false);
+        return true;
+    }
+//FIXME move it out into statistic MV
     self.version = ko.observable('not available');
     self.coon = ko.observable('not available');
     self.kerl = ko.observable('not available');
@@ -66,11 +72,15 @@ function PackageViewModel() {
                                      });
     
     self.simpleSearch = function() {
+    var userInput = self.searchFor().trim();
+
+        if (userInput.length>0) {
+
         self.toggleTableVisible();
         $.get({
           url: "/search",
           data: {
-            name: self.searchFor().trim()
+            name: userInput
           },
           dataType: 'json',
           success: function(reply) {
@@ -81,6 +91,7 @@ function PackageViewModel() {
               }
           }
         });
+        }
     }
     self.complexSearch = function(namespace, name, version, erl_version) {
 //            FIXME code duplication, extract base method
