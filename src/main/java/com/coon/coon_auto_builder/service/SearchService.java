@@ -64,13 +64,19 @@ public class SearchService extends AbstractService {
     public CompletableFuture<ResponseDTO> fetchBuild(RepositoryDTO request) {
         log.debug("Fetch {}", request);
         String[] splitted = request.getFullName().split("/");
-        PackageVersionDTO versionDTO = request.getVersions().get(0);
+        String ref = null;
+        String erl = null;
+        if(request.getVersions() != null && !request.getVersions().isEmpty()) {
+            PackageVersionDTO versionDTO = request.getVersions().get(0);
+            ref = versionDTO.getRef();
+            erl = versionDTO.getErlVersion();
+        }
         Optional<Build> found =
                 buildDao.findBy(
                         splitted[1],
                         splitted[0],
-                        versionDTO.getRef(),
-                        versionDTO.getErlVersion());
+                        ref,
+                        erl);
         if(found.isPresent())
             return CompletableFuture.completedFuture(ok(modelMapper.map(found.get(), BuildDTO.class)));
         return CompletableFuture.completedFuture(fail("No such build"));
