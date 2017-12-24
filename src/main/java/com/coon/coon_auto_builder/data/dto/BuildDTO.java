@@ -5,11 +5,13 @@ import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 
+@Data
 public class BuildDTO implements Validatable {
     @NotEmpty
     @JsonProperty("build_id")
@@ -67,37 +69,5 @@ public class BuildDTO implements Validatable {
     @Override
     public @Nullable String getCloneUrl() {
         return null;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public boolean isResult() {
-        return result;
-    }
-
-    public void setResult(boolean result) {
-        this.result = result;
-    }
-
-    public void setBuildId(String buildId) {
-        this.buildId = buildId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setArtifactPath(String artifactPath) {
-        this.artifactPath = artifactPath;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
     }
 }

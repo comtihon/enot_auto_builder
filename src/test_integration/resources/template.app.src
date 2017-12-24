@@ -1,0 +1,9 @@
+{application, '#{name}', [
+  {description, ""},
+  {vsn, "#{vsn}"},
+  {registered, []},
+  {applications, []},
+  {modules, []},
+  {mod, {'#{name}_app', []}},
+  {env, []}
+]}.

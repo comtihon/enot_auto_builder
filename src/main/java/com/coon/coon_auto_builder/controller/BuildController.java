@@ -7,7 +7,6 @@ import com.coon.coon_auto_builder.data.dto.RepositoryGithubDTO;
 import com.coon.coon_auto_builder.data.dto.Validatable;
 import com.coon.coon_auto_builder.service.BuildRequestValidator;
 import com.coon.coon_auto_builder.service.build.BuildService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +55,6 @@ public class BuildController extends AbstractController {
         return processBody(new RepositoryGithubDTO(signature, bodyStr));
     }
 
-    @NotNull
     private CompletableFuture<ResponseEntity<?>> processBody(Validatable body) throws Exception {
         CompletableFuture<ResponseDTO> validation = validator.validate(body);
         ResponseDTO validated = validation.get();

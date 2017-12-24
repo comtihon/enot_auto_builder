@@ -3,12 +3,13 @@ package com.coon.coon_auto_builder.service.build;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.service.Metrics;
+import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Kerl;
-import com.coon.coon_auto_builder.tool.CmdHelper;
 import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.GaugeService;
 
@@ -20,20 +21,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class Builder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
-
     private final Path repoPath;
+    @Getter
+    @Setter
     private Path buildPath;
+    @Getter
     private String erlang;
+    @Getter
     private String ref;
+    @Getter
     private String name;
+    @Getter
     private String namespace;
     // Name of the coon package. Should be based on application name from .app file
+    @Getter
     private String packageName;
 
     @Autowired
     private Kerl kerl;
+
+    @Autowired
+    private Coon coon;
 
     @Autowired
     private GaugeService gaugeService;
@@ -56,17 +66,8 @@ public class Builder {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
             throw new Exception("Can't copy from " + repoPath + " to " + buildPath + ": " + e.getMessage());
         }
-        ProcessBuilder pb = new ProcessBuilder("coon", "package");
-        pb.directory(buildPath.toFile());
-        Map<String, String> env = pb.environment();
-        String path = env.get("PATH");
-        env.put("PATH", Paths.get(erlangExecutable, "bin").toString() + ":" + path);
         try {
-            Process process = pb.start();
-            if (process.waitFor() != 0) {
-                this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
-                throw new Exception("build failed: " + CmdHelper.getProcessError(process));
-            }
+            coon.build(buildPath, erlangExecutable);
             this.gaugeService.submit(Metrics.BUILD_OK.toString(), 1.0);
         } catch (IOException | InterruptedException e) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
@@ -81,48 +82,12 @@ public class Builder {
         return build;
     }
 
-    public Path getBuildPath() {
-        return buildPath;
-    }
-
-    /**
-     * @return path to Erlang application configuration file. Usually ebin/Project.app
-     */
-    public Path getAppConfPath() throws IOException {
-        List<Path> appConfigs = Files.walk(Paths.get(buildPath.toString(), "ebin"))
-                .filter(file -> file.endsWith(".app"))
-                .collect(Collectors.toList());
-        if (appConfigs.size() == 0) {
-            LOGGER.warn("No .app file found for {}!", name);
-            return null;
-        }
-        if (appConfigs.size() > 1) {
-            LOGGER.warn("More than one .app file for {}!", name);
-        }
-        return appConfigs.get(0);
-    }
-
-    public String getErlang() {
-        return erlang;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public String getPackageName() {
-        return packageName;
-    }
-
-    public void setPackageName(Map projectConf) throws IOException {
+    void detectPackageName(Map<String, Object> projectConf) {
+        if (projectConf.isEmpty()) // can be empty if not used in formErlangForVersions
+            try {
+                projectConf.putAll(FileHelper.readConfig(repoPath));
+            } catch (IOException ignored) {
+            }
         String name = FileHelper.parseName(projectConf);
         if (name == null || name.isEmpty()) {
             // no name specified in project config. try to find .app manually
@@ -147,10 +112,43 @@ public class Builder {
         return this;
     }
 
+    /**
+     * @return path to Erlang application configuration file. Usually ebin/Project.app
+     */
+    private Path getAppConfPath() {
+        List<Path> appConfigs;
+        try {
+            appConfigs = Files.walk(Paths.get(buildPath.toString(), "ebin"))
+                    .filter(file -> file.getFileName().toString().endsWith(".app"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.warn("No ebin dir found in {} for {}!", buildPath, name);
+            return null;
+        }
+        if (appConfigs.size() == 0) {
+            log.warn("No .app file found for {}!", name);
+            return null;
+        }
+        if (appConfigs.size() > 1) {
+            log.warn("More than one .app file for {}!", name);
+        }
+        return appConfigs.get(0);
+    }
+
+    /**
+     * In case of builder need to build only one erlang version - it will be built
+     * in the current (cloned) directory.
+     * In case of several versions - cloned directory will be copied to /ErlVsn/ subdir
+     * before build.
+     *
+     * @param copy need to copy
+     * @throws IOException
+     */
     private void mayBeCopy(boolean copy) throws IOException {
-        if (copy)
+        if (copy) {
+            buildPath = Paths.get(repoPath.toString(), erlang);
             FileHelper.copyToBuildDir(repoPath, buildPath);
-        else
+        } else
             buildPath = repoPath;
     }
 }

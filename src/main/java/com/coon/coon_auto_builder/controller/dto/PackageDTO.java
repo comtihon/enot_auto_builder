@@ -1,73 +1,24 @@
 package com.coon.coon_auto_builder.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
+@Data
 public class PackageDTO {
     @JsonProperty("build_id")
-    private String buildId;
-    private String namespace;
-    private String name;
-    private boolean success;
-    private String path;
+    private final String buildId;
+    private final String namespace;
+    private final String name;
+    private final boolean success;
+    private final String path;
+    @JsonProperty("erl_version")
+    private final String erlangVersion;
+    private final String version;
     @JsonProperty("build_date")
-    private Date buildDate;
-
-    public PackageDTO() {
-    }
-
-    public PackageDTO(String buildId, String name, String namespace) {
-        this.namespace = namespace;
-        this.name = name;
-        this.buildId = buildId;
-    }
-
-    public String getBuildId() {
-        return buildId;
-    }
-
-    public void setBuildId(String buildId) {
-        this.buildId = buildId;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public Date getBuildDate() {
-        return buildDate;
-    }
-
-    public void setBuildDate(Date buildDate) {
-        this.buildDate = buildDate;
-    }
+    private final Date buildDate;
 }

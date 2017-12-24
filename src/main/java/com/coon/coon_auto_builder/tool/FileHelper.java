@@ -38,7 +38,7 @@ public class FileHelper {
     public static List<String> parseErlangVsns(Map config, String defaultErlang) {
         String[] erlangs;
         if (config.containsKey("erlang")) {
-            erlangs = (String[]) config.get("erlang");
+            return (List<String>) config.get("erlang");
         } else
             erlangs = new String[]{defaultErlang};
         return new ArrayList<>(Arrays.asList(erlangs));

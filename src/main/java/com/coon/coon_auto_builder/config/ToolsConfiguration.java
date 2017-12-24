@@ -3,6 +3,7 @@ package com.coon.coon_auto_builder.config;
 import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Kerl;
 import com.coon.coon_auto_builder.service.tool.Tool;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,8 +21,8 @@ import java.util.Map;
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties
+@Slf4j
 public class ToolsConfiguration implements InitializingBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToolsConfiguration.class);
 
     @Value("${kerl_executable}")
     private String kerlExecutable;
@@ -34,9 +35,9 @@ public class ToolsConfiguration implements InitializingBean {
         tools.forEach(tool -> {
             tool.check();
             if (tool.isReady())
-                LOGGER.info("{}", tool);
+                log.info("{}", tool);
             else
-                LOGGER.info(tool.getClass().getSimpleName() + " not ready: " + tool.getMessage());
+                log.info(tool.getClass().getSimpleName() + " not ready: " + tool.getMessage());
         });
     }
 

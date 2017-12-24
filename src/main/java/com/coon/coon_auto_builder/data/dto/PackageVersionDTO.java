@@ -1,12 +1,15 @@
 package com.coon.coon_auto_builder.data.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jetbrains.annotations.Nullable;
+import lombok.Data;
+import javax.annotation.Nullable;
 
 import java.util.List;
 
+@Data
 public class PackageVersionDTO {
     @Nullable
+    @JsonProperty("version_id")
     private String versionId;
 
     private String ref;

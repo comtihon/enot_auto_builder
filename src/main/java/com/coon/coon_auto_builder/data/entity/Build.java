@@ -1,20 +1,19 @@
 package com.coon.coon_auto_builder.data.entity;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
+import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "builds")
+@Data
 public class Build {
     @Id
     @Column(name = "build_id")
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    private String buildId;
+    private String buildId = UUID.randomUUID().toString();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_version_id")
@@ -30,11 +29,19 @@ public class Build {
     private String artifactPath;
 
     @CreatedDate
-    @NotNull
     @Column(name = "created_date", nullable = false, updatable = false)
     private Date createdDate = new Date();
 
     public Build() {
+    }
+
+    public Build(boolean result, String artifactPath) {
+        this(null, result, artifactPath);
+    }
+
+    public Build(String message) {
+        this(null, false, "");
+        this.message = message;
     }
 
     public Build(PackageVersion packageVersion, boolean result, String artifactPath) {
@@ -43,39 +50,13 @@ public class Build {
         this.artifactPath = artifactPath;
     }
 
-    public String getArtifactPath() {
-        return artifactPath;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public String getBuildId() {
-        return buildId;
-    }
-
-    public PackageVersion getPackageVersion() {
-        return packageVersion;
-    }
-
-    public void setPackageVersion(PackageVersion packageVersion) {
-        this.packageVersion = packageVersion;
-    }
-
-    public boolean isResult() {
-        return result;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setBuildId(String buildId) {
-        this.buildId = buildId;
+    @Override
+    public String toString() {
+        return "Build{" +
+                "id=" + buildId +
+                ", result=" + result +
+                ", message='" + message + '\'' +
+                ", artifactPath='" + artifactPath + '\'' +
+                '}';
     }
 }

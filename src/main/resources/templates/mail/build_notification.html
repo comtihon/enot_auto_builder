@@ -23,7 +23,7 @@
     </tr>
     <tr th:each="result : ${report.results}">
         <td th:text="${result.key}"></td>
-        <td th:text="${result.value.message}"></td>
+        <td th:text="${result.value.result}? '' : ${host + '/build_log?build_id=' + result.value.buildId}"></td>
         <td th:text="${result.value.result}"></td>
         <td th:text="${result.value.result}? ${host + '/download/' + result.value.buildId} : 'no artifact'"></td>
         <td th:text="${result.value.createdDate}"></td>

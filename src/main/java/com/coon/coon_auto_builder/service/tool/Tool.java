@@ -1,24 +1,16 @@
 package com.coon.coon_auto_builder.service.tool;
 
+import lombok.Getter;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 public abstract class Tool implements HealthIndicator {
+    @Getter
     protected String message = "";
+    @Getter
     boolean ready = false;
+    @Getter
     String version;
-
-    public String getMessage() {
-        return message;
-    }
-
-    public boolean isReady() {
-        return ready;
-    }
-
-    public String getVersion() {
-        return version;
-    }
 
     public abstract boolean check();
 

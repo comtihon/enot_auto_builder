@@ -20,7 +20,7 @@ public class LoaderFactory extends AbstractFactoryBean<Loader> {
     }
 
     @Override
-    protected Loader createInstance() throws Exception {
+    public Loader createInstance() throws Exception {
         if (path.startsWith("file:")) {
             return new FileLoader(path);
         }

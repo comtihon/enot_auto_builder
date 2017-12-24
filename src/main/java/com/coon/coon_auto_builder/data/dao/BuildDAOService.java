@@ -1,66 +1,46 @@
 package com.coon.coon_auto_builder.data.dao;
 
 import com.coon.coon_auto_builder.data.entity.Build;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import static com.coon.coon_auto_builder.data.entity.QBuild.build;
 
 @Service
 public class BuildDAOService implements DaoService<Build> {
     @Autowired
     private BuildDAO dao;
 
-    @Transactional
-    public void save(Build pack) {
-        Build saved = dao.save(pack);
-        if (saved != null) {
-            pack.setBuildId(saved.getBuildId());
-        }
-    }
-
-    public Optional<Build> findByValues(String name, String namespace, String ref, String erl) {
-        List<Build> builds = dao.findSuccessfullByNameAndNamespaceAndRefAndErl(name, namespace, ref, erl);
-        if (builds.size() == 0) {
-            return Optional.empty();
-        } else if (builds.size() == 1) {
-            return Optional.of(builds.get(0));
-        } else {
-            builds.sort(Comparator.comparing(Build::getCreatedDate));
-            return Optional.of(builds.get(builds.size()));
-        }
-    }
-
-    public List<Build> fetchByValues(String name, String namespace) {
-        return fetchByValues(name, namespace, null, null);
-    }
-
-    public List<Build> fetchByValues(String name, String namespace, String ref, String erl) {
-        if (ref == null) return dao.findSuccessfullByNameAndNamespace(name, namespace);
-        if (erl == null) return dao.findSuccessfullByNameAndNamespaceAndRef(name, namespace, ref);
-        return dao.findSuccessfullByNameAndNamespaceAndRefAndErl(name, namespace, ref, erl);
+    public Optional<Build> findBy(@NonNull String name, String namespace, String ref, String erl) {
+        return Optional.ofNullable(dao.findOneBy(predicateFindBy(name, namespace, ref, erl, true)));
     }
 
     /**
-     * Find all (including non-successful) builds
-     * @param name package name
+     * Find all builds
+     *
+     * @param name      package name
      * @param namespace package namespace
-     * @param ref package ref
-     * @param erl Erlang version
+     * @param ref       package ref
+     * @param erl       Erlang version
      * @return list of builds
      */
-    public List<Build> findAllByValues(String name, String namespace, String ref, String erl) {
-        if(namespace == null || namespace.isEmpty()) {
-            return dao.findByName(name);
-        }
-        return new ArrayList<>(); //TODO implement complex search!
+    public List<Build> findBy(String name, String namespace, String ref, String erl, boolean onlySuccessful) {
+        return dao.findBy(predicateFindBy(name, namespace, ref, erl, onlySuccessful));
+    }
+
+    public List<Build> findByGroupByPackage(String name, String namespace, String ref, String erl, boolean onlySuccessful) {
+        return dao.findBy(predicateFindBy(name, namespace, ref, erl, onlySuccessful), build.artifactPath);
     }
 
     @Override
     public Optional<Build> findByNameAndNamespace(String name, String namespace) {
-        return Optional.empty();
+        return Optional.ofNullable(dao.findOneBy(predicateFindBy(name, namespace, null, null, false)));
     }
 
     @Override
@@ -76,5 +56,19 @@ public class BuildDAOService implements DaoService<Build> {
     public Collection<Build> getAll() {
         Iterable<Build> itr = dao.findAll();
         return (Collection<Build>) itr;
+    }
+
+    private BooleanExpression predicateFindBy(
+            @NonNull String name, String namespace, String ref, String erl, boolean onlySuccessful) {
+        BooleanExpression expression = build.packageVersion.repository.name.eq(name);
+        if (onlySuccessful)
+            expression = expression.and(build.result.eq(true));
+        if (namespace != null && !namespace.isEmpty())
+            expression = expression.and(build.packageVersion.repository.namespace.eq(namespace));
+        if (ref != null && !ref.isEmpty())
+            expression = expression.and(build.packageVersion.ref.eq(ref));
+        if (erl != null && !erl.isEmpty())
+            expression = expression.and(build.packageVersion.erlVersion.eq(erl));
+        return expression;
     }
 }

@@ -10,23 +10,21 @@ import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class SearchService extends AbstractService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
-
     @Autowired
     private ModelMapper modelMapper;
 
@@ -34,21 +32,29 @@ public class SearchService extends AbstractService {
     private BuildDAOService buildDao;
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO<List<PackageDTO>>> searchPackages(
             String name, String namespace, String ref, String erlVsn) {
-        LOGGER.debug("Search {}", name, namespace, ref, erlVsn);
-        List<Build> builds = buildDao.findAllByValues(name, namespace, ref, erlVsn);
+        log.debug("Search {}", name, namespace, ref, erlVsn);
+        List<Build> builds = buildDao.findByGroupByPackage(name, namespace, ref, erlVsn, false);
         List<PackageDTO> packages = new ArrayList<>(builds.size());
         for (Build build : builds) {
             Repository repo = build.getPackageVersion().getRepository();
-            PackageDTO packageDTO = new PackageDTO(build.getBuildId(), repo.getName(), repo.getNamespace());
-            packageDTO.setBuildDate(build.getCreatedDate());
-            packageDTO.setSuccess(build.isResult());
-            if (build.isResult()) {
-                packageDTO.setPath(AbstractController.DOWNLOAD_ID + "/" + build.getBuildId());
-            } else {
-                packageDTO.setPath(AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId());
-            }
+            String path;
+            if (build.isResult())
+                path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
+            else
+                path = AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId();
+            PackageDTO packageDTO =
+                    new PackageDTO(
+                            build.getBuildId(),
+                            repo.getNamespace(),
+                            repo.getName(),
+                            build.isResult(),
+                            path,
+                            build.getPackageVersion().getErlVersion(),
+                            build.getPackageVersion().getRef(),
+                            build.getCreatedDate());
             packages.add(packageDTO);
         }
         //TODO remove test data
@@ -72,9 +78,31 @@ public class SearchService extends AbstractService {
     }
 
     @Async("searchExecutor")
+    public CompletableFuture<ResponseDTO> fetchBuild(RepositoryDTO request) {
+        log.debug("Fetch {}", request);
+        String[] splitted = request.getFullName().split("/");
+        String ref = null;
+        String erl = null;
+        if(request.getVersions() != null && !request.getVersions().isEmpty()) {
+            PackageVersionDTO versionDTO = request.getVersions().get(0);
+            ref = versionDTO.getRef();
+            erl = versionDTO.getErlVersion();
+        }
+        Optional<Build> found =
+                buildDao.findBy(
+                        splitted[1],
+                        splitted[0],
+                        ref,
+                        erl);
+        if(found.isPresent())
+            return CompletableFuture.completedFuture(ok(modelMapper.map(found.get(), BuildDTO.class)));
+        return CompletableFuture.completedFuture(fail("No such build"));
+    }
+
+    @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<BuildDTO>>> fetchBuilds(RepositoryDTO request) {
-        LOGGER.debug("Fetch {}", request);
-        List<Build> builds = findBuilds(request);
+        log.debug("Fetch {}", request);
+        List<Build> builds = findBuilds(request, false); //TODO change DB request
         Type listType = new TypeToken<List<BuildDTO>>() {
         }.getType();
         List<BuildDTO> found = modelMapper.map(builds, listType);
@@ -83,8 +111,8 @@ public class SearchService extends AbstractService {
 
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO<List<PackageVersionDTO>>> searchVersions(RepositoryDTO request) {
-        LOGGER.debug("Search {}", request);
-        List<Build> builds = findBuilds(request);
+        log.debug("Search {}", request);
+        List<Build> builds = findBuilds(request, true);
         Set<PackageVersion> versions = new HashSet<>();
         for (Build b : builds)
             versions.add(b.getPackageVersion());
@@ -96,7 +124,7 @@ public class SearchService extends AbstractService {
 
     @Async("searchExecutor")
     public CompletableFuture<ResponseDTO> findBuild(String build_id) {
-        LOGGER.debug("Find {}", build_id);
+        log.debug("Find {}", build_id);
         Optional<Build> find = buildDao.find(build_id);
         if (find.isPresent()) {
             BuildDTO dto = modelMapper.map(find.get(), BuildDTO.class);
@@ -105,16 +133,17 @@ public class SearchService extends AbstractService {
         return CompletableFuture.completedFuture(fail("No build for id"));
     }
 
-    private List<Build> findBuilds(RepositoryDTO request) {
+    private List<Build> findBuilds(RepositoryDTO request, boolean onlySuccessfull) {
         String[] splitted = request.getFullName().split("/");
         List<PackageVersionDTO> versions = request.getVersions();
         List<Build> builds = new ArrayList<>();
         if (versions.isEmpty()) {
-            builds.addAll(buildDao.fetchByValues(splitted[1], splitted[0]));
+            builds.addAll(buildDao.findByGroupByPackage(
+                    splitted[1], splitted[0], null, null, onlySuccessfull));
         } else {
             for (PackageVersionDTO pv : versions) {
-                builds.addAll(buildDao.fetchByValues(
-                        splitted[1], splitted[0], pv.getRef(), pv.getErlVersion()));
+                builds.addAll(buildDao.findByGroupByPackage(
+                        splitted[1], splitted[0], pv.getRef(), pv.getErlVersion(), onlySuccessfull));
             }
         }
         return builds;
