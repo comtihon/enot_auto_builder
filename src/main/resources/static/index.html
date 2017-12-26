@@ -5,15 +5,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
     <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/jquery.tagsinput.css" />
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="/css/main.css" rel="stylesheet">
+
 </head>
 
 <body>
 <!--navigation bar-->
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="#" data-bind="click: $root.cleanUp()" a>CoonHub</a>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" id="navbar">
+    <a class="navbar-brand" href="#" data-bind="click: $root.boss.infoVM.cleanUp" a>CoonHub</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -21,35 +23,34 @@
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Build</button>
+                <button class="btn btn-outline-success my-2 my-sm-0" data-bind="click: $root.boss.buildVM.cleanUp" type="submit">Add build</button>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="https://justtech.blog/tag/coon/">Documentation</a>
             </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search" data-bind='value: searchFor, valueUpdate: "afterkeydown"'>
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-bind="click: $root.simpleSearch">Search</button>
+            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search" data-bind='value: $root.boss.searchVM.searchFor, valueUpdate: "afterkeydown"'>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-bind="click: $root.boss.searchVM.simpleSearch">Search</button>
         </form>
     </div>
 </nav>
 
 <!--TODO add our own css style, replace starter-template-->
 <main role="main" class="starter-template container-fluid">
-    <div class="row" data-bind="visible: !$root.searchDone()">
+    <div class="row" data-bind="visible: $root.visible()" id="infoContainer">
         <div class="col-10">
             <h1>Welcome to Coon Hub</h1>
             <p class="lead">Here we store prebuilt Erlang packages, just like Maven does for java ;).</p>
         </div>
         <div class="col-2" >
             <!--FIXME add function in view model instead of it...-->
-            <p> Server version: <span data-bind="text: $root.version">not installed</span></p>
-            <p> Database: <span data-bind="text: $root.db">not available</span></p>
-            <p> Coon: <span data-bind="text: $root.coon">not installed</span></p>
-            <p> Kerl: <span data-bind="text: $root.kerl">not installed</span></p>
+            <p> Server version: <span data-bind="text: $root.serverInfo.serverVersion">not installed</span></p>
+            <p> Coon: <span data-bind="text: $root.serverInfo.coonVersion">not installed</span></p>
+            <p> Kerl: <span data-bind="text: $root.serverInfo.kerlVersion">not installed</span></p>
         </div>
     </div>
-    <div class="row" data-bind="visible: $root.searchDone()">
+    <div class="row" data-bind="visible: $root.visible()" id="searchContainer">
         <div class="col">
             <h2>Search results for package name: <span data-bind="text: $root.searchFor()"></span> </h2>
             <table class="packages table table-hover">
@@ -78,7 +79,28 @@
             </table>
         </div>
     </div>
+    <form class="pull-left" data-bind="visible: $root.visible()" id="newBuildContainer">
+        <div class="row col-8">
+            <label class="col-3" for="name">Namespace with name</label>
+            <input class="form-control col-9" data-bind='value: $root.build.name, valueUpdate: "afterkeydown"' placeholder="comtihon/coon" type="text" id="name">
+        </div>
+        <div class="row col-8">
+            <label class="col-3" for="url">Git URL</label>
+            <input class="form-control col-9" placeholder="https://github.com/comtihon/coon.git"  data-bind='value: $root.build.git_path, valueUpdate: "afterkeydown"' type="text" id="url">
+        </div>
 
+        <div class="row col-8">
+            <label class="col-3" for="package_versions">Git tags to build</label>
+            <input class="tags"  data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text" id="package_versions">
+        </div>
+        <div class="row col-8">
+            <label class="col-3" for="erl_versions">Erlang versions</label>
+            <input class="tags col-9" data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text" id="erl_versions">
+        </div>
+        <div class="row col-8">
+            <button type="button" class="btn btn-success" data-bind="click: $root.addBuild">Add</button>
+        </div>
+    </form>
 </main><!-- /.container -->
 
 <!--we place it at the end to optimize page load speed-->
@@ -94,6 +116,15 @@
 
 <script type="text/javascript" src="/js/lib/knockout.mapping.min.js"></script>
 
+<script type="text/javascript" src="/js/lib/jquery.tagsinput.js"></script>
+
+<script type="text/javascript" src="/js/src/boss.js"></script>
+
+<script type="text/javascript" src="/js/src/info.js"></script>
+
+<script type="text/javascript" src="/js/src/build.js"></script>
+
 <script type="text/javascript" src="/js/src/search.js"></script>
+
 </body>
 </html>

@@ -1,6 +1,6 @@
-(function($) {
-//class to represent erlang package row in searсh package grid
-function ErlPackage(build_id, namespace, name, success, build_date, path, version, erl_version) {
+
+//class to represent erlang package
+function ErlPackage(build_id, namespace, name, success, build_date, path, version, erl_version, git_path) {
     var self = this;
     self.build_id = ko.observable(build_id);
     self.namespace = ko.observable(namespace);
@@ -10,87 +10,47 @@ function ErlPackage(build_id, namespace, name, success, build_date, path, versio
     self.path = ko.observable(path);
     self.version = ko.observable(version);
     self.erl_version = ko.observable(erl_version);
+    self.git_path = ko.observable(git_path);
+
 }
 
-function checkTool(tool) {
-    if (tool.hasOwnProperty('version')) {
-        return tool.version;
-    } else if (tool.status == 'UP') {
-        return 'UP';
-    } else {
-        return tool.error;
-    }
-}
-
-function fillTools(reply, self) {
-    self.coon(checkTool(reply.coon));
-    self.kerl(checkTool(reply.kerl));
-    self.db(checkTool(reply.db));
-}
-
-function PackageViewModel() {
+function PackageViewModel(parent) {
     var self = this;
+    self.parent = parent;
     self.searchFor = ko.observable("");
-    console.log(self.searchFor);
-    self.searchDone = ko.observable(false);
-    console.log(self.searchDone);
-
     self.packages = ko.observableArray();
-    self.err_msg = function(msg) {
-        alert(msg);
-    }
-    self.toggleTableVisible = function() {
-        if (!self.searchDone()) {
-            self.searchDone(!self.searchDone());
-        }
-    }
+    self.visible = function() {
+        return self.parent.lastAction() === self.parent.showModeEnum.SEARCH
+    };
     self.cleanUp = function() {
         self.searchFor("");
-        self.searchDone(false);
+//        self.visible(false);
         return true;
     }
-//FIXME move it out into statistic MV
-    self.version = ko.observable('not available');
-    self.coon = ko.observable('not available');
-    self.kerl = ko.observable('not available');
-    self.db = ko.observable('not available');
-        $.get({
-                url: '/info', //TODO ability to get on 8081 port
-                dataType: 'json',
-                success:
-                    function(reply) {
-                                        self.version(reply.build.version);
-                                    }
-              });
-        $.get({
-                url: '/health',
-                dataType: 'json',
-                success: function(reply) {fillTools(reply, self);}
-              }).fail(function(jqXHR) {
-                                        reply = JSON.parse(jqXHR.responseText);
-                                        fillTools(reply, self);
-                                     });
-    
+
+
     self.simpleSearch = function() {
     var userInput = self.searchFor().trim();
 
-        if (userInput.length>0) {
+        if (userInput.length > 0) {
+            self.parent.lastAction(self.parent.showModeEnum.SEARCH);
 
-        self.toggleTableVisible();
-        $.get({
-          url: "/search",
-          data: {
-            name: userInput
-          },
-          dataType: 'json',
-          success: function(reply) {
-              if (reply.result) {
-                ko.mapping.fromJS(reply.response, {}, self.packages);
-              } else {
-                self.err_msg(reply.response);
+            $.get({
+              url: "/search",
+              data: {
+                name: userInput
+              },
+              dataType: 'json',
+              success: function(reply) {
+                  if (reply.result) {
+                    ko.mapping.fromJS(reply.response, {}, self.packages);
+                  } else {
+                    alert(reply.response);
+                  }
               }
-          }
-        });
+            });
+        } else {
+            alert("Input package name for the search.")
         }
     }
     self.complexSearch = function(namespace, name, version, erl_version) {
@@ -112,15 +72,9 @@ function PackageViewModel() {
                   }
               },
               error: function(xhr) {
-                self.err_msg(xhr);
+                alert(xhr);
                 //Do Something better to handle error
               }
             });
     }
 }
-
-
-// Activates knockout.js
-ko.applyBindings(new PackageViewModel());
-
-})(jQuery)
