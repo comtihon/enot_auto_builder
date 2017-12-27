@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" type="text/css" href="/css/jquery.tagsinput.css" />
+    <link href="/css/bootstrap-tagsinput.css" rel="stylesheet" type="text/css" />
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="/css/main.css" rel="stylesheet">
@@ -30,14 +30,14 @@
             </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search" data-bind='value: $root.boss.searchVM.searchFor, valueUpdate: "afterkeydown"'>
+            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search" data-bind='value: $root.boss.searchVM.searchFor'>
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-bind="click: $root.boss.searchVM.simpleSearch">Search</button>
         </form>
     </div>
 </nav>
 
 <!--TODO add our own css style, replace starter-template-->
-<main role="main" class="starter-template container-fluid">
+<main role="main" class="starter-template container-fluid" style="visibility: hidden" id="main">
     <div class="row" data-bind="visible: $root.visible()" id="infoContainer">
         <div class="col-10">
             <h1>Welcome to Coon Hub</h1>
@@ -66,7 +66,7 @@
                 </tr>
                 </thead>
                 <tbody data-bind="foreach: packages">
-                <tr data-bind="tag: build_id">
+                <tr data-bind="tag: build_id, css: $root.addRowClass($data.success())">
                     <th scope="row" data-bind="text: $data.erl_version"></th>
                     <td data-bind="text: $data.namespace"></td>
                     <td data-bind="text: $data.name"></td>
@@ -78,6 +78,9 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    <div class="alert alert-danger" role="alert" id="search_error" style="display:none">
+        <span data-bind="text: $root.searchError()">Error occurred.</span>
     </div>
     <form class="pull-left" data-bind="visible: $root.visible()" id="newBuildContainer">
         <div class="row col-8">
@@ -91,14 +94,23 @@
 
         <div class="row col-8">
             <label class="col-3" for="package_versions">Git tags to build</label>
-            <input class="tags"  data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text" id="package_versions">
+            <input class="col-9" data-role="tagsinput" data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text" id="package_versions">
         </div>
         <div class="row col-8">
             <label class="col-3" for="erl_versions">Erlang versions</label>
-            <input class="tags col-9" data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text" id="erl_versions">
+            <input class="col-9" data-role="tagsinput" data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text" id="erl_versions">
         </div>
         <div class="row col-8">
             <button type="button" class="btn btn-success" data-bind="click: $root.addBuild">Add</button>
+        </div>
+        <div class="alert alert-danger" role="alert" id="build_error" style="display:none">
+            <span data-bind="text: $root.build.error()">Error occurred.</span>
+        </div>
+        <div class="alert alert-success" role="alert" id="build_success" style="display:none">
+            <h4 class="alert-heading">Build was successfully queued</h4>
+            <p>Submitted build was added to a queue. You will receive an email in a couple of minutes.</p>
+            <hr>
+            <p class="mb-0">If you haven't got an email - use Search to find your build.</p>
         </div>
     </form>
 </main><!-- /.container -->
@@ -112,11 +124,11 @@
 
 <script type="text/javascript" src="/js/lib/bootstrap.min.js"></script>
 
+<script type="text/javascript" src="/js/lib/bootstrap-tagsinput.js"></script>
+
 <script type="text/javascript" src="/js/lib/knockout.min.js"></script>
 
 <script type="text/javascript" src="/js/lib/knockout.mapping.min.js"></script>
-
-<script type="text/javascript" src="/js/lib/jquery.tagsinput.js"></script>
 
 <script type="text/javascript" src="/js/src/boss.js"></script>
 

@@ -33,6 +33,7 @@ $(document).ready(function() {
     if ($.isEmptyObject(bossViewModel.boss.searchVM)) {
         bossViewModel.boss.searchVM = new PackageViewModel(bossViewModel);
         ko.applyBindings(bossViewModel.boss.searchVM, document.getElementById("searchContainer"));
+        ko.applyBindings(bossViewModel.boss.searchVM, document.getElementById("search_error"));
     }
     if ($.isEmptyObject(bossViewModel.boss.buildVM)) {
         bossViewModel.boss.buildVM = new NewBuildModelView(bossViewModel);
@@ -43,6 +44,7 @@ $(document).ready(function() {
         ko.applyBindings(bossViewModel, document.getElementById("navbar"));
         applyBoss = false;
     }
+    document.getElementById("main").style.visibility = "visible";
 });
 
 

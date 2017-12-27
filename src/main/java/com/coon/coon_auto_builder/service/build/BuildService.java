@@ -57,9 +57,9 @@ public class BuildService {
         try {
             for (String ref : versions.keySet()) {
                 try {
+                    log.debug("build {}:{}", repo.getFullName(), ref);
                     builds.addAll(buildRef(repository, versions, ref));
                 } catch (Exception e) {
-                    e.printStackTrace();
                     Build build = new Build(e.getMessage());
                     PackageVersion version = pvDAOService.getOrCreate(ref, "unknown", repo.getCloneUrl());
                     version.addBuild(build);

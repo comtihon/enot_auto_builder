@@ -56,7 +56,7 @@ public class BuildRequestValidator extends AbstractService {
         } catch (Exception e) {
             log.warn("Validation failed: request {}, error {}", request, e.getMessage());
             e.printStackTrace();
-            return CompletableFuture.completedFuture(fail(e.getMessage()));
+            return CompletableFuture.completedFuture(fail("Validation failed: " + e.getMessage()));
         }
     }
 
@@ -65,10 +65,12 @@ public class BuildRequestValidator extends AbstractService {
      *
      * @return null if no repo found or found repo has the same url
      */
-    private Optional<Repository> findCollision(Validatable repository) {
+    private Optional<Repository> findCollision(Validatable repository) throws Exception {
         String fullName = repository.getFullName();
         if (fullName == null)
             return Optional.empty();
+        if(!fullName.contains("/"))
+            throw new Exception("Wrong fullname format: " + fullName);
         String[] split = fullName.split("/");
         String name = split[1];
         String namespace = split[0];

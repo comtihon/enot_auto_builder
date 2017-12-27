@@ -44,7 +44,7 @@ public class SearchService extends AbstractService {
             if (build.isResult())
                 path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
             else
-                path = AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId();
+                path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
             PackageDTO packageDTO =
                     new PackageDTO(
                             build.getBuildId(),
@@ -57,23 +57,6 @@ public class SearchService extends AbstractService {
                             build.getCreatedDate());
             packages.add(packageDTO);
         }
-        //TODO remove test data
-//        PackageDTO ok = new PackageDTO();
-//        ok.setBuildId("1");
-//        ok.setSuccess(true);
-//        ok.setName("test");
-//        ok.setNamespace("comtihon");
-//        ok.setPath("/path/to/artifact.cp");
-//        ok.setBuildDate(new Date());
-//        PackageDTO fail = new PackageDTO();
-//        fail.setBuildId("2");
-//        fail.setSuccess(false);
-//        fail.setName("other");
-//        fail.setNamespace("comtihon");
-//        fail.setPath("/path/to/log");
-//        fail.setBuildDate(new Date());
-//        packages.add(ok);
-//        packages.add(fail);
         return CompletableFuture.completedFuture(ok(packages));
     }
 
