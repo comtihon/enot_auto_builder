@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class PackageDTO {
     @JsonProperty("erl_version")
     private final String erlangVersion;
     private final String version;
+    @JsonFormat(pattern="yyyy-MM-dd hh:mm")
     @JsonProperty("build_date")
     private final Date buildDate;
 }

@@ -61,7 +61,7 @@
                     <th scope="col">Package</th>
                     <th scope="col">Version</th>
                     <th scope="col">Build Date</th>
-                    <th scope="col">Build Status</th>
+                    <th scope="col">Success</th>
                     <th scope="col">Action</th>
                 </tr>
                 </thead>
@@ -73,7 +73,7 @@
                     <td data-bind="text: $data.version"></td>
                     <td data-bind="text: $data.build_date"></td>
                     <td data-bind="text: $data.success"></td>
-                    <td data-bind="text: $data.path"></td>
+                    <td><button class="btn btn-info" data-bind="click: $root.followLink($data.path())">Info</button></td>
                 </tr>
                 </tbody>
             </table>

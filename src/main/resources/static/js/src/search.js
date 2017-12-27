@@ -20,7 +20,9 @@ function PackageViewModel(parent) {
                               return "table-danger";
                           }
                       };
-
+    self.followLink = function(path) {
+        window.open(path, '_blank');
+    };
     self.simpleSearch = function() {
         self.packages([]);
         var userInput = self.searchFor().trim();

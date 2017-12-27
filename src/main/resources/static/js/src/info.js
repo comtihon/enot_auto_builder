@@ -20,6 +20,7 @@ function InfoViewModel(parent) {
         self.serverInfo.coonVersion('not available');
         self.serverInfo.kerlVersion('not available');
         self.parent.lastAction(self.parent.showModeEnum.INFO);
+        self.loadInfo();
         return true;
     }
 
@@ -37,8 +38,6 @@ function InfoViewModel(parent) {
     }
 
     self.loadInfo = function() {
-        self.cleanUp();
-
         $.get({
                 url: '/info', //TODO ability to get on 8081 port
                 dataType: 'json',
