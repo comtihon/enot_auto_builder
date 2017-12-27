@@ -24,7 +24,7 @@ public abstract class Tool implements HealthIndicator {
     @Override
     public Health health() {
         if (ready)
-            return Health.up().withDetail("Version", version).build();
-        return Health.down().withDetail("Error", message).build();
+            return Health.up().withDetail("version", version).build();
+        return Health.down().withDetail("error", message).build();
     }
 }

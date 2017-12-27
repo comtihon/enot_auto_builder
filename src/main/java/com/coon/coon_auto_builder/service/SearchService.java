@@ -44,7 +44,7 @@ public class SearchService extends AbstractService {
             if (build.isResult())
                 path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
             else
-                path = AbstractController.BUILD_LOG + "&build_id=" + build.getBuildId();
+                path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
             PackageDTO packageDTO =
                     new PackageDTO(
                             build.getBuildId(),

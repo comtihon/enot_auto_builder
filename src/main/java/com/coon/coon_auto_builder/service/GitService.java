@@ -5,6 +5,7 @@ import com.coon.coon_auto_builder.service.dto.CloneResult;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +37,12 @@ public class GitService {
      *
      * @param fullName namespace/name
      * @param url      git repo url
-     * @param ref      tag to be cloned
+     * @param refStr      tag to be cloned
      * @return clone result - path of cloned repo and author's email
      * @throws Exception if unable to clone
      */
-    public CloneResult cloneRepo(String fullName, String url, String ref) throws Exception {
-        Path repoPath = repoPath(fullName, ref);
+    public CloneResult cloneRepo(String fullName, String url, String refStr) throws Exception {
+        Path repoPath = repoPath(fullName, refStr);
         if (!repoPath.toFile().mkdirs()) {
             String msg = "clone failed, can't create " + repoPath;
             log.warn(msg);
@@ -51,11 +52,16 @@ public class GitService {
         try (Git result = Git.cloneRepository()
                 .setURI(url)
                 .setDirectory(repoPath.toFile())
-                .setBranch(ref)
+                .setBranch(refStr)
                 .call()) {
             log.debug("Cloned {} to {}", url, result.getRepository().getDirectory());
             this.gaugeService.submit(Metrics.CLONE_OK.toString(), 1.0);
-            RevCommit commit = result.getRepository().parseCommit(result.getRepository().findRef(ref).getObjectId());
+            Ref ref = result.getRepository().findRef(refStr);
+            if (ref == null) {
+                log.warn("No such tag {} for {}", fullName, refStr);
+                throw new Exception(refStr + " not found.");
+            }
+            RevCommit commit = result.getRepository().parseCommit(ref.getObjectId());
             return new CloneResult(commit.getAuthorIdent().getEmailAddress(), repoPath);
         } catch (IOException | GitAPIException e) {
             log.warn("clone failed {}", e.getMessage());

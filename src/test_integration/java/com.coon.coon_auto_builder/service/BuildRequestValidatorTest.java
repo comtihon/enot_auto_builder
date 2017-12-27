@@ -39,7 +39,7 @@ public class BuildRequestValidatorTest {
         CompletableFuture<ResponseDTO> result = validator.validate(request);
         ResponseDTO responseDTO = result.get();
         Assert.assertFalse(responseDTO.isResult());
-        Assert.assertEquals("No such build!", responseDTO.getResponse());
+        Assert.assertEquals("Validation failed: No such build!", responseDTO.getResponse());
 
         //Existent build rebuild - OK
         request = new BuildDTO();
@@ -69,7 +69,7 @@ public class BuildRequestValidatorTest {
         result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
         Assert.assertEquals(
-                "Request RepositoryDTO{fullName='namespace1/name1', cloneUrl='malformed'} " +
+                "Validation failed: Request RepositoryDTO{fullName='namespace1/name1', cloneUrl='malformed'} " +
                         "tries to overwrite Repository{url='url1', name='name1', namespace='namespace1'}",
                 result.get().getResponse());
     }
@@ -84,7 +84,7 @@ public class BuildRequestValidatorTest {
         RepositoryGithubDTO request = new RepositoryGithubDTO("signature", body);
         CompletableFuture<ResponseDTO> result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
-        Assert.assertEquals("Url url doesn't point to github!", result.get().getResponse());
+        Assert.assertEquals("Validation failed: Url url doesn't point to github!", result.get().getResponse());
 
         //malformed github url - Fail
         body = "{\"repository\":{\"clone_url\":\"https://github.com/a/b\",\"full_name\":\"namespace/name\"}," +
@@ -92,7 +92,7 @@ public class BuildRequestValidatorTest {
         request = new RepositoryGithubDTO("signature", body);
         result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
-        Assert.assertEquals("Malformed github url: https://github.com/a/b", result.get().getResponse());
+        Assert.assertEquals("Validation failed: Malformed github url: https://github.com/a/b", result.get().getResponse());
 
         //wrong signature - Fail
         body = "{\"repository\":{\"clone_url\":\"https://github.com/namespace/name\",\"full_name\":\"namespace/name\"}," +
@@ -100,7 +100,7 @@ public class BuildRequestValidatorTest {
         request = new RepositoryGithubDTO("signature", body);
         result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
-        Assert.assertEquals("Wrong signature for namespace/name", result.get().getResponse());
+        Assert.assertEquals("Validation failed: Wrong signature for namespace/name", result.get().getResponse());
 
         //right signature - OK
         String expected = secretExpected(body, request);
