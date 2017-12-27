@@ -2,6 +2,7 @@ package com.coon.coon_auto_builder.data.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -26,7 +27,7 @@ public class Repository {
     private Set<PackageVersion> versions = new HashSet<>();
 
     public Repository(String url, String fullName, Set<PackageVersion> versions) {
-        this.url = url;
+        this.url = remove_git(url);
         String[] splitted = fullName.split("/");
         this.name = splitted[1];
         this.namespace = splitted[0];
@@ -50,5 +51,12 @@ public class Repository {
                 ", name='" + name + '\'' +
                 ", namespace='" + namespace + '\'' +
                 '}';
+    }
+
+    private String remove_git(String url) {
+        if (url.endsWith(".git"))
+            return FilenameUtils.removeExtension(url);
+        else
+            return url;
     }
 }

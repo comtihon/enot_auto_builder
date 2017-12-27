@@ -9,8 +9,7 @@ import com.coon.coon_auto_builder.data.dto.Validatable;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.Repository;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -69,14 +68,17 @@ public class BuildRequestValidator extends AbstractService {
         String fullName = repository.getFullName();
         if (fullName == null)
             return Optional.empty();
-        if(!fullName.contains("/"))
+        if (!fullName.contains("/"))
             throw new Exception("Wrong fullname format: " + fullName);
         String[] split = fullName.split("/");
         String name = split[1];
         String namespace = split[0];
         Optional<Repository> repo = repositoryDAOService.findByNameAndNamespace(name, namespace);
         if (repo.isPresent()) {
-            if (repo.get().getUrl().equals(repository.getCloneUrl()))
+            String url = repo.get().getUrl();
+            if (url.endsWith(".git")) // remove .git
+                url = FilenameUtils.removeExtension(url);
+            if (url.equals(repository.getCloneUrl()))
                 return Optional.empty();
         }
         return repo;
