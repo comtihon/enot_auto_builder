@@ -2,14 +2,12 @@ package com.coon.coon_auto_builder.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
 @Data
+@Builder
 public class PackageDTO {
     @JsonProperty("build_id")
     private final String buildId;

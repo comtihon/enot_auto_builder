@@ -45,16 +45,16 @@ public class SearchService extends AbstractService {
                 path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
             else
                 path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
-            PackageDTO packageDTO =
-                    new PackageDTO(
-                            build.getBuildId(),
-                            repo.getNamespace(),
-                            repo.getName(),
-                            build.isResult(),
-                            path,
-                            build.getPackageVersion().getErlVersion(),
-                            build.getPackageVersion().getRef(),
-                            build.getCreatedDate());
+            PackageDTO packageDTO = PackageDTO.builder()
+                    .buildId(build.getBuildId())
+                    .namespace(repo.getNamespace())
+                    .name(repo.getName())
+                    .success(build.isResult())
+                    .path(path)
+                    .erlangVersion(build.getPackageVersion().getErlVersion())
+                    .version(build.getPackageVersion().getRef())
+                    .buildDate(build.getCreatedDate())
+                    .build();
             packages.add(packageDTO);
         }
         return CompletableFuture.completedFuture(ok(packages));
@@ -66,7 +66,7 @@ public class SearchService extends AbstractService {
         String[] splitted = request.getFullName().split("/");
         String ref = null;
         String erl = null;
-        if(request.getVersions() != null && !request.getVersions().isEmpty()) {
+        if (request.getVersions() != null && !request.getVersions().isEmpty()) {
             PackageVersionDTO versionDTO = request.getVersions().get(0);
             ref = versionDTO.getRef();
             erl = versionDTO.getErlVersion();
@@ -77,7 +77,7 @@ public class SearchService extends AbstractService {
                         splitted[0],
                         ref,
                         erl);
-        if(found.isPresent())
+        if (found.isPresent())
             return CompletableFuture.completedFuture(ok(modelMapper.map(found.get(), BuildDTO.class)));
         return CompletableFuture.completedFuture(fail("No such build"));
     }

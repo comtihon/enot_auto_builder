@@ -61,7 +61,6 @@
                     <th scope="col">Package</th>
                     <th scope="col">Version</th>
                     <th scope="col">Build Date</th>
-                    <th scope="col">Success</th>
                     <th scope="col">Action</th>
                 </tr>
                 </thead>
@@ -72,8 +71,11 @@
                     <td data-bind="text: $data.name"></td>
                     <td data-bind="text: $data.version"></td>
                     <td data-bind="text: $data.build_date"></td>
-                    <td data-bind="text: $data.success"></td>
-                    <td><button class="btn btn-info" data-bind="click: $root.followLink($data.path())">Info</button></td>
+                    <td>
+                        <a data-bind="attr: { href: $data.path(), title: $root.getTitleText($data.success())}">
+                            <span data-bind="css: $root.addDownloadClass($data.success())"></span>
+                        </a>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -129,6 +131,8 @@
 <script type="text/javascript" src="/js/lib/knockout.min.js"></script>
 
 <script type="text/javascript" src="/js/lib/knockout.mapping.min.js"></script>
+
+<script type="text/javascript" src="/js/lib/fontawesome_5.2.0.all.js"></script>
 
 <script type="text/javascript" src="/js/src/boss.js"></script>
 

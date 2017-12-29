@@ -20,9 +20,20 @@ function PackageViewModel(parent) {
                               return "table-danger";
                           }
                       };
-    self.followLink = function(path) {
-        window.open(path, '_blank');
-    };
+    self.addDownloadClass = function(success) {
+                              if(success) {
+                                  return "fas fa-cloud-download-alt";
+                              } else {
+                                  return "far fa-file-alt";
+                              }
+                            };
+    self.getTitleText = function(success) {
+                            if(success) {
+                                  return "Package was built. Click to download.";
+                            } else {
+                              return "Build failed. Click to see log.";
+                            }
+                        };
     self.simpleSearch = function() {
         self.packages([]);
         var userInput = self.searchFor().trim();
