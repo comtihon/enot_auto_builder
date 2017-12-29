@@ -10,6 +10,7 @@ function InfoViewModel(parent) {
     var self = this;
     self.parent = parent;
     self.serverInfo = new ServerInfo('not available','not available','not available');
+    self.last_builds = ko.observableArray();
 
     self.visible = function() {
         return self.parent.lastAction() === self.parent.showModeEnum.INFO
@@ -38,6 +39,7 @@ function InfoViewModel(parent) {
     }
 
     self.loadInfo = function() {
+        self.getLastBuilds();
         $.get({
                 url: '/info', //TODO ability to get on 8081 port
                 dataType: 'json',
@@ -58,4 +60,16 @@ function InfoViewModel(parent) {
                       }
                     );
     }
+
+    self.getLastBuilds = function() {
+        self.last_builds([]);
+        $.get({
+                url: '/last_builds?n=20',
+                dataType: 'json',
+                success:
+                    function(reply) {
+                        ko.mapping.fromJS(reply.response, {}, self.last_builds);
+                    }
+              });
+    };
 }

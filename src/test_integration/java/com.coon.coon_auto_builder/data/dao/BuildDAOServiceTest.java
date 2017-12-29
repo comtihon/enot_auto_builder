@@ -29,4 +29,24 @@ public class BuildDAOServiceTest {
         builds = buildDAOService.findBy("name1", "namespace1", "1.0.0", "18", true);
         Assert.assertEquals(2, builds.size());
     }
+
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
+    public void findLimit() {
+        List<Build> builds = buildDAOService.getWithLimit(3);
+        Assert.assertEquals(3, builds.size());
+        builds = buildDAOService.getWithLimit(2);
+        Assert.assertEquals(2, builds.size());
+        builds = buildDAOService.getWithLimit(1);
+        Assert.assertEquals(1, builds.size());
+    }
+
+    @Test
+    @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:versions_group.sql")
+    @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
+    public void findLimitGroupedBy() {
+        List<Build> builds = buildDAOService.getWithLimit(3);
+        Assert.assertEquals(1, builds.size());
+    }
 }

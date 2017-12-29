@@ -13,4 +13,6 @@ public interface QueryDSLRepository<T> {
     List<T> findBy(BooleanExpression where, StringPath groupBy);
 
     T findOneBy(BooleanExpression where);
+
+    List<T> findLimit(BooleanExpression where, StringPath groupBy, int limit);
 }

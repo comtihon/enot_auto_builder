@@ -128,6 +128,28 @@ RESPONSE:
         ]
     }
 
+GET __/last_builds__ - get last n built packages.
+PARAMETERS:
+`n` - N packages to return
+RESPONSE:
+
+    {
+        "result" : <result>,
+        "response" :
+        [
+            {
+                "build_id" : <build_id>,
+                "namespace" : <namespace>,
+                "name" : <name>,
+                "success" : <success>,
+                "path" : <path>,
+                "build_date" : <date>,
+                "version" : <version>,
+                "erl_version" : <erl_version>
+             }
+             ...
+        ]
+    }
 ## Download
 
 GET __/download/{id}__ - download artifact by id.  

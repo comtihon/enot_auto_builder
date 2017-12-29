@@ -37,26 +37,15 @@ public class SearchService extends AbstractService {
             String name, String namespace, String ref, String erlVsn) {
         log.debug("Search {}", name, namespace, ref, erlVsn);
         List<Build> builds = buildDao.findByGroupByPackage(name, namespace, ref, erlVsn, false);
-        List<PackageDTO> packages = new ArrayList<>(builds.size());
-        for (Build build : builds) {
-            Repository repo = build.getPackageVersion().getRepository();
-            String path;
-            if (build.isResult())
-                path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
-            else
-                path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
-            PackageDTO packageDTO = PackageDTO.builder()
-                    .buildId(build.getBuildId())
-                    .namespace(repo.getNamespace())
-                    .name(repo.getName())
-                    .success(build.isResult())
-                    .path(path)
-                    .erlangVersion(build.getPackageVersion().getErlVersion())
-                    .version(build.getPackageVersion().getRef())
-                    .buildDate(build.getCreatedDate())
-                    .build();
-            packages.add(packageDTO);
-        }
+        List<PackageDTO> packages = toPackages(builds);
+        return CompletableFuture.completedFuture(ok(packages));
+    }
+
+    @Async("searchExecutor")
+    public CompletableFuture<ResponseDTO<List<PackageDTO>>> listBuilds(int n) {
+        log.debug("List {} builds", n);
+        List<Build> builds = buildDao.getWithLimit(n);
+        List<PackageDTO> packages = toPackages(builds);
         return CompletableFuture.completedFuture(ok(packages));
     }
 
@@ -130,5 +119,29 @@ public class SearchService extends AbstractService {
             }
         }
         return builds;
+    }
+
+    private List<PackageDTO> toPackages(List<Build> builds) {
+        List<PackageDTO> packages = new ArrayList<>(builds.size());
+        for (Build build : builds) {
+            Repository repo = build.getPackageVersion().getRepository();
+            String path;
+            if (build.isResult())
+                path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
+            else
+                path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
+            PackageDTO packageDTO = PackageDTO.builder()
+                    .buildId(build.getBuildId())
+                    .namespace(repo.getNamespace())
+                    .name(repo.getName())
+                    .success(build.isResult())
+                    .path(path)
+                    .erlangVersion(build.getPackageVersion().getErlVersion())
+                    .version(build.getPackageVersion().getRef())
+                    .buildDate(build.getCreatedDate())
+                    .build();
+            packages.add(packageDTO);
+        }
+        return packages;
     }
 }

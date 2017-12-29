@@ -4,6 +4,7 @@ import com.coon.coon_auto_builder.data.entity.Build;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQuery;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -35,6 +36,12 @@ public class BuildDAOImpl implements QueryDSLRepository<Build> {
     @Override
     public Build findOneBy(BooleanExpression where) {
         return from(where).fetchFirst();
+    }
+
+    @Override
+    public List<Build> findLimit(BooleanExpression where, StringPath groupBy, int limit) {
+        Map results =  from(where).limit(limit).transform(groupBy(groupBy).as(build));
+        return new ArrayList<>(results.values());
     }
 
     private JPAQuery<Build> from(BooleanExpression where) {

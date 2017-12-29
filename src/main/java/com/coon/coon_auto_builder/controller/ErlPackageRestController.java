@@ -45,4 +45,11 @@ public class ErlPackageRestController extends AbstractController {
         CompletableFuture<ResponseDTO<List<PackageVersionDTO>>> builds = searchService.searchVersions(request);
         return builds.thenApply(this::returnResult);
     }
+
+    @RequestMapping(path = "/last_builds", method = RequestMethod.GET)
+    public CompletableFuture<ResponseEntity<?>> listLastNBuilds(@RequestParam int n) throws IOException {
+        CompletableFuture<ResponseDTO<List<PackageDTO>>> builds = searchService.listBuilds(n);
+        return builds.thenApply(this::returnResult);
+    }
+
 }

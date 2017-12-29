@@ -58,6 +58,10 @@ public class BuildDAOService implements DaoService<Build> {
         return (Collection<Build>) itr;
     }
 
+    public List<Build> getWithLimit(int n) {
+        return dao.findLimit(build.result.eq(true), build.packageVersion.ref, n);
+    }
+
     private BooleanExpression predicateFindBy(
             @NonNull String name, String namespace, String ref, String erl, boolean onlySuccessful) {
         BooleanExpression expression = build.packageVersion.repository.name.eq(name);

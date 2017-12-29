@@ -42,6 +42,23 @@
         <div class="col-10">
             <h1>Welcome to Coon Hub</h1>
             <p class="lead">Here we store prebuilt Erlang packages, just like Maven does for java ;).</p>
+            <span>Last built packages</span><br>
+            <table class="packages table table-hover">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">Fullname</th>
+                    <th scope="col">Version</th>
+                    <th scope="col">Build Date</th>
+                </tr>
+                </thead>
+                <tbody data-bind="foreach: last_builds">
+                <tr>
+                    <td data-bind="text: $data.namespace() + '/' + $data.name()"></td>
+                    <td data-bind="text: $data.version"></td>
+                    <td data-bind="text: $data.build_date"></td>
+                </tr>
+                </tbody>
+            </table>
         </div>
         <div class="col-2" >
             <!--FIXME add function in view model instead of it...-->
@@ -115,11 +132,7 @@
             <p class="mb-0">If you haven't got an email - use Search to find your build.</p>
         </div>
     </form>
-</main><!-- /.container -->
-
-<!--we place it at the end to optimize page load speed-->
-<!--additional libs-->
-
+</main>
 <script type="text/javascript" src="/js/lib/popper.min.js"></script>
 
 <script type="text/javascript" src="/js/lib/jquery.min.js"></script>
