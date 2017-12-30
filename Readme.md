@@ -1,18 +1,24 @@
 # Coon build and load server [![Build Status](https://travis-ci.org/comtihon/coon_auto_builder.svg?branch=master)](https://travis-ci.org/comtihon/coon_auto_builder)[![Docker Automated build](https://img.shields.io/docker/build/comtihon/coon_auto_builder.svg)](https://hub.docker.com/r/comtihon/coon_auto_builder)  
 Automated service for building and storing Erlang packages. Can be treat as a maven/pip for Erlang.  
-This service is a replacement for deprecated [octocoon](https://github.com/comtihon/octocoon).  
 
 # Adding your package to Coon
-(TODO)
+Package can be built manually via [Coon](https://coon.justtech.blog) service.
 
 # Running your own Coon build server
-(TODO)  
+## Standalone
 Requirements:
 - postgres
 - EMAIL_USER env var set up
 - EMAIL_PASSWORD env var set up
-- kerl installed (TODO make build server install kerl automatically)
-- coon installed (TODO make build server install coon automatically)
+- GIT_SECRET is Coon's git application secret
+- kerl installed
+- coon installed
+
+## Monitoring
+Monitoring is made via [collectd](https://collectd.org/) and `/metrics` endpoint. 
+
+## Docker
+You can run all services with docker-compose. See `docker-compose.yml` for details.
 
 # Protocol
 ## Build
