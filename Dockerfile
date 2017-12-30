@@ -4,6 +4,9 @@ RUN apk update  \
     && apk add python3 \
     && pip3 install coon
 
+RUN mkdir -p ${HOME}/.config/coon
+
+COPY docker/global_config.json ${HOME}/.config/coon/
 COPY src src
 COPY build.gradle .
 COPY settings.gradle .

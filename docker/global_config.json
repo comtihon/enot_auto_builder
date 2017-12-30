@@ -1,0 +1,12 @@
+{
+  "compiler" : "native",
+  "temp_dir": "/tmp/coon",
+  "cache":
+  [
+    {
+      "name": "local",
+      "type": "local",
+      "url": "file:///.cache/coon"
+    }
+  ]
+}
