@@ -47,6 +47,7 @@ services:
     environment:
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - GIT_SECRET=${GIT_SECRET}
     volumes:
       - ./builder-data:/coon/artifacts
   collectd:

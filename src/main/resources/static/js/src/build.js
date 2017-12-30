@@ -60,6 +60,13 @@ function NewBuildModelView(parent) {
         document.getElementById("build_error").style.display = "block";
     };
 
+    self.remove_git_ending = function(url) {
+        if(url.endsWith('.git')) {
+            return url.slice(0, -4);
+        }
+        return url;
+    };
+
 //    function to process new build...
     self.addBuild = function() {
          if((self.build.name().trim() + self.build.git_path().trim()).length > 0) {
@@ -67,7 +74,7 @@ function NewBuildModelView(parent) {
                       url: '/buildAsync',
                       data: JSON.stringify({
                                 "full_name": self.build.name().trim(),
-                                "clone_url": self.build.git_path().trim(),
+                                "clone_url": self.remove_git_ending(self.build.git_path().trim()),
                                 "versions": self.constructVersions()
                             }),
                       contentType: 'application/json',

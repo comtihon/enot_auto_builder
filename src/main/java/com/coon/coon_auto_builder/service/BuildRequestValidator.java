@@ -9,7 +9,6 @@ import com.coon.coon_auto_builder.data.dto.Validatable;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.Repository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -76,8 +75,6 @@ public class BuildRequestValidator extends AbstractService {
         Optional<Repository> repo = repositoryDAOService.findByNameAndNamespace(name, namespace);
         if (repo.isPresent()) {
             String url = repo.get().getUrl();
-            if (url.endsWith(".git")) // remove .git
-                url = FilenameUtils.removeExtension(url);
             if (url.equals(repository.getCloneUrl()))
                 return Optional.empty();
         }
