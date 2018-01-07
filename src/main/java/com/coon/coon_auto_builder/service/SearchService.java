@@ -42,6 +42,7 @@ public class SearchService extends AbstractService {
     }
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO<List<PackageDTO>>> listBuilds(int n) {
         log.debug("List {} builds", n);
         List<Build> builds = buildDao.getWithLimit(n);
