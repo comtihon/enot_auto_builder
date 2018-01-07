@@ -43,6 +43,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -88,8 +90,6 @@ public class CoonAutoBuilderApplicationTests {
 
     private CountDownLatch startSearch;
 
-    private List notified;
-
     @Before
     public void setUp() throws Exception {
         //mock repo clone
@@ -109,8 +109,6 @@ public class CoonAutoBuilderApplicationTests {
         }).when(loader).loadArtifact(any());
         //mock email sending
         Mockito.doAnswer((Answer<Void>) invocation -> {
-            Object[] args = invocation.getArguments();
-            notified = (List) args[0];
             startSearch.countDown();
             return null;
         }).when(mailSender).sendReport(any());
@@ -139,6 +137,14 @@ public class CoonAutoBuilderApplicationTests {
     public void testNormalBuild() throws InterruptedException, IOException {
         writeApp("test/tmp", "test", "1.0.0", NORMAL_CONF);
         startSearch = new CountDownLatch(1);
+        List notified = new ArrayList();
+        Mockito.doAnswer((Answer<Void>) invocation -> {
+            Object[] args = invocation.getArguments();
+            notified.addAll((List) args[0]);
+            startSearch.countDown();
+            return null;
+        }).when(mailSender).sendReport(any());
+
         RepositoryDTO repo = new RepositoryDTO("comtihon/test",
                 "https://github.com/comtihon/test.git",
                 new PackageVersionDTO("1.0.0"));
@@ -151,7 +157,7 @@ public class CoonAutoBuilderApplicationTests {
         ResponseDTO searchResponse =
                 this.restTemplate.getForObject(
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
-        Assert.assertTrue(responseDTO.isResult());
+        Assert.assertTrue(searchResponse.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
         Assert.assertEquals(1, packages.size());
         LinkedHashMap packageDTO = packages.get(0);
@@ -180,7 +186,56 @@ public class CoonAutoBuilderApplicationTests {
         ResponseDTO searchResponse =
                 this.restTemplate.getForObject(
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
+        Assert.assertTrue(searchResponse.isResult());
+        List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
+        Assert.assertEquals(3, packages.size());
+    }
+
+    @Test
+    public void testBuildNoEmailNotification() throws IOException, InterruptedException {
+        writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
+        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
+                "https://github.com/comtihon/test.git",
+                new PackageVersionDTO("1.0.0"));
+        repo.setNotifyEmail(false);
+        ResponseDTO responseDTO =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
         Assert.assertTrue(responseDTO.isResult());
+        Assert.assertNotNull(responseDTO.getResponse());
+        Thread.sleep(100);
+        ResponseDTO searchResponse =
+                this.restTemplate.getForObject(
+                        "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
+        Assert.assertTrue(searchResponse.isResult());
+        verify(mailSender, never()).sendReport(any());
+    }
+
+    @Test
+    public void testBuildSeveralFailOne() throws Exception {
+        writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
+        Mockito.doAnswer((Answer<Void>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String erlangExecutable = (String)args[1];
+            if (erlangExecutable.equals("path/to/19"))
+                throw new RuntimeException("build failed");
+            return null;
+        }).when(coon).build(any(), any());
+
+        startSearch = new CountDownLatch(1);
+        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
+                "https://github.com/comtihon/test.git",
+                new PackageVersionDTO("1.0.0"));
+        ResponseDTO responseDTO =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
+        Assert.assertTrue(responseDTO.isResult());
+        Assert.assertNotNull(responseDTO.getResponse());
+        startSearch.await(30, TimeUnit.SECONDS);
+        ResponseDTO searchResponse =
+                this.restTemplate.getForObject(
+                        "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
+        Assert.assertTrue(searchResponse.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
         Assert.assertEquals(3, packages.size());
     }

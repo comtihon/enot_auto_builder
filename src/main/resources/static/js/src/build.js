@@ -1,17 +1,18 @@
 
-function Build(name, git_path, package_versions, erl_versions) {
+function Build(name, git_path, package_versions, erl_versions, notify_email) {
     var self = this;
     self.name = ko.observable(name);
     self.git_path = ko.observable(git_path);
     self.package_versions = ko.observable(package_versions);
     self.erl_versions = ko.observable(erl_versions);
     self.error = ko.observable("Error occurred");
+    self.is_notify_email = ko.observable(notify_email);
 }
 
 function NewBuildModelView(parent) {
     var self = this;
     self.parent = parent
-    self.build = new Build('', '', '', '');
+    self.build = new Build('', '', '', '', true);
     self.visible = function() {
         return self.parent.lastAction() === self.parent.showModeEnum.BUILD
     };
@@ -25,6 +26,7 @@ function NewBuildModelView(parent) {
         self.build.erl_versions("");
         self.build.package_versions("");
         self.build.erl_versions("");
+        self.build.notify_email(true);
         self.visible(true);
         document.getElementById("build_success").style.display = "none";
         document.getElementById("build_error").style.display = "none";
@@ -75,7 +77,8 @@ function NewBuildModelView(parent) {
                       data: JSON.stringify({
                                 "full_name": self.build.name().trim(),
                                 "clone_url": self.remove_git_ending(self.build.git_path().trim()),
-                                "versions": self.constructVersions()
+                                "versions": self.constructVersions(),
+                                "notify_email": self.build.is_notify_email()
                             }),
                       contentType: 'application/json',
                       dataType: 'json',

@@ -69,7 +69,8 @@ public class BuildService {
             }
         } finally {
             cleanClonedRepos(repo, versions.keySet());
-            mailSender.sendReport(builds);
+            if (repo.isNotifyEmail())
+                mailSender.sendReport(builds);
         }
     }
 

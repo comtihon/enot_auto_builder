@@ -31,6 +31,8 @@ public class RepositoryDTO implements Validatable {
     List<PackageVersionDTO> versions;
     @JsonProperty("ref_type")
     String refType;
+    @JsonProperty("notify_email")
+    private boolean notifyEmail = true;
 
     public RepositoryDTO(String url) {
         this.cloneUrl = url;

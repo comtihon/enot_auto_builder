@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
     <!-- Bootstrap core CSS -->
-    <link href="/css/bootstrap-tagsinput.css" rel="stylesheet" type="text/css" />
+    <link href="/css/bootstrap-tagsinput.css" rel="stylesheet" type="text/css"/>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="/css/main.css" rel="stylesheet">
@@ -16,22 +16,28 @@
 <!--navigation bar-->
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" id="navbar">
     <a class="navbar-brand" href="#" data-bind="click: $root.boss.infoVM.cleanUp" a>CoonHub</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <button class="btn btn-outline-success my-2 my-sm-0" data-bind="click: $root.boss.buildVM.cleanUp" type="submit">Add build</button>
+                <button class="btn btn-outline-success my-2 my-sm-0" data-bind="click: $root.boss.buildVM.cleanUp"
+                        type="submit">Add build
+                </button>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="https://justtech.blog/tag/coon/">Documentation</a>
             </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search" data-bind='value: $root.boss.searchVM.searchFor'>
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" data-bind="click: $root.boss.searchVM.simpleSearch">Search</button>
+            <input class="form-control mr-sm-2" type="text" placeholder="package name" aria-label="Search"
+                   data-bind='value: $root.boss.searchVM.searchFor'>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit"
+                    data-bind="click: $root.boss.searchVM.simpleSearch">Search
+            </button>
         </form>
     </div>
 </nav>
@@ -60,7 +66,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-2" >
+        <div class="col-2">
             <!--FIXME add function in view model instead of it...-->
             <p> Server version: <span data-bind="text: $root.serverInfo.serverVersion">not installed</span></p>
             <p> Coon: <span data-bind="text: $root.serverInfo.coonVersion">not installed</span></p>
@@ -69,7 +75,7 @@
     </div>
     <div class="row" data-bind="visible: $root.visible()" id="searchContainer">
         <div class="col">
-            <h2>Search results for package name: <span data-bind="text: $root.searchFor()"></span> </h2>
+            <h2>Search results for package name: <span data-bind="text: $root.searchFor()"></span></h2>
             <table class="packages table table-hover">
                 <thead class="thead-light">
                 <tr>
@@ -104,20 +110,30 @@
     <form class="pull-left" data-bind="visible: $root.visible()" id="newBuildContainer">
         <div class="row col-8">
             <label class="col-3" for="name">Namespace with name</label>
-            <input class="form-control col-9" data-bind='value: $root.build.name, valueUpdate: "afterkeydown"' placeholder="comtihon/coon" type="text" id="name">
+            <input class="form-control col-9" data-bind='value: $root.build.name, valueUpdate: "afterkeydown"'
+                   placeholder="comtihon/coon" type="text" id="name">
         </div>
         <div class="row col-8">
             <label class="col-3" for="url">Git URL</label>
-            <input class="form-control col-9" placeholder="https://github.com/comtihon/coon"  data-bind='value: $root.build.git_path, valueUpdate: "afterkeydown"' type="text" id="url">
+            <input class="form-control col-9" placeholder="https://github.com/comtihon/coon"
+                   data-bind='value: $root.build.git_path, valueUpdate: "afterkeydown"' type="text" id="url">
         </div>
 
         <div class="row col-8">
             <label class="col-3" for="package_versions">Git tags to build</label>
-            <input class="col-9" data-role="tagsinput" data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text" id="package_versions">
+            <input class="col-9" data-role="tagsinput"
+                   data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text"
+                   id="package_versions">
         </div>
         <div class="row col-8">
             <label class="col-3" for="erl_versions">Erlang versions</label>
-            <input class="col-9" data-role="tagsinput" data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text" id="erl_versions">
+            <input class="col-9" data-role="tagsinput"
+                   data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text"
+                   id="erl_versions">
+        </div>
+        <div class="row col-8">
+            <p>Notify last commit's author via email on build status
+                <input type="checkbox" data-bind="checked: $root.build.is_notify_email"/></p>
         </div>
         <div class="row col-8">
             <button type="button" class="btn btn-success" data-bind="click: $root.addBuild">Add</button>
