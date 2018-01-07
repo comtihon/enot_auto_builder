@@ -1,8 +1,10 @@
 # Coon build and load server [![Build Status](https://travis-ci.org/comtihon/coon_auto_builder.svg?branch=master)](https://travis-ci.org/comtihon/coon_auto_builder)[![Docker Automated build](https://img.shields.io/docker/build/comtihon/coon_auto_builder.svg)](https://hub.docker.com/r/comtihon/coon_auto_builder)  
-Automated service for building and storing Erlang packages. Can be treat as a maven/pip for Erlang.  
+Build once, use everywhere.
+Automated service for building, storing and deploying Erlang packages.
+Can be treat as a maven/pip for Erlang.
 
 # Adding your package to Coon
-Package can be built manually via [Coon](https://coon.justtech.blog) service.
+Read [howto](https://github.com/comtihon/coon_auto_builder/blob/master/docs/Add.md).
 
 # Running your own Coon build server
 ## Standalone

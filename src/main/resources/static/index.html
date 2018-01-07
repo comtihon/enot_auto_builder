@@ -29,7 +29,16 @@
                 </button>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="https://justtech.blog/tag/coon/">Documentation</a>
+                <a class="nav-link"
+                   href="https://github.com/comtihon/coon_auto_builder/tree/master/docs">Documentation</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://justtech.blog/tag/coon/">Blog</a>
+            </li>
+            <li class="nav-item">
+                <a href="https://github.com/comtihon/coon_auto_builder">
+                    <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+                </a>
             </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
@@ -109,34 +118,39 @@
     </div>
     <form class="pull-left" data-bind="visible: $root.visible()" id="newBuildContainer">
         <div class="row col-8">
-            <label class="col-3" for="name">Namespace with name</label>
-            <input class="form-control col-9" data-bind='value: $root.build.name, valueUpdate: "afterkeydown"'
+            <label class="col-3 form_label_right" for="name">Namespace with name</label>
+            <input align="left" class="form-control col-9"
+                   data-bind='value: $root.build.name, valueUpdate: "afterkeydown"'
                    placeholder="comtihon/coon" type="text" id="name">
         </div>
         <div class="row col-8">
-            <label class="col-3" for="url">Git URL</label>
-            <input class="form-control col-9" placeholder="https://github.com/comtihon/coon"
+            <label class="col-3 form_label_right" for="url">Git URL</label>
+            <input align="left" class="form-control col-9" placeholder="https://github.com/comtihon/coon"
                    data-bind='value: $root.build.git_path, valueUpdate: "afterkeydown"' type="text" id="url">
         </div>
 
         <div class="row col-8">
-            <label class="col-3" for="package_versions">Git tags to build</label>
-            <input class="col-9" data-role="tagsinput"
+            <label class="col-3 form_label_right" for="package_versions">Git tags to build</label>
+            <input align="left" class="col-9" data-role="tagsinput"
                    data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text"
                    id="package_versions">
         </div>
         <div class="row col-8">
-            <label class="col-3" for="erl_versions">Erlang versions</label>
-            <input class="col-9" data-role="tagsinput"
+            <label class="col-3 form_label_right" for="erl_versions">Erlang versions</label>
+            <input align="left" class="col-9" data-role="tagsinput"
                    data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text"
                    id="erl_versions">
         </div>
         <div class="row col-8">
-            <p>Notify last commit's author via email on build status
-                <input type="checkbox" data-bind="checked: $root.build.is_notify_email"/></p>
+            <div align="right" class="col-3">
+                <input type="checkbox" data-bind="checked: $root.build.is_notify_email"/>
+            </div>
+            <label class="col-9 form_label_left">Notify last commit's author via email on build status</label>
         </div>
-        <div class="row col-8">
-            <button type="button" class="btn btn-success" data-bind="click: $root.addBuild">Add</button>
+        <div class="row col-12">
+            <div align="right" class="col-2">
+                <button type="button" class="btn btn-success" data-bind="click: $root.addBuild">Add</button>
+            </div>
         </div>
         <div class="alert alert-danger" role="alert" id="build_error" style="display:none">
             <span data-bind="text: $root.build.error()">Error occurred.</span>
@@ -162,6 +176,8 @@
 <script type="text/javascript" src="/js/lib/knockout.mapping.min.js"></script>
 
 <script type="text/javascript" src="/js/lib/fontawesome_5.2.0.all.js"></script>
+
+<script type="text/javascript" src="/js/lib/github_buttons.js"></script>
 
 <script type="text/javascript" src="/js/src/boss.js"></script>
 

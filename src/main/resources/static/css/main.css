@@ -5,3 +5,14 @@ body {
   padding: 3rem 1.5rem;
   text-align: center;
 }
+.form_label_right {
+  text-align: right
+}
+.form_label_left {
+  text-align: left;
+  margin-left: 0px;
+  padding-left: 0px;
+}
+.form_center {
+  text-align: center
+}
