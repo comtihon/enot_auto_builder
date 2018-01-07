@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.Resource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -45,9 +46,11 @@ import java.util.concurrent.TimeUnit;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @Slf4j
 public class CoonAutoBuilderApplicationTests {
 
@@ -184,7 +187,6 @@ public class CoonAutoBuilderApplicationTests {
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
         Assert.assertTrue(searchResponse.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
-        log.info("---<> {}", packages);
         Assert.assertEquals(3, packages.size());
     }
 
@@ -226,7 +228,6 @@ public class CoonAutoBuilderApplicationTests {
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
-        log.info("---<> {}", responseDTO);
         Assert.assertTrue(responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
         startSearch.await(30, TimeUnit.SECONDS);
