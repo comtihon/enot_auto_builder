@@ -184,6 +184,7 @@ public class CoonAutoBuilderApplicationTests {
                         "http://localhost:" + port + "/search?name=test", ResponseDTO.class);
         Assert.assertTrue(searchResponse.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
+        log.info("---<> {}", packages);
         Assert.assertEquals(3, packages.size());
     }
 
@@ -225,6 +226,7 @@ public class CoonAutoBuilderApplicationTests {
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
+        log.info("---<> {}", responseDTO);
         Assert.assertTrue(responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
         startSearch.await(30, TimeUnit.SECONDS);
