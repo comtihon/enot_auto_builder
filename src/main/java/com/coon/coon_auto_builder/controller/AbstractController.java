@@ -1,6 +1,6 @@
 package com.coon.coon_auto_builder.controller;
 
-import com.coon.coon_auto_builder.data.dto.BuildDTO;
+import com.coon.coon_auto_builder.controller.dto.Renderable;
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +17,7 @@ public abstract class AbstractController {
 
     public static final String BUILD_LOG = "/build_log";
     public static final String DOWNLOAD_ID = "/download/{id}";
+    public static final String DOWNLOAD_ERTS = "/download_erts/{version}";
     //TODO all controllers to constants
 
     private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -33,7 +34,7 @@ public abstract class AbstractController {
 
     void renderPackage(ResponseDTO result, HttpServletResponse response) throws IOException {
         if (result.isResult()) {
-            File file = new File(((BuildDTO) result.getResponse()).getArtifactPath());
+            File file = new File(((Renderable) result.getResponse()).getArtifactPath());
             String mimeType = "application/gzip";
 
             response.setContentType(mimeType);
@@ -43,9 +44,13 @@ public abstract class AbstractController {
             InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
             FileCopyUtils.copy(inputStream, response.getOutputStream());
         } else {
-            OutputStream outputStream = response.getOutputStream();
-            outputStream.write(((String) result.getResponse()).getBytes(Charset.forName("UTF-8")));
-            outputStream.close();
+            renderError(response, (String) result.getResponse());
         }
+    }
+
+    private void renderError(HttpServletResponse response, String error) throws IOException {
+        OutputStream outputStream = response.getOutputStream();
+        outputStream.write(error.getBytes(Charset.forName("UTF-8")));
+        outputStream.close();
     }
 }

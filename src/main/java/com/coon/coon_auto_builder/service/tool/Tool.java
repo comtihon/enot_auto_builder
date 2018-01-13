@@ -4,12 +4,10 @@ import lombok.Getter;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
+@Getter
 public abstract class Tool implements HealthIndicator {
-    @Getter
     protected String message = "";
-    @Getter
     boolean ready = false;
-    @Getter
     String version;
 
     public abstract boolean check();

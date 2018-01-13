@@ -4,6 +4,7 @@ import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.service.Metrics;
 import com.coon.coon_auto_builder.service.tool.Coon;
+import com.coon.coon_auto_builder.service.tool.Erlang;
 import com.coon.coon_auto_builder.service.tool.Kerl;
 import com.coon.coon_auto_builder.tool.ErlangHelper;
 import com.coon.coon_auto_builder.tool.FileHelper;
@@ -54,8 +55,8 @@ public class Builder {
     }
 
     void buildVersion(boolean copy) throws Exception {
-        Map<String, String> compilers = kerl.getErlInstallations();
-        String erlangExecutable = compilers.get(erlang);
+        Map<String, Erlang> compilers = kerl.getErlInstallations();
+        String erlangExecutable = compilers.get(erlang).getPath();
         if (erlangExecutable == null) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
             throw new Exception("no erlang installed");

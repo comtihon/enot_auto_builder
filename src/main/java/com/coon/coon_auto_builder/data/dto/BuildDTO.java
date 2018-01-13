@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.data.dto;
 
+import com.coon.coon_auto_builder.controller.dto.Renderable;
 import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
@@ -12,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 
 @Data
-public class BuildDTO implements Validatable {
+public class BuildDTO implements Validatable, Renderable {
     @NotEmpty
     @JsonProperty("build_id")
     private String buildId;
@@ -57,17 +58,20 @@ public class BuildDTO implements Validatable {
     }
 
     @Override
-    public @Nullable String getBuildId() {
+    public @Nullable
+    String getBuildId() {
         return buildId;
     }
 
     @Override
-    public @Nullable String getFullName() {
+    public @Nullable
+    String getFullName() {
         return null;
     }
 
     @Override
-    public @Nullable String getCloneUrl() {
+    public @Nullable
+    String getCloneUrl() {
         return null;
     }
 }

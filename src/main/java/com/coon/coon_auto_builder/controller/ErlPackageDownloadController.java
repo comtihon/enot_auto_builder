@@ -4,6 +4,8 @@ import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.service.SearchService;
+import com.coon.coon_auto_builder.service.tool.Erlang;
+import com.coon.coon_auto_builder.service.tool.Kerl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,6 +29,9 @@ public class ErlPackageDownloadController extends AbstractController {
 
     @Autowired
     private SearchService searchService;
+
+    @Autowired
+    private Kerl kerl;
 
     @RequestMapping(value = "/get", method = RequestMethod.POST)
     public void downloadBySearch(HttpServletResponse response,
@@ -53,5 +59,15 @@ public class ErlPackageDownloadController extends AbstractController {
                 return new ResponseEntity<>(responseDTO.getResponse(), headers, HttpStatus.OK);
             }
         });
+    }
+
+    @RequestMapping(path = DOWNLOAD_ERTS, method = RequestMethod.GET)
+    public void downloadErts(HttpServletResponse response, @PathVariable("version") String erlang) throws IOException {
+        Erlang erl = kerl.getErlInstallations().get(erlang);
+        if (erl == null) {
+            renderPackage(new ResponseDTO<>(false, "No such erlang"), response);
+        } else {
+            renderPackage(new ResponseDTO<>(erl), response);
+        }
     }
 }
