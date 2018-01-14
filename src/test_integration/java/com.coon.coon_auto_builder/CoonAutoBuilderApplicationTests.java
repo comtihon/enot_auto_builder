@@ -12,6 +12,7 @@ import com.coon.coon_auto_builder.service.dto.CloneResult;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.loader.LoaderFactory;
 import com.coon.coon_auto_builder.service.tool.Coon;
+import com.coon.coon_auto_builder.service.tool.Erlang;
 import com.coon.coon_auto_builder.service.tool.Kerl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -120,11 +121,11 @@ public class CoonAutoBuilderApplicationTests {
             return null;
         }).when(mailSender).sendReport(any());
         //mock kerl
-        Map<String, String> erlInstallations = new HashMap<>();
-        erlInstallations.put("18", "path/to/18");
-        erlInstallations.put("19", "path/to/19");
-        erlInstallations.put("20", "path/to/20");
-        erlInstallations.put(erlangVersion, "path/to/" + erlangVersion);
+        Map<String, Erlang> erlInstallations = new HashMap<>();
+        erlInstallations.put("18", new Erlang("18","path/to/18", "/artifacts"));
+        erlInstallations.put("19", new Erlang("19","path/to/19", "/artifacts"));
+        erlInstallations.put("20", new Erlang("20","path/to/20", "/artifacts"));
+        erlInstallations.put(erlangVersion, new Erlang(erlangVersion,"path/to/" + erlangVersion, "/artifacts"));
         Mockito.when(kerl.getErlInstallations()).thenReturn(erlInstallations);
     }
 
