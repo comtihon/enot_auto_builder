@@ -14,6 +14,7 @@ import com.coon.coon_auto_builder.service.loader.LoaderFactory;
 import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Erlang;
 import com.coon.coon_auto_builder.service.tool.Kerl;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -238,6 +239,29 @@ public class CoonAutoBuilderApplicationTests {
         Assert.assertTrue(searchResponse.isResult());
         List<LinkedHashMap> packages = (List<LinkedHashMap>) searchResponse.getResponse();
         Assert.assertEquals(3, packages.size());
+    }
+
+    @Test
+    public void testSyncBuildReturnError() throws Exception {
+        writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
+        Mockito.doAnswer((Answer<Void>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String erlangExecutable = (String)args[1];
+            if (erlangExecutable.equals("path/to/19"))
+                throw new RuntimeException("build failed");
+            return null;
+        }).when(coon).build(any(), any());
+
+        startSearch = new CountDownLatch(1);
+        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
+                "https://github.com/comtihon/test.git",
+                new PackageVersionDTO("1.0.0"));
+        ResponseDTO responseDTO =
+                this.restTemplate.postForObject(
+                        "http://localhost:" + port + "/buildSync", repo, ResponseDTO.class);
+        Assert.assertTrue(!responseDTO.isResult());
+        Assert.assertNotNull(responseDTO.getResponse());
+        Assert.assertEquals("build failed\n", responseDTO.getResponse());
     }
 
     // Create application with name/coonfig.json and name/ebin/name.app

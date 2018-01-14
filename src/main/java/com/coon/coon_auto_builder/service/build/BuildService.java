@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,14 +59,22 @@ public class BuildService {
     @Transactional
     public ResponseDTO buildSync(RepositoryDTO repo) {
         try {
-            build(repo);
-            return new ResponseDTO<>(true);
+            List<Build> builds = build(repo);
+            List<Build> failed = builds.stream().filter(build -> !build.isResult()).collect(Collectors.toList());
+            if (failed.isEmpty())
+                return new ResponseDTO<>(true);
+            else {
+                StringBuilder sb = new StringBuilder();
+                for (Build build : failed)
+                    sb.append(build.getMessage()).append("\n");
+                return new ResponseDTO<>(false, sb.toString());
+            }
         } catch (Exception e) {
             return new ResponseDTO<>(false, e.getMessage());
         }
     }
 
-    private void build(RepositoryDTO repo) {
+    private List<Build> build(RepositoryDTO repo) {
         Repository repository = repositoryDAOService.getOrCreate(repo.getCloneUrl(), repo.getFullName());
         Map<String, List<String>> versions = formVersions(repo.getVersions());
         List<Build> builds = new ArrayList<>();
@@ -83,6 +91,7 @@ public class BuildService {
                     builds.add(build);
                 }
             }
+            return builds;
         } finally {
             cleanClonedRepos(repo, versions.keySet());
             if (repo.isNotifyEmail())
