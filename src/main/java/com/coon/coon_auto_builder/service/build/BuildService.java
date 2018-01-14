@@ -1,6 +1,7 @@
 package com.coon.coon_auto_builder.service.build;
 
 import com.coon.coon_auto_builder.config.ServerConfiguration;
+import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dao.PackageVersionDAOService;
 import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -51,6 +53,20 @@ public class BuildService {
     @Async("taskExecutor")
     @Transactional
     public void buildAsync(RepositoryDTO repo) {
+        build(repo);
+    }
+
+    @Transactional
+    public ResponseDTO buildSync(RepositoryDTO repo) {
+        try {
+            build(repo);
+            return new ResponseDTO<>(true);
+        } catch (Exception e) {
+            return new ResponseDTO<>(false, e.getMessage());
+        }
+    }
+
+    private void build(RepositoryDTO repo) {
         Repository repository = repositoryDAOService.getOrCreate(repo.getCloneUrl(), repo.getFullName());
         Map<String, List<String>> versions = formVersions(repo.getVersions());
         List<Build> builds = new ArrayList<>();

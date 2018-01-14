@@ -37,7 +37,7 @@
             </li>
             <li class="nav-item">
                 <a href="https://github.com/comtihon/coon_auto_builder">
-                    <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+                    <i class="fab fa-github fa-2x inl_svg_color" aria-hidden="true"></i>
                 </a>
             </li>
         </ul>
@@ -118,48 +118,98 @@
     </div>
     <form class="pull-left" data-bind="visible: $root.visible()" id="newBuildContainer">
         <div class="row col-8">
-            <label class="col-3 form_label_right" for="name">Namespace with name</label>
-            <input align="left" class="form-control col-9"
-                   data-bind='value: $root.build.name, valueUpdate: "afterkeydown"'
-                   placeholder="comtihon/coon" type="text" id="name">
+            <label class="col-3 form_right" for="name">Namespace with name</label>
+            <div class="row col-9">
+                <button type="button" class="btn info-button" data-toggle="popover" title="Fullname"
+                        data-content="Your project's namespace and name here.">
+                    <i class="fas fa-info-circle inl_svg_color"></i>
+                </button>
+                <input align="left" class="form-control col-11"
+                       data-bind='value: $root.build.name, valueUpdate: "afterkeydown"'
+                       placeholder="comtihon/coon" type="text" id="name">
+            </div>
         </div>
         <div class="row col-8">
-            <label class="col-3 form_label_right" for="url">Git URL</label>
-            <input align="left" class="form-control col-9" placeholder="https://github.com/comtihon/coon"
-                   data-bind='value: $root.build.git_path, valueUpdate: "afterkeydown"' type="text" id="url">
+            <label class="col-3 form_right" for="url">Git URL</label>
+            <div class="row col-9">
+                <button type="button" class="btn info-button" data-toggle="popover" title="Url"
+                        data-content="Your project's git url here.">
+                    <i class="fas fa-info-circle inl_svg_color"></i>
+                </button>
+                <input align="left" class="form-control col-11" placeholder="https://github.com/comtihon/coon"
+                       data-bind='value: $root.build.git_path, valueUpdate: "afterkeydown"' type="text" id="url">
+            </div>
         </div>
-
         <div class="row col-8">
-            <label class="col-3 form_label_right" for="package_versions">Git tags to build</label>
-            <input align="left" class="col-9" data-role="tagsinput"
-                   data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text"
-                   id="package_versions">
+            <label class="col-3 form_right" for="package_versions">Git tags to build</label>
+            <div class="row col-9">
+                <button type="button" class="btn info-button" data-toggle="popover" title="Git tags"
+                        data-content="Comma separated git tags here.">
+                    <i class="fas fa-info-circle inl_svg_color"></i>
+                </button>
+                <input align="left" class="col-11" data-role="tagsinput"
+                       data-bind='value: $root.build.package_versions, valueUpdate: "afterkeydown"' type="text"
+                       id="package_versions">
+            </div>
         </div>
         <div class="row col-8">
-            <label class="col-3 form_label_right" for="erl_versions">Erlang versions</label>
-            <input align="left" class="col-9" data-role="tagsinput"
-                   data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text"
-                   id="erl_versions">
+            <label class="col-3 form_right" for="erl_versions">Erlang versions</label>
+            <div class="row col-9">
+                <button type="button" class="btn info-button" data-toggle="popover" title="Erlang versions"
+                        data-content="Comma separated Erlang versions. For each version you will have independent build.">
+                    <i class="fas fa-info-circle inl_svg_color"></i>
+                </button>
+                <input align="left" class="col-11" data-role="tagsinput"
+                       data-bind='value: $root.build.erl_versions, valueUpdate: "afterkeydown"' type="text"
+                       id="erl_versions">
+            </div>
         </div>
         <div class="row col-8">
             <div align="right" class="col-3">
                 <input type="checkbox" data-bind="checked: $root.build.is_notify_email"/>
             </div>
-            <label class="col-9 form_label_left">Notify last commit's author via email on build status</label>
+            <div class="row col-9">
+                <button type="button" class="btn info-button" data-toggle="popover" title="Notify author"
+                        data-content="Send build results to the last commit's author's email.">
+                    <i class="fas fa-info-circle inl_svg_color"></i>
+                </button>
+                <label class="col-11 form_left">Notify last commit's author via email on build status</label>
+            </div>
+        </div>
+        <div class="row col-8">
+            <div align="right" class="col-3">
+                <input type="checkbox" data-bind="checked: $root.build.is_build_sync"/>
+            </div>
+            <div class="row col-9">
+                <button type="button" class="btn info-button" data-toggle="popover" title="Build type"
+                        data-content="With synchronous build you will see results here, after build is complete.">
+                    <i class="fas fa-info-circle inl_svg_color"></i>
+                </button>
+                <label class="col-11 form_left">Build synchronously.</label>
+            </div>
         </div>
         <div class="row col-12">
             <div align="right" class="col-2">
                 <button type="button" class="btn btn-success" data-bind="click: $root.addBuild">Add</button>
             </div>
+            <button type="button" class="btn info-button" data-toggle="popover" title="Add build"
+                    data-content="Push this button to trigger build.">
+                <i class="fas fa-info-circle inl_svg_color"></i>
+            </button>
         </div>
+        <div class="loader center" id="build_loader" style="display:none"></div>
         <div class="alert alert-danger" role="alert" id="build_error" style="display:none">
             <span data-bind="text: $root.build.error()">Error occurred.</span>
         </div>
-        <div class="alert alert-success" role="alert" id="build_success" style="display:none">
+        <div class="alert alert-success" role="alert" id="build_queued" style="display:none">
             <h4 class="alert-heading">Build was successfully queued</h4>
             <p>Submitted build was added to a queue. You will receive an email in a couple of minutes.</p>
             <hr>
             <p class="mb-0">If you haven't got an email - use Search to find your build.</p>
+        </div>
+        <div class="alert alert-success" role="alert" id="build_success" style="display:none">
+            <h4 class="alert-heading">Build succeeded</h4>
+            <p>Build finished successfully.</p>
         </div>
     </form>
 </main>
@@ -186,6 +236,27 @@
 <script type="text/javascript" src="/js/src/build.js"></script>
 
 <script type="text/javascript" src="/js/src/search.js"></script>
+
+<script>
+    $(function () {
+  $('[data-toggle="popover"]').popover()
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
 
 </body>
 </html>

@@ -26,10 +26,22 @@ public class BuildController extends AbstractController {
      * Manual build/rebuild request. Can be sent via gui.
      *
      * @param body json with repository to build
+     * @throws Exception
      */
     @RequestMapping(path = "/buildAsync", method = RequestMethod.POST)
     public CompletableFuture<ResponseEntity<?>> build(@RequestBody RepositoryDTO body) throws Exception {
         return processBody(body);
+    }
+
+    /**
+     * Manual build request. Sync
+     *
+     * @param body json with repository to build
+     * @return build result
+     */
+    @RequestMapping(path = "/buildSync", method = RequestMethod.POST)
+    public CompletableFuture<ResponseEntity<?>> buildSync(@RequestBody RepositoryDTO body) {
+        return processSyncBody(body);
     }
 
     /**
@@ -61,5 +73,15 @@ public class BuildController extends AbstractController {
         if (validated.isResult())
             manager.buildAsync((RepositoryDTO) validated.getResponse());
         return validation.thenApply(this::returnResult);
+    }
+
+    private CompletableFuture<ResponseEntity<?>> processSyncBody(Validatable body) {
+        CompletableFuture<ResponseDTO> request = validator.validate(body);
+        return request.thenApply(validated -> {
+            if (validated.isResult()) {
+                return manager.buildSync((RepositoryDTO) validated.getResponse());
+            }
+            return validated;
+        }).thenApply(this::returnResult);
     }
 }

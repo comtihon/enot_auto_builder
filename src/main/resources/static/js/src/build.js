@@ -1,5 +1,5 @@
 
-function Build(name, git_path, package_versions, erl_versions, notify_email) {
+function Build(name, git_path, package_versions, erl_versions, notify_email, build_sync) {
     var self = this;
     self.name = ko.observable(name);
     self.git_path = ko.observable(git_path);
@@ -7,12 +7,13 @@ function Build(name, git_path, package_versions, erl_versions, notify_email) {
     self.erl_versions = ko.observable(erl_versions);
     self.error = ko.observable("Error occurred");
     self.is_notify_email = ko.observable(notify_email);
+    self.is_build_sync = ko.observable(build_sync);
 }
 
 function NewBuildModelView(parent) {
     var self = this;
     self.parent = parent
-    self.build = new Build('', '', '', '', true);
+    self.build = new Build('', '', '', '', true, true);
     self.visible = function() {
         return self.parent.lastAction() === self.parent.showModeEnum.BUILD
     };
@@ -27,9 +28,9 @@ function NewBuildModelView(parent) {
         self.build.package_versions("");
         self.build.erl_versions("");
         self.build.notify_email(true);
+        self.build.build_sync(true);
         self.visible(true);
-        document.getElementById("build_success").style.display = "none";
-        document.getElementById("build_error").style.display = "none";
+        self.hideAllElements();
         return true;
     };
 
@@ -58,8 +59,21 @@ function NewBuildModelView(parent) {
 
     self.renderError = function(text) {
         self.build.error(text);
+        document.getElementById("build_queued").style.display = "none";
         document.getElementById("build_success").style.display = "none";
         document.getElementById("build_error").style.display = "block";
+        self.hideLoader();
+    };
+    self.renderSuccess = function() {
+        if(self.build.is_build_sync()) {
+            document.getElementById("build_queued").style.display = "none";
+            document.getElementById("build_success").style.display = "block";
+        } else {
+            document.getElementById("build_queued").style.display = "block";
+            document.getElementById("build_success").style.display = "none";
+        }
+        document.getElementById("build_error").style.display = "none";
+        self.hideLoader();
     };
 
     self.remove_git_ending = function(url) {
@@ -71,9 +85,11 @@ function NewBuildModelView(parent) {
 
 //    function to process new build...
     self.addBuild = function() {
+        self.hideAllElements();
          if((self.build.name().trim() + self.build.git_path().trim()).length > 0) {
+            self.showLoader();
              $.post({
-                      url: '/buildAsync',
+                      url: self.getController(),
                       data: JSON.stringify({
                                 "full_name": self.build.name().trim(),
                                 "clone_url": self.remove_git_ending(self.build.git_path().trim()),
@@ -84,8 +100,7 @@ function NewBuildModelView(parent) {
                       dataType: 'json',
                       success:
                           function(reply) {
-                            document.getElementById("build_error").style.display = "none";
-                            document.getElementById("build_success").style.display = "block";
+                            self.renderSuccess();
                           }
                     }
              ).fail(function(jqXHR) {
@@ -96,5 +111,25 @@ function NewBuildModelView(parent) {
             self.renderError("Input name or/and git path to add new build.");
         }
      }
+    self.getController = function() {
+        if (self.build.is_build_sync())
+            return '/buildSync';
+        else
+            return '/buildAsync'
+    };
+    self.showLoader = function() {
+        if(self.build.is_build_sync())
+            document.getElementById("build_loader").style.display = "block";
+    };
+    self.hideLoader = function() {
+        if(self.build.is_build_sync())
+            document.getElementById("build_loader").style.display = "none";
+    };
+    self.hideAllElements = function() {
+        document.getElementById("build_queued").style.display = "none";
+        document.getElementById("build_success").style.display = "none";
+        document.getElementById("build_error").style.display = "none";
+        document.getElementById("build_loader").style.display = "none";
+    }
 }
 
