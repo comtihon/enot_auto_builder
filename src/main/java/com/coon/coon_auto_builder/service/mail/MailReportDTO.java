@@ -1,4 +1,4 @@
-package com.coon.coon_auto_builder.service.dto;
+package com.coon.coon_auto_builder.service.mail;
 
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import lombok.Data;

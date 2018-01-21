@@ -34,6 +34,14 @@ public class BuildDAOService implements DaoService<Build> {
         return dao.findBy(predicateFindBy(name, namespace, ref, erl, onlySuccessful));
     }
 
+    public Build findSuccessfulBy(String url, String ref, String erl) {
+        BooleanExpression expression = build.packageVersion.repository.url.eq(url)
+                .and(build.packageVersion.ref.eq(ref))
+                .and(build.packageVersion.erlVersion.eq(erl))
+                .and(build.result.eq(true));
+        return dao.findOneBy(expression);
+    }
+
     public List<Build> findByGroupByPackage(String name, String namespace, String ref, String erl, boolean onlySuccessful) {
         return dao.findBy(predicateFindBy(name, namespace, ref, erl, onlySuccessful), build.artifactPath);
     }

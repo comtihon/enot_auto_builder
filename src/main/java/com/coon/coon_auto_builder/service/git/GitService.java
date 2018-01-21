@@ -1,14 +1,12 @@
-package com.coon.coon_auto_builder.service;
+package com.coon.coon_auto_builder.service.git;
 
 import com.coon.coon_auto_builder.config.ServerConfiguration;
-import com.coon.coon_auto_builder.service.dto.CloneResult;
+import com.coon.coon_auto_builder.service.Metrics;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.GaugeService;
 import org.springframework.stereotype.Service;
@@ -41,7 +39,7 @@ public class GitService {
      * @return clone result - path of cloned repo and author's email
      * @throws Exception if unable to clone
      */
-    public CloneResult cloneRepo(String fullName, String url, String refStr) throws Exception {
+    public ClonedRepo cloneRepo(String fullName, String url, String refStr) throws Exception {
         Path repoPath = repoPath(fullName, refStr);
         if (!repoPath.toFile().mkdirs()) {
             String msg = "clone failed, can't create " + repoPath;
@@ -62,7 +60,7 @@ public class GitService {
                 throw new Exception(refStr + " not found.");
             }
             RevCommit commit = result.getRepository().parseCommit(ref.getObjectId());
-            return new CloneResult(commit.getAuthorIdent().getEmailAddress(), repoPath);
+            return new ClonedRepo(commit.getAuthorIdent().getEmailAddress(), repoPath);
         } catch (IOException | GitAPIException e) {
             log.warn("clone failed {}", e.getMessage());
             this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);

@@ -3,6 +3,7 @@ package com.coon.coon_auto_builder.service.build;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.service.Metrics;
+import com.coon.coon_auto_builder.service.git.ClonedRepo;
 import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Erlang;
 import com.coon.coon_auto_builder.service.tool.Kerl;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class Builder {
-    private final Path repoPath;
+    private final ClonedRepo repo;
     @Getter
     @Setter
     private Path buildPath;
@@ -49,8 +50,8 @@ public class Builder {
     @Autowired
     private GaugeService gaugeService;
 
-    public Builder(Path repoPath, String erlang) {
-        this.repoPath = repoPath;
+    public Builder(ClonedRepo repo, String erlang) {
+        this.repo = repo;
         this.erlang = erlang;
     }
 
@@ -65,7 +66,7 @@ public class Builder {
             mayBeCopy(copy);
         } catch (IOException e) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
-            throw new Exception("Can't copy from " + repoPath + " to " + buildPath + ": " + e.getMessage());
+            throw new Exception("Can't copy from " + repo + " to " + buildPath + ": " + e.getMessage());
         }
         try {
             coon.build(buildPath, erlangExecutable);
@@ -86,7 +87,7 @@ public class Builder {
     void detectPackageName(Map<String, Object> projectConf) {
         if (projectConf.isEmpty()) // can be empty if not used in formErlangForVersions
             try {
-                projectConf.putAll(FileHelper.readConfig(repoPath));
+                projectConf.putAll(repo.getConfig());
             } catch (IOException ignored) {
             }
         String name = FileHelper.parseName(projectConf);
@@ -147,9 +148,9 @@ public class Builder {
      */
     private void mayBeCopy(boolean copy) throws IOException {
         if (copy) {
-            buildPath = Paths.get(repoPath.toString(), erlang);
-            FileHelper.copyToBuildDir(repoPath, buildPath);
+            buildPath = Paths.get(repo.toString(), erlang);
+            FileHelper.copyToBuildDir(repo.getCloned(), buildPath);
         } else
-            buildPath = repoPath;
+            buildPath = repo.getCloned();
     }
 }

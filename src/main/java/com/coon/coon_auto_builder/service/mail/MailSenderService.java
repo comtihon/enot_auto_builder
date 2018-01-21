@@ -1,14 +1,12 @@
-package com.coon.coon_auto_builder.service;
+package com.coon.coon_auto_builder.service.mail;
 
 import com.coon.coon_auto_builder.config.MailConfiguration;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
-import com.coon.coon_auto_builder.service.dto.MailReportDTO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.mail.MailHeaders;
 import org.springframework.messaging.Message;
@@ -18,10 +16,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j

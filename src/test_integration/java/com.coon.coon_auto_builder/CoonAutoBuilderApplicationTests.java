@@ -5,16 +5,15 @@ import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
-import com.coon.coon_auto_builder.service.GitService;
-import com.coon.coon_auto_builder.service.MailSenderService;
+import com.coon.coon_auto_builder.service.git.GitService;
+import com.coon.coon_auto_builder.service.mail.MailSenderService;
 import com.coon.coon_auto_builder.service.build.Builder;
-import com.coon.coon_auto_builder.service.dto.CloneResult;
+import com.coon.coon_auto_builder.service.git.ClonedRepo;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.loader.LoaderFactory;
 import com.coon.coon_auto_builder.service.tool.Coon;
 import com.coon.coon_auto_builder.service.tool.Erlang;
 import com.coon.coon_auto_builder.service.tool.Kerl;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -54,14 +53,11 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @Slf4j
-public class CoonAutoBuilderApplicationTests {
+public class CoonAutoBuilderApplicationTests extends IntegrationTest {
 
     private static final String NORMAL_CONF = "{\"name\":\"test\",\"fullname\":\"comtihon/test\",\"app_vsn\":\"1.0.0\"}";
     private static final String MULTIPLE_ERL_CONF =
             "{\"name\":\"test\",\"fullname\":\"comtihon/test\",\"app_vsn\":\"1.0.0\",\"erlang\":[\"18\",\"19\",\"20\"]}";
-
-    @Value(value = "classpath:template.app.src")
-    private Resource templateAppSrc;
 
     @LocalServerPort
     private int port;
@@ -99,35 +95,13 @@ public class CoonAutoBuilderApplicationTests {
 
     @Before
     public void setUp() throws Exception {
-        //mock repo clone
-        Mockito.when(gitService.cloneRepo(
-                any(),
-                any(),
-                any()))
-                .thenReturn(new CloneResult("valerii.tikhonov@gmail.com", Paths.get("test/tmp/test")));
-        Mockito.when(gitService.getClonedPaths(any(), any())).thenReturn(new ArrayList<>());
-        //mock repo build
-        Mockito.doNothing().when(coon).build(any(), any());
-        //mock package loading
-        Mockito.doAnswer((Answer<String>) invocation -> {
-            Object[] args = invocation.getArguments();
-            Builder repo = (Builder)args[0];
-            return repo.getName() + "/" + repo.getErlang() + "/" + repo.getName() + ".cp";
-        }).when(loader).loadArtifact(any());
-        //mock email sending
+        super.setUp(gitService, coon, kerl, loader, erlangVersion, startSearch, mailSender);
         Mockito.doAnswer((Answer<Void>) invocation -> {
             Object[] args = invocation.getArguments();
             notified = (List) args[0];
             startSearch.countDown();
             return null;
         }).when(mailSender).sendReport(any());
-        //mock kerl
-        Map<String, Erlang> erlInstallations = new HashMap<>();
-        erlInstallations.put("18", new Erlang("18","path/to/18", "/artifacts"));
-        erlInstallations.put("19", new Erlang("19","path/to/19", "/artifacts"));
-        erlInstallations.put("20", new Erlang("20","path/to/20", "/artifacts"));
-        erlInstallations.put(erlangVersion, new Erlang(erlangVersion,"path/to/" + erlangVersion, "/artifacts"));
-        Mockito.when(kerl.getErlInstallations()).thenReturn(erlInstallations);
     }
 
     @After
@@ -262,20 +236,5 @@ public class CoonAutoBuilderApplicationTests {
         Assert.assertTrue(!responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
         Assert.assertEquals("build failed\n", responseDTO.getResponse());
-    }
-
-    // Create application with name/coonfig.json and name/ebin/name.app
-    private void writeApp(String pathStr, String name, String vsn, String conf) throws IOException {
-        Paths.get(pathStr, name, "ebin").toFile().mkdirs();
-        Path coonfig = Paths.get(pathStr, name, "coonfig.json");
-        byte[] strToBytes = conf.getBytes();
-        Files.write(coonfig, strToBytes);
-        InputStream inputStream = templateAppSrc.getInputStream();
-        String appFile = IOUtils.toString(inputStream, "UTF-8");
-        appFile = appFile.replaceAll("#\\{name}", name);
-        appFile = appFile.replaceAll("#\\{vsn}", vsn);
-        Path appConf = Paths.get(pathStr, name, "ebin", name + ".app");
-        strToBytes = appFile.getBytes();
-        Files.write(appConf, strToBytes);
     }
 }

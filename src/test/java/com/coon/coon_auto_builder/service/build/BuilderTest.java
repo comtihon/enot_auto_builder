@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.service.build;
 
+import com.coon.coon_auto_builder.service.git.ClonedRepo;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -44,7 +45,7 @@ public class BuilderTest {
     public void setPackageNameFromConf() throws IOException {
         writeFile("coonfig.json", NAME_OVERWRITE_CONF);
         writeFile("ebin/test.app", ERLANG_APP);
-        Builder builder = new Builder(Paths.get("test/tmp"), "18");
+        Builder builder = new Builder(new ClonedRepo("", Paths.get("test/tmp")), "18");
         builder.withName("ns/other_name");
         builder.setBuildPath(Paths.get("test/tmp"));
         builder.detectPackageName(new HashMap<>());
@@ -59,7 +60,7 @@ public class BuilderTest {
     @Test
     public void setPackageNameFromApp() throws IOException {
         writeFile("ebin/test.app", ERLANG_APP);
-        Builder builder = new Builder(Paths.get("test/tmp"), "18");
+        Builder builder = new Builder(new ClonedRepo("", Paths.get("test/tmp")), "18");
         builder.withName("ns/other_name");
         builder.setBuildPath(Paths.get("test/tmp"));
         builder.detectPackageName(new HashMap<>());
@@ -68,11 +69,11 @@ public class BuilderTest {
 
     /**
      * in case of no coonfig.json and no .app file - package name will be taken from name (Repository name)
-     * @throws IOException
+     *
      */
     @Test
-    public void setPackageNameFromName() throws IOException {
-        Builder builder = new Builder(Paths.get("test/tmp"), "18");
+    public void setPackageNameFromName() {
+        Builder builder = new Builder(new ClonedRepo("", Paths.get("test/tmp")), "18");
         builder.withName("ns/other_name");
         builder.setBuildPath(Paths.get("test/tmp"));
         builder.detectPackageName(new HashMap<>());

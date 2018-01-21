@@ -1,10 +1,11 @@
-package com.coon.coon_auto_builder.service;
+package com.coon.coon_auto_builder.service.mail;
 
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
-import com.coon.coon_auto_builder.service.dto.MailReportDTO;
+import com.coon.coon_auto_builder.service.mail.MailReportDTO;
+import com.coon.coon_auto_builder.service.mail.MailSenderService;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;

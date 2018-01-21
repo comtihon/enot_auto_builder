@@ -1,8 +1,8 @@
 package com.coon.coon_auto_builder.config;
 
 import com.coon.coon_auto_builder.service.build.Builder;
+import com.coon.coon_auto_builder.service.git.ClonedRepo;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,10 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
-
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @EnableConfigurationProperties
@@ -48,7 +44,7 @@ public class ServerConfiguration {
     @Bean
     @Scope("prototype")
     @Lazy
-    public Builder builder(Path repoPath, String erlang) {
-        return new Builder(repoPath, erlang);
+    public Builder builder(ClonedRepo repo, String erlang) {
+        return new Builder(repo, erlang);
     }
 }

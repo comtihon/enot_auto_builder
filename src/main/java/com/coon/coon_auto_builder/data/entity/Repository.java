@@ -28,11 +28,9 @@ public class Repository {
 
     public Repository(String url, String fullName, Set<PackageVersion> versions) {
         this.url = remove_git(url);
-        String[] splitted = fullName.split("/");
-        this.name = splitted[1];
-        this.namespace = splitted[0];
         this.versions = versions;
         versions.forEach(version -> version.setRepository(this));
+        setName(fullName);
     }
 
     public String getFullName() {
@@ -58,5 +56,17 @@ public class Repository {
             return FilenameUtils.removeExtension(url);
         else
             return url;
+    }
+
+    private void setName(String fullName) {
+        String[] splitted = fullName.split("/");
+        if (splitted.length > 1) {
+            this.name = splitted[1];
+            this.namespace = splitted[0];
+        } else {
+            splitted = this.url.split("/");
+            this.name = splitted[splitted.length - 1];
+            this.namespace = splitted[splitted.length - 2];
+        }
     }
 }

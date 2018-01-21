@@ -6,6 +6,7 @@ import com.coon.coon_auto_builder.data.entity.Repository;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import lombok.experimental.Wither;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.NotEmpty;
 import javax.annotation.Nullable;
@@ -20,6 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class RepositoryDTO implements Validatable {
     @NotEmpty
@@ -32,6 +34,7 @@ public class RepositoryDTO implements Validatable {
     @JsonProperty("ref_type")
     String refType;
     @JsonProperty("notify_email")
+    @Wither
     private boolean notifyEmail = true;
 
     public RepositoryDTO(String url) {

@@ -2,6 +2,7 @@ package com.coon.coon_auto_builder.service.build;
 
 import com.coon.coon_auto_builder.config.ServerConfiguration;
 import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
+import com.coon.coon_auto_builder.data.dao.BuildDAOService;
 import com.coon.coon_auto_builder.data.dao.PackageVersionDAOService;
 import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
@@ -9,10 +10,10 @@ import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
-import com.coon.coon_auto_builder.service.GitService;
-import com.coon.coon_auto_builder.service.MailSenderService;
-import com.coon.coon_auto_builder.service.dto.CloneResult;
+import com.coon.coon_auto_builder.service.git.ClonedRepo;
+import com.coon.coon_auto_builder.service.git.GitService;
 import com.coon.coon_auto_builder.service.loader.Loader;
+import com.coon.coon_auto_builder.service.mail.MailSenderService;
 import com.coon.coon_auto_builder.tool.FileHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ public class BuildService {
     private PackageVersionDAOService pvDAOService;
 
     @Autowired
+    private BuildDAOService daoService;
+
+    @Autowired
     private Loader loader;
 
     @Async("taskExecutor")
@@ -70,6 +74,7 @@ public class BuildService {
                 return new ResponseDTO<>(false, sb.toString());
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseDTO<>(false, e.getMessage());
         }
     }
@@ -81,7 +86,7 @@ public class BuildService {
         try {
             for (String ref : versions.keySet()) {
                 try {
-                    log.debug("build {}:{}", repo.getFullName(), ref);
+                    log.info("build {}:{}", repo.getFullName(), ref);
                     builds.addAll(buildRef(repository, versions, ref));
                 } catch (Exception e) {
                     Build build = new Build(e.getMessage());
@@ -119,16 +124,15 @@ public class BuildService {
      *
      * @param repo     repository to build
      * @param versions versions from build request
-     * @param ref      ref being build
+     * @param ref      package version (git tag) being build
      * @return success build or build with error information
      * @throws Exception in case of cloning repo or reading configuration
      */
     private List<Build> buildRef(
             Repository repo, Map<String, List<String>> versions, String ref) throws Exception {
-        CloneResult cloned = gitService.cloneRepo(repo.getFullName(), repo.getUrl(), ref);
-        Path repoPath = cloned.getCloned();
+        ClonedRepo cloned = gitService.cloneRepo(repo.getFullName(), repo.getUrl(), ref);
         Map<String, Object> projectConf = new HashMap<>();
-        List<String> erlangs = formErlangForVersions(projectConf, versions, ref, repoPath);
+        List<String> erlangs = formErlangForVersions(projectConf, versions, ref, cloned);
         List<Build> results = new ArrayList<>();
         if (erlangs.isEmpty()) {
             log.warn("Nothing to build for {}, versions {}", repo, versions);
@@ -143,7 +147,7 @@ public class BuildService {
         for (String erlang : erlangs) {
             PackageVersion version = pvDAOService.getOrCreate(ref, erlang, repo.getUrl());
             version.setEmail(cloned.getEmail()); // can have different emails for different refs
-            Builder builder = appContext.getBean(Builder.class, repoPath, erlang);
+            Builder builder = appContext.getBean(Builder.class, cloned, erlang);
             try {
                 builder.buildVersion(erlangs.size() != 1);
                 String artifact = loadPackage(builder, projectConf, repo, ref);
@@ -158,7 +162,32 @@ public class BuildService {
             }
             repo.addVersion(version);
         }
+        buildDepsAsync(cloned, results, ref);
         return results;
+    }
+
+    /**
+     * For every successful build check deps. If there is no build for this dep and Erlang version - build it.
+     * Do not build non-coon deps recursively.
+     */
+    @Async("taskExecutor")
+    private void buildDepsAsync(ClonedRepo cloned, List<Build> results, String ref) {
+        List<Build> successfull = results.stream().filter(Build::isResult).collect(Collectors.toList());
+        List<Dep> deps = cloned.getDeps();
+        //Filter non-tags deps.
+        deps.stream()
+                .filter(Dep::isTagged)
+                .flatMap(dep ->
+                        successfull.stream()
+                                .map(build -> dep.withErlVsn(build.getPackageVersion().getErlVersion())))
+                .filter(dep -> daoService.findSuccessfulBy(dep.getUrl(), ref, dep.getErlVsn()) == null)
+                .map(dep ->
+                        new RepositoryDTO(
+                                dep.getName(),
+                                dep.getUrl(),
+                                new PackageVersionDTO(ref, dep.getErlVsn()))
+                                .withNotifyEmail(false))
+                .forEach(this::buildSync);
     }
 
     /**
@@ -166,17 +195,17 @@ public class BuildService {
      *
      * @param versions versions from build request
      * @param ref      repository version
-     * @param repoPath path to the cloned repo
+     * @param cloned   cloned repo
      * @return Erlang versions to build with
      */
     private List<String> formErlangForVersions(Map<String, Object> projectConf,
                                                Map<String, List<String>> versions,
                                                String ref,
-                                               Path repoPath) {
+                                               ClonedRepo cloned) {
         List<String> erlangs = versions.get(ref);
         if (erlangs.isEmpty()) {
             try {
-                projectConf.putAll(FileHelper.readConfig(repoPath));
+                projectConf.putAll(cloned.getConfig());
             } catch (IOException ignored) {
             }
             erlangs = FileHelper.parseErlangVsns(projectConf, configuration.getErlangVersion());
