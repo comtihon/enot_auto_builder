@@ -18,3 +18,8 @@ repo
 ## Email notification notice
 Notification email is sent to the last commit's author email. If you
 don't receive one - check if last email is yours.
+
+## How to add deps of my package?
+All dependencies of your package, mentioned in `coonfig.json` will be built after you package's build succeed.  
+__Important__: Coon will build dependencies of dependencies only if they contain `coonfig.json`. Otherwise only first
+level of dependencies will be built.
