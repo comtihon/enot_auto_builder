@@ -162,6 +162,8 @@ RESPONSE:
 
 GET __/download/{id}__ - download artifact by id.  
 
+GET __/download_erts/{version}__ - download erts for erlang version. `version` - is an Erlang version, not erts!  
+
 POST __/get__ - try to download artifact by name, ref and version. If there is multiple - the last built
 will be fetched.    
 BODY:
