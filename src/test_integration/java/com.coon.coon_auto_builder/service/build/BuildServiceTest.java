@@ -60,7 +60,7 @@ public class BuildServiceTest {
         List<Build> results = Arrays.asList(
                 new Build(new PackageVersion("1", "18"), true, "/"),
                 new Build(new PackageVersion("1", "19"), false, "/"));
-        buildService.buildDepsAsync(clonedRepo, results, "1.0.0", builds::add);
+        buildService.buildDepsAsync(clonedRepo, results, builds::add);
         Assert.assertEquals(2, builds.size()); // 2 deps to build
         Assert.assertEquals(1, builds.get(0).getVersions().size());
         Assert.assertEquals("18", builds.get(0).getVersions().get(0).getErlVersion());
@@ -84,7 +84,7 @@ public class BuildServiceTest {
         List<Build> results = Arrays.asList(
                 new Build(new PackageVersion("1", "18"), true, "/"),
                 new Build(new PackageVersion("1", "19"), false, "/"));
-        buildService.buildDepsAsync(clonedRepo, results, "1.0.0", builds::add);
+        buildService.buildDepsAsync(clonedRepo, results,  builds::add);
         Assert.assertEquals(1, builds.size()); // 1 dep to build
         Assert.assertEquals("dep1", builds.get(0).getFullName());
     }
@@ -102,7 +102,7 @@ public class BuildServiceTest {
         List<Build> results = Arrays.asList(
                 new Build(new PackageVersion("1", "18"), true, "/"),
                 new Build(new PackageVersion("1", "19"), true, "/"));
-        buildService.buildDepsAsync(clonedRepo, results, "1.0.0", builds::add);
+        buildService.buildDepsAsync(clonedRepo, results, builds::add);
         Assert.assertEquals(2, builds.size()); // 2 deps to build
         Assert.assertEquals(2, builds.get(0).getVersions().size()); // 2 versions each
         Assert.assertEquals("18", builds.get(0).getVersions().get(0).getErlVersion());
@@ -132,7 +132,7 @@ public class BuildServiceTest {
         List<Build> results = Arrays.asList(
                 new Build(new PackageVersion("1", "18"), true, "/"),
                 new Build(new PackageVersion("1", "19"), false, "/"));
-        buildService.buildDepsAsync(clonedRepo, results, "1.0.0", builds::add);
+        buildService.buildDepsAsync(clonedRepo, results, builds::add);
         Assert.assertEquals(1, builds.size()); // 1 dep to build
         Assert.assertEquals("dep2", builds.get(0).getFullName());
     }

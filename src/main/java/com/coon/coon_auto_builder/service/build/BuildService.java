@@ -164,7 +164,7 @@ public class BuildService {
             }
             repo.addVersion(version);
         }
-        buildDepsAsync(cloned, results, ref, this::buildSync);
+        buildDepsAsync(cloned, results, this::buildSync);
         return results;
     }
 
@@ -174,7 +174,7 @@ public class BuildService {
      */
     @Async("taskExecutor")
     @VisibleForTesting
-    void buildDepsAsync(ClonedRepo cloned, List<Build> results, String ref, Consumer<RepositoryDTO> consumer) {
+    void buildDepsAsync(ClonedRepo cloned, List<Build> results, Consumer<RepositoryDTO> consumer) {
         List<Build> successfull = results.stream().filter(Build::isResult).collect(Collectors.toList());
         List<Dep> deps = cloned.getDeps();
         //Filter non-tags deps.
@@ -183,7 +183,7 @@ public class BuildService {
                 .flatMap(dep ->
                         successfull.stream()
                                 .map(build -> dep.withErlVsn(build.getPackageVersion().getErlVersion())))
-                .filter(dep -> daoService.findSuccessfulBy(dep.getUrl(), ref, dep.getFirstErlVsn()) == null)
+                .filter(dep -> daoService.findSuccessfulBy(dep.getUrl(), dep.getTag(), dep.getFirstErlVsn()) == null)
                 .collect(HashMap::new, Dep::addDep, Dep::mergeDeps)
                 .values()
                 .stream()
