@@ -51,6 +51,7 @@ public class SearchService extends AbstractService {
     }
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO> fetchBuild(RepositoryDTO request) {
         log.debug("Fetch {}", request);
         String[] splitted = request.getFullName().split("/");
@@ -96,6 +97,7 @@ public class SearchService extends AbstractService {
     }
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO> findBuild(String build_id) {
         log.debug("Find {}", build_id);
         Optional<Build> find = buildDao.find(build_id);
