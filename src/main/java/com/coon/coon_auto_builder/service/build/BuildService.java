@@ -15,6 +15,7 @@ import com.coon.coon_auto_builder.service.git.GitService;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.mail.MailSenderService;
 import com.coon.coon_auto_builder.tool.FileHelper;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -162,7 +164,7 @@ public class BuildService {
             }
             repo.addVersion(version);
         }
-        buildDepsAsync(cloned, results, ref);
+        buildDepsAsync(cloned, results, ref, this::buildSync);
         return results;
     }
 
@@ -171,7 +173,8 @@ public class BuildService {
      * Do not build non-coon deps recursively.
      */
     @Async("taskExecutor")
-    private void buildDepsAsync(ClonedRepo cloned, List<Build> results, String ref) {
+    @VisibleForTesting
+    void buildDepsAsync(ClonedRepo cloned, List<Build> results, String ref, Consumer<RepositoryDTO> consumer) {
         List<Build> successfull = results.stream().filter(Build::isResult).collect(Collectors.toList());
         List<Dep> deps = cloned.getDeps();
         //Filter non-tags deps.
@@ -180,14 +183,12 @@ public class BuildService {
                 .flatMap(dep ->
                         successfull.stream()
                                 .map(build -> dep.withErlVsn(build.getPackageVersion().getErlVersion())))
-                .filter(dep -> daoService.findSuccessfulBy(dep.getUrl(), ref, dep.getErlVsn()) == null)
-                .map(dep ->
-                        new RepositoryDTO(
-                                dep.getName(),
-                                dep.getUrl(),
-                                new PackageVersionDTO(ref, dep.getErlVsn()))
-                                .withNotifyEmail(false))
-                .forEach(this::buildSync);
+                .filter(dep -> daoService.findSuccessfulBy(dep.getUrl(), ref, dep.getFirstErlVsn()) == null)
+                .collect(HashMap::new, Dep::addDep, Dep::mergeDeps)
+                .values()
+                .stream()
+                .map(dep -> dep.toRepositoryDTO(ref))
+                .forEach(consumer);
     }
 
     /**

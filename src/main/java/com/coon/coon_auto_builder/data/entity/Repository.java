@@ -8,6 +8,8 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.coon.coon_auto_builder.tool.UrlHelper.removeGitEnding;
+
 @Entity
 @Table(name = "repository")
 @Data
@@ -27,7 +29,7 @@ public class Repository {
     private Set<PackageVersion> versions = new HashSet<>();
 
     public Repository(String url, String fullName, Set<PackageVersion> versions) {
-        this.url = remove_git(url);
+        this.url = removeGitEnding(url);
         this.versions = versions;
         versions.forEach(version -> version.setRepository(this));
         setName(fullName);
@@ -49,13 +51,6 @@ public class Repository {
                 ", name='" + name + '\'' +
                 ", namespace='" + namespace + '\'' +
                 '}';
-    }
-
-    private String remove_git(String url) {
-        if (url.endsWith(".git"))
-            return FilenameUtils.removeExtension(url);
-        else
-            return url;
     }
 
     private void setName(String fullName) {

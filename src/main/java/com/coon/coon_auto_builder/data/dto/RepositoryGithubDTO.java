@@ -4,11 +4,8 @@ import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.entity.Repository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -16,6 +13,8 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+
+import static com.coon.coon_auto_builder.tool.UrlHelper.removeGitEnding;
 
 /**
  * Request from github
@@ -34,7 +33,7 @@ public class RepositoryGithubDTO extends RepositoryDTO {
         PackageVersionDTO pv = new PackageVersionDTO(rootNode.path("ref").asText());
         this.refType = rootNode.path("ref_type").asText();
         this.fullName = repoNode.path("full_name").asText();
-        this.cloneUrl = repoNode.path("clone_url").asText();
+        this.cloneUrl = removeGitEnding(repoNode.path("clone_url").asText());
         this.versions = Collections.singletonList(pv);
     }
 
@@ -42,12 +41,7 @@ public class RepositoryGithubDTO extends RepositoryDTO {
     public void basicValidation(String secret) throws Exception {
         if (!isGithub(this.cloneUrl))
             throw new Exception("Url " + this.cloneUrl + " doesn't point to github!");
-        String cloneUrl;
-        if (this.cloneUrl.endsWith(".git"))
-            cloneUrl = this.cloneUrl.substring(0, this.cloneUrl.length() - 4);
-        else
-            cloneUrl = this.cloneUrl;
-        if (!isGithubMatch(cloneUrl, this.fullName))
+        if (!isGithubMatch(this.cloneUrl, this.fullName))
             throw new Exception("Malformed github url: " + this.cloneUrl);
         checkSignature(secret);
     }

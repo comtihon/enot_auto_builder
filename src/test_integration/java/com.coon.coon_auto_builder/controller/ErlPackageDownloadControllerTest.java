@@ -38,7 +38,7 @@ public class ErlPackageDownloadControllerTest {
     private TestRestTemplate restTemplate;
 
     @SpyBean
-    ErlPackageDownloadController controller;
+    private ErlPackageDownloadController controller;
 
     @Before
     public void setUp() throws Exception {
@@ -62,8 +62,7 @@ public class ErlPackageDownloadControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_builds.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void downloadBySearchName() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         String response =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/get", repo, String.class);
@@ -74,8 +73,7 @@ public class ErlPackageDownloadControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void downloadBySearchVersion() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         repo.setVersions(Collections.singletonList(new PackageVersionDTO("1.0.1", "18")));
         String response =
                 this.restTemplate.postForObject(
@@ -90,8 +88,7 @@ public class ErlPackageDownloadControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void downloadByListIds() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         ResponseDTO buildsNoVersions =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/builds", repo, ResponseDTO.class);

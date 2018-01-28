@@ -18,6 +18,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.crypto.Mac;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RunWith(SpringRunner.class)
@@ -54,18 +57,18 @@ public class BuildRequestValidatorTest {
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void validateManualBuild() throws Exception {
         //save new - OK
-        PackageVersionDTO pv = new PackageVersionDTO("1.0.0", "18");
-        RepositoryDTO request = new RepositoryDTO("namespace/name", "url", pv);
+        List<PackageVersionDTO> pv = Collections.singletonList(new PackageVersionDTO("1.0.0", "18"));
+        RepositoryDTO request = RepositoryDTO.builder().fullName("namespace/name").cloneUrl("url").versions(pv).build();
         CompletableFuture<ResponseDTO> result = validator.validate(request);
         Assert.assertTrue(result.get().isResult());
 
         //save save - OK
-        request = new RepositoryDTO("namespace1/name1", "url1", pv);
+        request = RepositoryDTO.builder().fullName("namespace1/name1").cloneUrl("url1").versions(pv).build();
         result = validator.validate(request);
         Assert.assertTrue(result.get().isResult());
 
         //save collision - Fail
-        request = new RepositoryDTO("namespace1/name1", "malformed", pv);
+        request = RepositoryDTO.builder().fullName("namespace1/name1").cloneUrl("malformed").versions(pv).build();
         result = validator.validate(request);
         Assert.assertFalse(result.get().isResult());
         Assert.assertEquals(

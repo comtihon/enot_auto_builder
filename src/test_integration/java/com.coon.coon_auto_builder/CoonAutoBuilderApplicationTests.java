@@ -6,17 +6,13 @@ import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.service.git.GitService;
-import com.coon.coon_auto_builder.service.mail.MailSenderService;
-import com.coon.coon_auto_builder.service.build.Builder;
-import com.coon.coon_auto_builder.service.git.ClonedRepo;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.loader.LoaderFactory;
+import com.coon.coon_auto_builder.service.mail.MailSenderService;
 import com.coon.coon_auto_builder.service.tool.Coon;
-import com.coon.coon_auto_builder.service.tool.Erlang;
 import com.coon.coon_auto_builder.service.tool.Kerl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,17 +26,14 @@ import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -95,7 +88,7 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp(gitService, coon, kerl, loader, erlangVersion, startSearch, mailSender);
+        super.setUp(gitService, coon, kerl, loader, erlangVersion, mailSender);
         Mockito.doAnswer((Answer<Void>) invocation -> {
             Object[] args = invocation.getArguments();
             notified = (List) args[0];
@@ -120,9 +113,7 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
     public void testNormalBuild() throws InterruptedException, IOException {
         writeApp("test/tmp", "test", "1.0.0", NORMAL_CONF);
         startSearch = new CountDownLatch(1);
-        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
-                "https://github.com/comtihon/test.git",
-                new PackageVersionDTO("1.0.0"));
+        RepositoryDTO repo = testRepo();
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
@@ -142,16 +133,14 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
         Assert.assertEquals("/download/" + packageDTO.get("build_id"), packageDTO.get("path"));
         Assert.assertNotNull(notified); //notification was sent with proper version
         Assert.assertEquals(1, notified.size());
-        Assert.assertEquals(((Build)notified.get(0)).getBuildId(), packageDTO.get("build_id"));
+        Assert.assertEquals(((Build) notified.get(0)).getBuildId(), packageDTO.get("build_id"));
     }
 
     @Test
     public void testMultipleErlangBuild() throws IOException, InterruptedException {
         writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
         startSearch = new CountDownLatch(1);
-        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
-                "https://github.com/comtihon/test.git",
-                new PackageVersionDTO("1.0.0"));
+        RepositoryDTO repo = testRepo();
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
@@ -169,9 +158,7 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
     @Test
     public void testBuildNoEmailNotification() throws IOException, InterruptedException {
         writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
-        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
-                "https://github.com/comtihon/test.git",
-                new PackageVersionDTO("1.0.0"));
+        RepositoryDTO repo = testRepo();
         repo.setNotifyEmail(false);
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
@@ -191,16 +178,14 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
         writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
         Mockito.doAnswer((Answer<Void>) invocation -> {
             Object[] args = invocation.getArguments();
-            String erlangExecutable = (String)args[1];
+            String erlangExecutable = (String) args[1];
             if (erlangExecutable.equals("path/to/19"))
                 throw new RuntimeException("build failed");
             return null;
         }).when(coon).build(any(), any());
 
         startSearch = new CountDownLatch(1);
-        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
-                "https://github.com/comtihon/test.git",
-                new PackageVersionDTO("1.0.0"));
+        RepositoryDTO repo = testRepo();
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/buildAsync", repo, ResponseDTO.class);
@@ -220,21 +205,28 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
         writeApp("test/tmp", "test", "1.0.0", MULTIPLE_ERL_CONF);
         Mockito.doAnswer((Answer<Void>) invocation -> {
             Object[] args = invocation.getArguments();
-            String erlangExecutable = (String)args[1];
+            String erlangExecutable = (String) args[1];
             if (erlangExecutable.equals("path/to/19"))
                 throw new RuntimeException("build failed");
             return null;
         }).when(coon).build(any(), any());
 
         startSearch = new CountDownLatch(1);
-        RepositoryDTO repo = new RepositoryDTO("comtihon/test",
-                "https://github.com/comtihon/test.git",
-                new PackageVersionDTO("1.0.0"));
+        RepositoryDTO repo = testRepo();
         ResponseDTO responseDTO =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/buildSync", repo, ResponseDTO.class);
         Assert.assertTrue(!responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
         Assert.assertEquals("build failed\n", responseDTO.getResponse());
+    }
+
+    private RepositoryDTO testRepo() {
+        return RepositoryDTO.builder()
+                .fullName("comtihon/test")
+                .cloneUrl("https://github.com/comtihon/test.git")
+                .versions(Collections.singletonList(new PackageVersionDTO("1.0.0")))
+                .notifyEmail(true)
+                .build();
     }
 }

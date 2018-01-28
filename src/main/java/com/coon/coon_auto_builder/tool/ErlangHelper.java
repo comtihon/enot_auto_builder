@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 
-public class ErlangHelper {
+final public class ErlangHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErlangHelper.class);
+
+    private ErlangHelper() {
+
+    }
 
     /**
      * Get application name from Erlang configuration file (.app or .app.src)

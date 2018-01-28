@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import static org.mockito.Matchers.any;
 
@@ -36,14 +35,14 @@ public abstract class IntegrationTest {
                       Kerl kerl,
                       Loader loader,
                       String erlangVersion,
-                      CountDownLatch startSearch,
                       MailSenderService mailSender) throws Exception {
         //mock repo clone
-        Mockito.when(gitService.cloneRepo(
-                any(),
-                any(),
-                any()))
-                .thenReturn(new ClonedRepo("valerii.tikhonov@gmail.com", Paths.get("test/tmp/test")));
+        Mockito.doAnswer((Answer<ClonedRepo>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String fullName = (String) args[0];
+            String[] splitted = fullName.split("/");
+            return new ClonedRepo("valerii.tikhonov@gmail.com", Paths.get("test/tmp/", splitted[1]));
+        }).when(gitService).cloneRepo(any(), any(), any());
         Mockito.when(gitService.getClonedPaths(any(), any())).thenReturn(new ArrayList<>());
         //mock repo build
         Mockito.doNothing().when(coon).build(any(), any());
@@ -54,10 +53,7 @@ public abstract class IntegrationTest {
             return repo.getName() + "/" + repo.getErlang() + "/" + repo.getName() + ".cp";
         }).when(loader).loadArtifact(any());
         //mock email sending
-        Mockito.doAnswer((Answer<Void>) invocation -> {
-            startSearch.countDown();
-            return null;
-        }).when(mailSender).sendReport(any());
+        Mockito.doNothing().when(mailSender).sendReport(any());
         //mock kerl
         Map<String, Erlang> erlInstallations = new HashMap<>();
         erlInstallations.put("18", new Erlang("18", "path/to/18", "/artifacts"));

@@ -62,8 +62,7 @@ public class ErlPackageRestControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void testBuildsFetch() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         ResponseDTO buildsNoVersions =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/builds", repo, ResponseDTO.class);
@@ -79,8 +78,7 @@ public class ErlPackageRestControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_builds.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void testBuildMultipleFetch() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         ResponseDTO buildsNoVersions =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/builds", repo, ResponseDTO.class);
@@ -95,8 +93,7 @@ public class ErlPackageRestControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void testFetchVersions() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         ResponseDTO buildsNoVersions =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/versions", repo, ResponseDTO.class);
@@ -112,8 +109,7 @@ public class ErlPackageRestControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_builds.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void testFetchMultipleVersions() {
-        RepositoryDTO repo = new RepositoryDTO();
-        repo.setFullName("namespace1/name1");
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
         ResponseDTO buildsNoVersions =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/versions", repo, ResponseDTO.class);

@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,8 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class FileHelper {
+final public class FileHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileHelper.class);
+
+    private FileHelper() {
+
+    }
 
     public static void copyToBuildDir(Path src, Path dst) throws IOException {
         FileUtils.copyDirectory(src.toFile(), dst.toFile());

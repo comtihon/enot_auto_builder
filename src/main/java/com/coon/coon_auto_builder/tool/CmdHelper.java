@@ -8,7 +8,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 @Slf4j
-public class CmdHelper {
+final public class CmdHelper {
+
+    private CmdHelper() {
+
+    }
 
     @NonNull
     public static String runCmd(String cmd) throws IOException, InterruptedException {

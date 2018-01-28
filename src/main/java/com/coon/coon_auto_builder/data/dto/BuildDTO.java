@@ -10,6 +10,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Date;
 
 @Data
@@ -33,7 +34,7 @@ public class BuildDTO implements Validatable, Renderable {
     }
 
     @Override
-    public void onConflict(Repository found, RepositoryDAOService service) throws Exception {
+    public void onConflict(Repository found, RepositoryDAOService service) {
     }
 
     @Override
@@ -48,8 +49,11 @@ public class BuildDTO implements Validatable, Renderable {
             PackageVersionDTO pv = new PackageVersionDTO(ref, erl);
             String name = repo.getName();
             String namespace = repo.getNamespace();
-            String url = repo.getUrl();
-            return new RepositoryDTO(namespace + "/" + name, url, pv);
+            return RepositoryDTO.builder()
+                    .fullName(namespace + "/" + name)
+                    .cloneUrl(repo.getUrl())
+                    .versions(Arrays.asList(pv))
+                    .build();
         }
     }
 
