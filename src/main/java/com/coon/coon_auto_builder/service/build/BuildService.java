@@ -187,7 +187,7 @@ public class BuildService {
                 .collect(HashMap::new, Dep::addDep, Dep::mergeDeps)
                 .values()
                 .stream()
-                .map(dep -> dep.toRepositoryDTO(ref))
+                .map(Dep::toRepositoryDTO)
                 .forEach(consumer);
     }
 

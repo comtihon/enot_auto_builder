@@ -42,9 +42,9 @@ public class Dep {
         return erlVsn.stream().findFirst().orElse(null);
     }
 
-    public RepositoryDTO toRepositoryDTO(String ref) {
+    public RepositoryDTO toRepositoryDTO() {
         List<PackageVersionDTO> versions = erlVsn.stream()
-                .map(vsn -> new PackageVersionDTO(ref, vsn))
+                .map(vsn -> new PackageVersionDTO(tag, vsn))
                 .collect(Collectors.toList());
         return RepositoryDTO.builder()
                 .fullName(name)

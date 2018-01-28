@@ -29,3 +29,4 @@ nbdist/
 .nb-gradle/
 /builder-data/
 /test/
+/ClonedRepo{cloned=test/

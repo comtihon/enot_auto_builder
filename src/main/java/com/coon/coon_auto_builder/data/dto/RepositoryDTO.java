@@ -31,6 +31,7 @@ public class RepositoryDTO implements Validatable {
     @JsonProperty("ref_type")
     String refType;
     @JsonProperty("notify_email")
+    @Builder.Default
     private boolean notifyEmail = true;
 
     @NonNull
