@@ -34,21 +34,21 @@ public class GitService {
      * Clones repo, returns email of the ref's commit and cloned path
      *
      * @param fullName namespace/name
-     * @param url      git repo url
-     * @param refStr      tag to be cloned
+     * @param url      git repo url without protocol
+     * @param refStr   tag to be cloned
      * @return clone result - path of cloned repo and author's email
-     * @throws Exception if unable to clone
+     * @throws CloneException if unable to clone
      */
-    public ClonedRepo cloneRepo(String fullName, String url, String refStr) throws Exception {
+    public ClonedRepo cloneRepo(String fullName, String url, String refStr) throws CloneException {
         Path repoPath = repoPath(fullName, refStr);
         if (!repoPath.toFile().mkdirs()) {
             String msg = "clone failed, can't create " + repoPath;
             log.warn(msg);
             this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);
-            throw new Exception(msg);
+            throw new CloneException(msg);
         }
         try (Git result = Git.cloneRepository()
-                .setURI(url)
+                .setURI("https://" + url)
                 .setDirectory(repoPath.toFile())
                 .setBranch(refStr)
                 .call()) {
@@ -57,14 +57,14 @@ public class GitService {
             Ref ref = result.getRepository().findRef(refStr);
             if (ref == null) {
                 log.warn("No such tag {} for {}", fullName, refStr);
-                throw new Exception(refStr + " not found.");
+                throw new CloneException(refStr + " not found.");
             }
             RevCommit commit = result.getRepository().parseCommit(ref.getObjectId());
             return new ClonedRepo(commit.getAuthorIdent().getEmailAddress(), repoPath);
         } catch (IOException | GitAPIException e) {
             log.warn("clone failed {}", e.getMessage());
             this.gaugeService.submit(Metrics.CLONE_FAIL.toString(), 1.0);
-            throw e;
+            throw new CloneException(e.getMessage());
         }
     }
 

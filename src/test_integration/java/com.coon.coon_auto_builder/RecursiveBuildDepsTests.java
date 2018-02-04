@@ -147,7 +147,7 @@ public class RecursiveBuildDepsTests extends IntegrationTest {
         Assert.assertTrue(responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
         Build depBuild = daoService.findSuccessfulBy(
-                "https://github.com/comtihon/dep1",
+                "github.com/comtihon/dep1",
                 "1.0.0",
                 erlangVersion);
         Assert.assertNotNull(depBuild);

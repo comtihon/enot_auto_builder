@@ -5,6 +5,7 @@ import com.coon.coon_auto_builder.data.dao.RepositoryDAOService;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
+import com.coon.coon_auto_builder.service.build.BuildException;
 import com.coon.coon_auto_builder.service.git.GitService;
 import com.coon.coon_auto_builder.service.loader.Loader;
 import com.coon.coon_auto_builder.service.loader.LoaderFactory;
@@ -180,7 +181,7 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
             Object[] args = invocation.getArguments();
             String erlangExecutable = (String) args[1];
             if (erlangExecutable.equals("path/to/19"))
-                throw new RuntimeException("build failed");
+                throw new BuildException("build failed");
             return null;
         }).when(coon).build(any(), any());
 
@@ -207,7 +208,7 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
             Object[] args = invocation.getArguments();
             String erlangExecutable = (String) args[1];
             if (erlangExecutable.equals("path/to/19"))
-                throw new RuntimeException("build failed");
+                throw new BuildException("build failed");
             return null;
         }).when(coon).build(any(), any());
 
@@ -218,7 +219,7 @@ public class CoonAutoBuilderApplicationTests extends IntegrationTest {
                         "http://localhost:" + port + "/buildSync", repo, ResponseDTO.class);
         Assert.assertTrue(!responseDTO.isResult());
         Assert.assertNotNull(responseDTO.getResponse());
-        Assert.assertEquals("build failed\n", responseDTO.getResponse());
+        Assert.assertEquals("build failed: build failed\n", responseDTO.getResponse());
     }
 
     private RepositoryDTO testRepo() {

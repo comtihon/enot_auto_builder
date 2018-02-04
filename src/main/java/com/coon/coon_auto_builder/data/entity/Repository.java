@@ -2,13 +2,10 @@ package com.coon.coon_auto_builder.data.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.coon.coon_auto_builder.tool.UrlHelper.removeGitEnding;
 
 @Entity
 @Table(name = "repository")
@@ -29,7 +26,7 @@ public class Repository {
     private Set<PackageVersion> versions = new HashSet<>();
 
     public Repository(String url, String fullName, Set<PackageVersion> versions) {
-        this.url = removeGitEnding(url);
+        this.url = url;
         this.versions = versions;
         versions.forEach(version -> version.setRepository(this));
         setName(fullName);

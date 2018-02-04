@@ -6,10 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.coon.coon_auto_builder.tool.UrlHelper.removeGitEnding;
+import static com.coon.coon_auto_builder.tool.UrlHelper.removeProtocol;
 
 @Data
 @Builder
@@ -22,7 +26,7 @@ public class Dep {
     private Set<String> erlVsn;
 
     public Dep(Map<String, String> data) {
-        url = removeGitEnding(data.get("url"));
+        url = removeProtocol(removeGitEnding(data.get("url")));
         name = data.get("name");
         tag = data.get("tag");
         branch = data.get("branch");

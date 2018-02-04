@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.service.tool;
 
+import com.coon.coon_auto_builder.service.build.BuildException;
 import com.coon.coon_auto_builder.tool.CmdHelper;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import static com.coon.coon_auto_builder.tool.CmdHelper.runCmd;
 @Slf4j
 public class Coon extends Tool {
 
-    public void build(Path buildPath, String erlangExecutable) throws Exception {
+    public void build(Path buildPath, String erlangExecutable) throws BuildException, IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder("coon", "package");
         pb.directory(buildPath.toFile());
         Map<String, String> env = pb.environment();
@@ -25,7 +26,7 @@ public class Coon extends Tool {
         env.put("PATH", Paths.get(erlangExecutable, "bin").toString() + ":" + path);
         Process process = pb.start();
         if (process.waitFor() != 0) {
-            throw new Exception(CmdHelper.getProcessError(process));
+            throw new BuildException(CmdHelper.getProcessError(process));
         }
     }
 

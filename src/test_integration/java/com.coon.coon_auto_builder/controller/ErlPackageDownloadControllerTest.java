@@ -4,6 +4,8 @@ import com.coon.coon_auto_builder.controller.dto.ResponseDTO;
 import com.coon.coon_auto_builder.data.dto.BuildDTO;
 import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
+import com.coon.coon_auto_builder.service.git.CloneException;
+import com.coon.coon_auto_builder.service.git.GitService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +42,9 @@ public class ErlPackageDownloadControllerTest {
     @SpyBean
     private ErlPackageDownloadController controller;
 
+    @Autowired
+    private GitService service;
+
     @Before
     public void setUp() throws Exception {
         Mockito.doAnswer((Answer<Void>) invocation -> {
@@ -62,7 +67,7 @@ public class ErlPackageDownloadControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_builds.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void downloadBySearchName() {
-        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").cloneUrl("url").build();
         String response =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/get", repo, String.class);
@@ -73,7 +78,7 @@ public class ErlPackageDownloadControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void downloadBySearchVersion() {
-        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").cloneUrl("url").build();
         repo.setVersions(Collections.singletonList(new PackageVersionDTO("1.0.1", "18")));
         String response =
                 this.restTemplate.postForObject(
@@ -88,7 +93,7 @@ public class ErlPackageDownloadControllerTest {
     @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:multiple_versions.sql")
     @Sql(executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clean.sql")
     public void downloadByListIds() {
-        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").build();
+        RepositoryDTO repo = RepositoryDTO.builder().fullName("namespace1/name1").cloneUrl("url").build();
         ResponseDTO buildsNoVersions =
                 this.restTemplate.postForObject(
                         "http://localhost:" + port + "/builds", repo, ResponseDTO.class);

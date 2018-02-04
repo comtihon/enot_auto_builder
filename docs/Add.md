@@ -23,3 +23,11 @@ don't receive one - check if last email is yours.
 All dependencies of your package, mentioned in `coonfig.json` will be built after you package's build succeed.  
 __Important__: Coon will build dependencies of dependencies only if they contain `coonfig.json`. Otherwise only first
 level of dependencies will be built.
+
+## Coon Badge
+To add [badges](shields.io) for your service use `https://coon.justtech.blog/badge?full_name=<YOUR_PACKAGES_FULL_NAME>`
+url.  
+Example:
+
+    https://coon.justtech.blog/badge?full_name=comtihon/mongodb-erlang
+Will display your package's version from coon.

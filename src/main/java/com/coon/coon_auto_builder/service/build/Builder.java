@@ -55,25 +55,25 @@ public class Builder {
         this.erlang = erlang;
     }
 
-    void buildVersion(boolean copy) throws Exception {
+    void buildVersion(boolean copy) throws BuildException {
         Map<String, Erlang> compilers = kerl.getErlInstallations();
         String erlangExecutable = compilers.get(erlang).getPath();
         if (erlangExecutable == null) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
-            throw new Exception("no erlang installed");
+            throw new BuildException("no erlang installed");
         }
         try {
             mayBeCopy(copy);
         } catch (IOException e) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
-            throw new Exception("Can't copy from " + repo + " to " + buildPath + ": " + e.getMessage());
+            throw new BuildException("Can't copy from " + repo + " to " + buildPath + ": " + e.getMessage());
         }
         try {
             coon.build(buildPath, erlangExecutable);
             this.gaugeService.submit(Metrics.BUILD_OK.toString(), 1.0);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | BuildException e) {
             this.gaugeService.submit(Metrics.BUILD_FAIL.toString(), 1.0);
-            throw new Exception("build failed: " + e.getMessage());
+            throw new BuildException("build failed: " + e.getMessage());
         }
     }
 

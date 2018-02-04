@@ -16,17 +16,21 @@ public class DataSourceHealth implements HealthIndicator {
 
     @Autowired
     public DataSourceHealth(DataSource dataSource) {
-        pool = (HikariPool) new DirectFieldAccessor(dataSource).getPropertyValue("pool");
+        if (dataSource.getClass().equals(HikariPool.class))
+            pool = (HikariPool) new DirectFieldAccessor(dataSource).getPropertyValue("pool");
     }
 
 
     @Override
     public Health health() {
-        return Health.up()
-                .withDetail("active", pool.getActiveConnections())
-                .withDetail("idle", pool.getIdleConnections())
-                .withDetail("total", pool.getTotalConnections())
-                .withDetail("waiting", pool.getThreadsAwaitingConnection())
-                .build();
+        if (pool != null)
+            return Health.up()
+                    .withDetail("active", pool.getActiveConnections())
+                    .withDetail("idle", pool.getIdleConnections())
+                    .withDetail("total", pool.getTotalConnections())
+                    .withDetail("waiting", pool.getThreadsAwaitingConnection())
+                    .build();
+        else
+            return Health.down().build();
     }
 }

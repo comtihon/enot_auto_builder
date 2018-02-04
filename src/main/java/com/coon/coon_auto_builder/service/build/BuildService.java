@@ -10,6 +10,7 @@ import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.data.entity.Build;
 import com.coon.coon_auto_builder.data.entity.PackageVersion;
 import com.coon.coon_auto_builder.data.entity.Repository;
+import com.coon.coon_auto_builder.service.git.CloneException;
 import com.coon.coon_auto_builder.service.git.ClonedRepo;
 import com.coon.coon_auto_builder.service.git.GitService;
 import com.coon.coon_auto_builder.service.loader.Loader;
@@ -90,7 +91,7 @@ public class BuildService {
                 try {
                     log.info("build {}:{}", repo.getFullName(), ref);
                     builds.addAll(buildRef(repository, versions, ref));
-                } catch (Exception e) {
+                } catch (CloneException e) {
                     Build build = new Build(e.getMessage());
                     PackageVersion version = pvDAOService.getOrCreate(ref, "unknown", repo.getCloneUrl());
                     version.addBuild(build);
@@ -128,10 +129,10 @@ public class BuildService {
      * @param versions versions from build request
      * @param ref      package version (git tag) being build
      * @return success build or build with error information
-     * @throws Exception in case of cloning repo or reading configuration
+     * @throws CloneException in case of cloning repo or reading configuration
      */
     private List<Build> buildRef(
-            Repository repo, Map<String, List<String>> versions, String ref) throws Exception {
+            Repository repo, Map<String, List<String>> versions, String ref) throws CloneException {
         ClonedRepo cloned = gitService.cloneRepo(repo.getFullName(), repo.getUrl(), ref);
         Map<String, Object> projectConf = new HashMap<>();
         List<String> erlangs = formErlangForVersions(projectConf, versions, ref, cloned);
@@ -156,7 +157,7 @@ public class BuildService {
                 Build result = builder.getBuild(artifact, "");
                 version.addBuild(result);
                 results.add(result);
-            } catch (Exception e) {
+            } catch (BuildException | IOException e) {
                 e.printStackTrace();
                 Build result = builder.getBuild(null, e.getMessage());
                 version.addBuild(result);

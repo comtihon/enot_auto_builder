@@ -12,6 +12,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.coon.coon_auto_builder.tool.UrlHelper.removeGitEnding;
+import static com.coon.coon_auto_builder.tool.UrlHelper.removeProtocol;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,6 +49,10 @@ public class RepositoryDTO implements Validatable {
                 "fullName='" + fullName + '\'' +
                 ", cloneUrl='" + cloneUrl + '\'' +
                 '}';
+    }
+
+    public String getCloneUrl() {
+        return removeProtocol(removeGitEnding(cloneUrl));
     }
 
     /**
