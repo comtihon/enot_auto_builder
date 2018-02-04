@@ -81,7 +81,7 @@ public class SearchService extends AbstractService {
         String[] splitted = fullName.split("/");
         Optional<Build> found = buildDao.findBy(splitted[1], splitted[0], null, null);
         return found.<CompletableFuture<ResponseDTO>>map(
-                build -> CompletableFuture.completedFuture(ok(toPackage(found.get()))))
+                build -> CompletableFuture.completedFuture(ok(toPackage(build))))
                 .orElseGet(() -> CompletableFuture.completedFuture(fail("unknown")));
     }
 

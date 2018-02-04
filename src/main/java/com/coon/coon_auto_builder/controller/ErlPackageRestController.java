@@ -7,8 +7,6 @@ import com.coon.coon_auto_builder.data.dto.PackageVersionDTO;
 import com.coon.coon_auto_builder.data.dto.RepositoryDTO;
 import com.coon.coon_auto_builder.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +19,6 @@ public class ErlPackageRestController extends AbstractController {
 
     @Autowired
     private SearchService searchService;
-    @Value("${service.host}")
-    private String serviceHost;
 
     @RequestMapping(path = "/search", method = RequestMethod.GET)
     public CompletableFuture<ResponseEntity<?>> listPackagesBySearch(
@@ -47,27 +43,6 @@ public class ErlPackageRestController extends AbstractController {
             @Valid @RequestBody RepositoryDTO request) {
         CompletableFuture<ResponseDTO<List<PackageVersionDTO>>> builds = searchService.searchVersions(request);
         return builds.thenApply(this::returnResult);
-    }
-
-    /**
-     * @param fullName git package namespace + nameEx. comtihon/coon
-     * @return url  https://img.shields.io/badge/coon-<VSN>-green.svg?link=<Link-to-coonhub>
-     */
-    @RequestMapping(path = "/badge", method = RequestMethod.GET)
-    public CompletableFuture<ResponseEntity> badgeForService(
-            @RequestParam(name = "full_name") String fullName) {
-        CompletableFuture<ResponseDTO> build = searchService.fetchLastSuccessfulVersion(fullName);
-        return build.thenApply(responseDTO -> {
-            if (responseDTO.isResult()) {
-                PackageDTO data = (PackageDTO) responseDTO.getResponse();
-                return new ResponseEntity<>(
-                        "https://img.shields.io/badge/coon-" + data.getVersion()
-                                + "-green.svg"
-                                + "?link=" + serviceHost + data.getPath(),
-                        HttpStatus.OK);
-            }
-            return new ResponseEntity<>("https://img.shields.io/badge/coon-unknown-red.svg", HttpStatus.OK);
-        });
     }
 
     @RequestMapping(path = "/last_builds", method = RequestMethod.GET)
