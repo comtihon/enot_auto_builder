@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -68,9 +69,20 @@ public class SearchService extends AbstractService {
                         splitted[0],
                         ref,
                         erl);
-        if (found.isPresent())
-            return CompletableFuture.completedFuture(ok(modelMapper.map(found.get(), BuildDTO.class)));
-        return CompletableFuture.completedFuture(fail("No such build"));
+        return found.<CompletableFuture<ResponseDTO>>map(
+                build -> CompletableFuture.completedFuture(ok(modelMapper.map(build, BuildDTO.class))))
+                .orElseGet(() -> CompletableFuture.completedFuture(fail("No such build")));
+    }
+
+    @Async("searchExecutor")
+    @Transactional
+    public CompletableFuture<ResponseDTO> fetchLastSuccessfulVersion(String fullName) {
+        log.debug("Version for {}", fullName);
+        String[] splitted = fullName.split("/");
+        Optional<Build> found = buildDao.findBy(splitted[1], splitted[0], null, null);
+        return found.<CompletableFuture<ResponseDTO>>map(
+                build -> CompletableFuture.completedFuture(ok(toPackage(found.get()))))
+                .orElseGet(() -> CompletableFuture.completedFuture(fail("unknown")));
     }
 
     @Async("searchExecutor")
@@ -125,26 +137,25 @@ public class SearchService extends AbstractService {
     }
 
     private List<PackageDTO> toPackages(List<Build> builds) {
-        List<PackageDTO> packages = new ArrayList<>(builds.size());
-        for (Build build : builds) {
-            Repository repo = build.getPackageVersion().getRepository();
-            String path;
-            if (build.isResult())
-                path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
-            else
-                path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
-            PackageDTO packageDTO = PackageDTO.builder()
-                    .buildId(build.getBuildId())
-                    .namespace(repo.getNamespace())
-                    .name(repo.getName())
-                    .success(build.isResult())
-                    .path(path)
-                    .erlangVersion(build.getPackageVersion().getErlVersion())
-                    .version(build.getPackageVersion().getRef())
-                    .buildDate(build.getCreatedDate())
-                    .build();
-            packages.add(packageDTO);
-        }
-        return packages;
+        return builds.stream().map(this::toPackage).collect(Collectors.toList());
+    }
+
+    private PackageDTO toPackage(Build build) {
+        Repository repo = build.getPackageVersion().getRepository();
+        String path;
+        if (build.isResult())
+            path = AbstractController.DOWNLOAD_ID.replace("{id}", build.getBuildId());
+        else
+            path = AbstractController.BUILD_LOG + "?build_id=" + build.getBuildId();
+        return PackageDTO.builder()
+                .buildId(build.getBuildId())
+                .namespace(repo.getNamespace())
+                .name(repo.getName())
+                .success(build.isResult())
+                .path(path)
+                .erlangVersion(build.getPackageVersion().getErlVersion())
+                .version(build.getPackageVersion().getRef())
+                .buildDate(build.getCreatedDate())
+                .build();
     }
 }
