@@ -1,5 +1,6 @@
 package com.coon.coon_auto_builder.service;
 
+import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class DataSourceHealth implements HealthIndicator {
 
     @Autowired
     public DataSourceHealth(DataSource dataSource) {
-        if (dataSource.getClass().equals(HikariPool.class))
+        if (dataSource.getClass().equals(HikariDataSource.class))
             pool = (HikariPool) new DirectFieldAccessor(dataSource).getPropertyValue("pool");
     }
 
