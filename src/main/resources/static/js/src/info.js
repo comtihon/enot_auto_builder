@@ -1,8 +1,8 @@
 
-function ServerInfo(serverVersion, coonVersion, kerlVersion) {
+function ServerInfo(serverVersion, enotVersion, kerlVersion) {
     var self = this;
     self.serverVersion = ko.observable(serverVersion);
-    self.coonVersion = ko.observable(coonVersion);
+    self.enotVersion = ko.observable(enotVersion);
     self.kerlVersion = ko.observable(kerlVersion);
 }
 
@@ -18,7 +18,7 @@ function InfoViewModel(parent) {
 
     self.cleanUp = function() {
         self.serverInfo.serverVersion('not available');
-        self.serverInfo.coonVersion('not available');
+        self.serverInfo.enotVersion('not available');
         self.serverInfo.kerlVersion('not available');
         self.parent.lastAction(self.parent.showModeEnum.INFO);
         self.loadInfo();
@@ -34,7 +34,7 @@ function InfoViewModel(parent) {
     }
 
     self.fillTools = function(reply) {
-        self.serverInfo.coonVersion(self.checkTool(reply.coon));
+        self.serverInfo.enotVersion(self.checkTool(reply.enot));
         self.serverInfo.kerlVersion(self.checkTool(reply.kerl));
     }
 

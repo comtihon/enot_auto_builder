@@ -5,9 +5,9 @@ services:
     image: postgres
     restart: always
     environment:
-      - POSTGRES_PASSWORD=coon
-      - POSTGRES_USER=coon
-      - POSTGRES_DB=coon_packages
+      - POSTGRES_PASSWORD=enot
+      - POSTGRES_USER=enot
+      - POSTGRES_DB=enot_packages
     ports:
       - "5433:5432"
     volumes:
@@ -38,7 +38,7 @@ services:
     depends_on:
       - influxdb
   builder:
-    image: comtihon/coon_auto_builder
+    image: comtihon/enot_auto_builder
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -49,7 +49,7 @@ services:
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - GIT_SECRET=${GIT_SECRET}
     volumes:
-      - ./builder-data:/coon/artifacts
+      - ./builder-data:/enot/artifacts
   collectd:
     build:
       context: ./docker/

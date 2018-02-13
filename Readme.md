@@ -1,20 +1,20 @@
-# Coon build and load server [![Build Status](https://travis-ci.org/comtihon/coon_auto_builder.svg?branch=master)](https://travis-ci.org/comtihon/coon_auto_builder)[![Docker Automated build](https://img.shields.io/docker/build/comtihon/coon_auto_builder.svg)](https://hub.docker.com/r/comtihon/coon_auto_builder)  
+# Enot build and load server [![Build Status](https://travis-ci.org/comtihon/enot_auto_builder.svg?branch=master)](https://travis-ci.org/comtihon/enot_auto_builder)[![Docker Automated build](https://img.shields.io/docker/build/comtihon/enot_auto_builder.svg)](https://hub.docker.com/r/comtihon/enot_auto_builder)  
 Build once, use everywhere.
-Automated service for building, storing and deploying Erlang packages with [Coon](https://github.com/comtihon/coon).  
+Automated service for building, storing and deploying Erlang packages with [Enot](https://github.com/comtihon/enot).  
 Can be treat as a maven/pip for Erlang. 
 
-# Adding your package to Coon
-Read [howto](https://github.com/comtihon/coon_auto_builder/blob/master/docs/Add.md).
+# Adding your package to Enot
+Read [howto](https://github.com/comtihon/enot_auto_builder/blob/master/docs/Add.md).
 
-# Running your own Coon build server
+# Running your own Enot build server
 ## Standalone
 Requirements:
 - postgres
 - EMAIL_USER env var set up
 - EMAIL_PASSWORD env var set up
-- GIT_SECRET is Coon's git application secret
+- GIT_SECRET is Enot's git application secret
 - kerl installed
-- coon installed
+- enot installed
 
 ## Monitoring
 Monitoring is made via [collectd](https://collectd.org/) and `/metrics` endpoint. 
@@ -39,7 +39,7 @@ BODY:
         ]
     }
 Where:  
-`fullName` is a fullname of a repository, containing namespace and repo name. Ex. "comtihon/coon"  
+`fullName` is a fullname of a repository, containing namespace and repo name. Ex. "comtihon/enot"  
 `cloneUrl` is a url for repository clone.  
 `ref` is a version to be built. Ex: "1.0.0".  
 `erl_version` _(optional)_ is an Erlang version used for build. Ex: "19".    

@@ -23,7 +23,7 @@ repositories {
 }
 
 jar {
-    baseName = 'coon_auto_builder'
+    baseName = 'enot_auto_builder'
     version = version
 }
 ext {
