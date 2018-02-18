@@ -86,6 +86,7 @@ public class SearchService extends AbstractService {
     }
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO<List<BuildDTO>>> fetchBuilds(RepositoryDTO request) {
         log.debug("Fetch {}", request);
         List<Build> builds = findBuilds(request, false); //TODO change DB request
@@ -96,6 +97,7 @@ public class SearchService extends AbstractService {
     }
 
     @Async("searchExecutor")
+    @Transactional
     public CompletableFuture<ResponseDTO<List<PackageVersionDTO>>> searchVersions(RepositoryDTO request) {
         log.debug("Search {}", request);
         List<Build> builds = findBuilds(request, true);
