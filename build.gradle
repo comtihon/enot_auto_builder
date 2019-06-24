@@ -104,7 +104,7 @@ dependencies {
     compile('com.github.metadave:etp:0.4')
     compile('com.querydsl:querydsl-jpa:4.1.4')
     compile('org.projectlombok:lombok:1.16.18')
-    compile('com.querydsl:querydsl-apt:4.1.4')
+    compile('com.querydsl:querydsl-apt:4.2.1')
     compile('org.apache.commons:commons-compress:1.14')
 
     runtime('org.postgresql:postgresql')
