@@ -97,7 +97,7 @@ dependencies {
     compile('com.zaxxer:HikariCP')
     compile('org.modelmapper:modelmapper:1.1.0')
     compile('javax.mail:javax.mail-api')
-    compile('javax:javaee-api:7.0')
+    compile('javax:javaee-api:8.0.1')
     compile('commons-io:commons-io:2.5')
     compile('org.eclipse.jgit:org.eclipse.jgit:4.8.0.201706111038-r')
     compile('org.springframework.boot:spring-boot-devtools')
