@@ -105,7 +105,7 @@ dependencies {
     compile('com.querydsl:querydsl-jpa:4.1.4')
     compile('org.projectlombok:lombok:1.16.18')
     compile('com.querydsl:querydsl-apt:4.1.4')
-    compile('org.apache.commons:commons-compress:1.14')
+    compile('org.apache.commons:commons-compress:1.18')
 
     runtime('org.postgresql:postgresql')
 
