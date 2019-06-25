@@ -110,6 +110,6 @@ dependencies {
     runtime('org.postgresql:postgresql')
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile('com.h2database:h2:1.4.196')
+    testCompile('com.h2database:h2:1.4.199')
     testCompile('org.mockito:mockito-all:1.10.19')
 }
