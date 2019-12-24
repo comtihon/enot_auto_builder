@@ -95,7 +95,7 @@ dependencies {
     compile('org.springframework.integration:spring-integration-core')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('com.zaxxer:HikariCP')
-    compile('org.modelmapper:modelmapper:1.1.0')
+    compile('org.modelmapper:modelmapper:2.3.6')
     compile('javax.mail:javax.mail-api')
     compile('javax:javaee-api:7.0')
     compile('commons-io:commons-io:2.5')
